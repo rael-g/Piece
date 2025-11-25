@@ -1,0 +1,190 @@
+@startuml
+autonumber
+
+participant "EditorApplication (C#)" as EA
+participant "EditorState (C#)" as ES
+participant "ViewportPanel (C#)" as VP
+participant "HierarchyPanel (C#)" as HP
+participant "InspectorPanel (C#)" as IP
+participant "AssetBrowserPanel (C#)" as ABP
+participant "Toolbar (C#)" as TB
+participant "UndoRedoSystem (C#)" as URS
+participant "SelectionSystem (C#)" as SS
+participant "SerializationSystem (C#)" as SerS
+participant "GizmoSystem (C#)" as GS
+
+' High-Level C# Framework components
+participant "GameEngine (C#)" as GE
+participant "Scene (C#)" as Sc
+participant "Node (C#)" as Nd
+participant "Component (C#)" as Comp
+participant "RenderManager (C#)" as RM
+participant "AssetManager (C#)" as AM
+participant "ResourceManagerWrapper (C#)" as ResM_Cs
+participant "CameraWrapper (C#)" as Cam_Cs
+participant "NativeCalls (C# P/Invoke)" as NC
+participant "EngineCore (C++ Interm.)" as EC_Cpp
+
+' --- Editor Initialization ---
+EA -> GE: new GameEngine()
+activate GE
+EA -> GE: Initialize() ' This internally calls NativeCalls::Engine_InitializeFromLibraries
+activate GE
+GE -> NC: Engine_InitializeFromLibraries(...)
+activate NC
+NC -> EC_Cpp: Create(...)
+activate EC_Cpp
+EC_Cpp --> NC:
+deactivate EC_Cpp
+NC --> GE: engine_core_ptr
+deactivate NC
+GE --> EA:
+deactivate GE
+deactivate GE
+
+EA -> ES: new EditorState()
+EA -> URS: new UndoRedoSystem()
+EA -> SS: new SelectionSystem()
+EA -> SerS: new SerializationSystem()
+EA -> GS: new GizmoSystem()
+
+EA -> VP: new ViewportPanel(GE, ES, GS)
+EA -> HP: new HierarchyPanel(ES, SS)
+EA -> IP: new InspectorPanel(ES)
+EA -> ABP: new AssetBrowserPanel(ES, AM)
+EA -> TB: new Toolbar(EA)
+
+' --- Project Loading ---
+EA -> TB: OnLoadProjectClicked()
+activate TB
+TB --> EA:
+deactivate TB
+EA -> SerS: LoadProject(path)
+activate SerS
+SerS --> EA: loadedProject
+deactivate SerS
+EA -> ES: SetCurrentProject(loadedProject)
+activate ES
+ES --> EA:
+deactivate ES
+EA -> ES: SetActiveScene(loadedProject.MainScene)
+activate ES
+ES --> EA:
+deactivate ES
+EA -> HP: DisplaySceneTree(ES.ActiveScene)
+activate HP
+HP --> EA:
+deactivate HP
+EA -> ABP: DisplayAssets(ES.CurrentProject)
+activate ABP
+ABP --> EA:
+deactivate ABP
+
+' --- Editor Loop (User Interaction, Play/Stop Mode, Rendering) ---
+loop Editor Loop (continuous)
+  ' 1. User Interaction and State Updates
+  EA -> VP: HandleInput()
+  activate VP
+  VP -> SS: HandleSelectionInput(ES.ActiveScene, editorCamera)
+  activate SS
+  SS -> ES: SetSelectedObjects(...)
+  activate ES
+  ES --> SS:
+  deactivate ES
+  SS --> VP:
+  deactivate SS
+  VP -> GS: HandleGizmoInput(ES.SelectedObjects, editorCamera)
+  activate GS
+  GS --> VP:
+  deactivate GS
+  VP --> EA:
+  deactivate VP
+
+  EA -> IP: InspectObject(ES.SelectedObjects.FirstOrDefault())
+  activate IP
+  IP -> Nd: GetProperties() ' Or Comp.GetProperties()
+  activate Nd
+  Nd --> IP: propertiesList
+  deactivate Nd
+  IP --> EA:
+  deactivate IP
+
+  EA -> HP: OnNodeSelected(...) ' Triggered by user click
+  activate HP
+  HP -> ES: SetSelectedObjects(...)
+  activate ES
+  ES --> HP:
+  deactivate ES
+  HP --> EA:
+  deactivate HP
+
+  EA -> ABP: OnAssetSelected(...)
+  activate ABP
+  ABP --> EA:
+  deactivate ABP
+
+  EA -> TB: OnPlayClicked() ' User enters Play Mode
+  activate TB
+  TB --> EA:
+  deactivate TB
+  alt If Play Mode Active
+    EA -> GE: Update(gameTime)
+    activate GE
+    GE --> EA:
+    deactivate GE
+  else If Editor Mode
+    EA -> EA: ' Editor-specific updates (e.g., UI animations)
+  end
+
+  EA -> TB: OnStopClicked() ' User exits Play Mode
+  activate TB
+  TB --> EA:
+  deactivate TB
+
+  ' 2. Rendering
+  EA -> VP: OnRender()
+  activate VP
+  alt If Play Mode Active
+    VP -> GE: Draw(gameTime)
+    activate GE
+    GE --> VP: renderedGameView
+    deactivate GE
+  else If Editor Mode
+    VP -> GE: DrawEditor(ES.ActiveScene, VP.EditorCamera)
+    activate GE
+    GE --> VP: renderedEditorView
+    deactivate GE
+    VP -> GS: DrawGizmos(ES.SelectedObjects, VP.EditorCamera)
+    activate GS
+    GS --> VP:
+    deactivate GS
+  end
+  VP --> EA:
+  deactivate VP
+
+  ' 3. Undo/Redo Example
+  EA -> TB: OnUndoClicked()
+  activate TB
+  TB --> EA:
+  deactivate TB
+  EA -> URS: Undo()
+  activate URS
+  URS --> EA:
+  deactivate URS
+
+  ' 4. Asset Importing Example
+  EA -> ABP: ImportAsset(sourcePath)
+  activate ABP
+  ABP -> AM: ImportAsset(sourcePath, destinationPath)
+  activate AM
+  AM -> ResM_Cs: Load<T>(destinationPath) ' Trigger C++ side if needed
+  activate ResM_Cs
+  ResM_Cs --> AM:
+  deactivate ResM_Cs
+  AM --> ABP: importedAssetInfo
+  deactivate AM
+  ABP --> EA:
+  deactivate ABP
+
+end
+@enduml

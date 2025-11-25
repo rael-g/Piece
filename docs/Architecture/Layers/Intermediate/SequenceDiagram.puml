@@ -1,0 +1,207 @@
+@startuml
+autonumber
+
+participant "GameApp (C#)" as App_Cs
+participant "NativeCalls (C# P/Invoke)" as NC
+participant "EngineCore (C++ Interm.)" as EC_Cpp
+participant "JobSystem (C++ Interm.)" as JS_Cpp
+participant "PhysicsSystem (C++ Interm.)" as PS_Cpp
+participant "ResourceManager (C++ Interm.)" as RM_Cpp
+participant "RenderSystem (C++ Interm.)" as RS_Cpp
+participant "IGraphicsDevice (C++ Backend)" as GD_Cpp
+participant "IPhysicsWorld (C++ Backend)" as PW_Cpp
+participant "IWindow" as Window
+participant "IRenderContext (C++ Backend)" as RC_Cpp
+participant "PostProcMgr (C++ Interm.)" as PPM_Cpp
+participant "Camera (C# Wrapper)" as Cam_Cs
+participant "Model (C# Wrapper)" as Mod_Cs
+participant "Mesh (C++ Interm.)" as Msh_Cpp
+participant "Material (C++ Interm.)" as Mat_Cpp
+
+' Initialization Sequence
+App_Cs -> NC: Engine_InitializeFromLibraries("gfx_opengl.dll", "physics_jolt.dll")
+activate NC
+NC -> EC_Cpp: Create(graphicsLibPath, physicsLibPath)
+activate EC_Cpp
+EC_Cpp -> Window: Create("Piece Engine", 1280, 720)
+activate Window
+Window --> EC_Cpp:
+deactivate Window
+EC_Cpp -> GD_Cpp: CreateGraphicsDevice()
+activate GD_Cpp
+GD_Cpp --> EC_Cpp:
+deactivate GD_Cpp
+EC_Cpp -> GD_Cpp: Init(Window)
+activate GD_Cpp
+GD_Cpp --> EC_Cpp:
+deactivate GD_Cpp
+EC_Cpp -> PW_Cpp: CreatePhysicsWorld()
+activate PW_Cpp
+PW_Cpp --> EC_Cpp:
+deactivate PW_Cpp
+EC_Cpp -> PW_Cpp: Init()
+activate PW_Cpp
+PW_Cpp --> EC_Cpp:
+deactivate PW_Cpp
+EC_Cpp -> JS_Cpp: new JobSystem()
+activate JS_Cpp
+JS_Cpp --> EC_Cpp:
+deactivate JS_Cpp
+EC_Cpp -> PS_Cpp: new PhysicsSystemCpp(PW_Cpp, JS_Cpp)
+activate PS_Cpp
+PS_Cpp --> EC_Cpp:
+deactivate PS_Cpp
+EC_Cpp -> RM_Cpp: new ResourceManagerCpp(GD_Cpp)
+activate RM_Cpp
+RM_Cpp --> EC_Cpp:
+deactivate RM_Cpp
+EC_Cpp -> RS_Cpp: new RenderSystemCpp(GD_Cpp, GD_Cpp.GetImmediateContext())
+activate RS_Cpp
+RS_Cpp --> EC_Cpp:
+deactivate RS_Cpp
+EC_Cpp --> NC: ec_cpp_ptr
+deactivate EC_Cpp
+NC --> App_Cs: engine_core_ptr
+deactivate NC
+
+' C# wrappers for C++ components
+App_Cs -> Cam_Cs: new Camera(EC_Cpp.GetCameraPtr())
+App_Cs -> RM_Cs: new ResourceManager(EC_Cpp.GetResourceManagerPtr())
+App_Cs -> RS_Cs: new RenderSystem(EC_Cpp.GetRenderSystemPtr())
+App_Cs -> App_Cs: ... (Create/Load Models, Materials, etc. using RM_Cs)
+
+App_Cs -> App_Cs: GameLoop()
+loop Game Loop
+  ' 1. Physics Update
+  App_Cs -> NC: Engine_UpdatePhysics(ec_cpp_ptr, deltaTime)
+  activate NC
+  NC -> EC_Cpp: UpdatePhysics(deltaTime)
+  activate EC_Cpp
+  EC_Cpp -> PS_Cpp: Update(deltaTime)
+  activate PS_Cpp
+  PS_Cpp -> PW_Cpp: Step(deltaTime)
+  activate PW_Cpp
+  PW_Cpp --> PS_Cpp:
+  deactivate PW_Cpp
+  PS_Cpp --> EC_Cpp:
+  deactivate PS_Cpp
+  EC_Cpp --> NC:
+  deactivate EC_Cpp
+  NC --> App_Cs:
+  deactivate NC
+
+  ' 2. Render Frame
+  App_Cs -> NC: Engine_RenderFrame(ec_cpp_ptr, activeCamera_Cs.NativePtr, models_ptr_array, numModels)
+  activate NC
+  NC -> EC_Cpp: RenderFrame(cam_cpp_ptr, models_cpp_vector)
+  activate EC_Cpp
+  EC_Cpp -> RS_Cpp: RenderFrame(cam_cpp_ptr, models_cpp_vector)
+  activate RS_Cpp
+
+  RS_Cpp -> GD_Cpp: BeginFrame()
+  activate GD_Cpp
+  GD_Cpp --> RS_Cpp:
+  deactivate GD_Cpp
+
+  RS_Cpp -> RC_Cpp: SetViewport(...)
+  activate RC_Cpp
+  RC_Cpp --> RS_Cpp:
+  deactivate RC_Cpp
+
+  RS_Cpp -> RC_Cpp: Configure Camera (UBOs, View/Projection)
+  activate RC_Cpp
+  RC_Cpp --> RS_Cpp:
+  deactivate RC_Cpp
+
+  RS_Cpp -> JS_Cpp: Submit(CullingJob)
+  activate JS_Cpp
+  JS_Cpp --> RS_Cpp: jobHandle
+  deactivate JS_Cpp
+  RS_Cpp -> JS_Cpp: Wait(jobHandle) ' Or continue other work in parallel
+  activate JS_Cpp
+  JS_Cpp --> RS_Cpp: cullingResults
+  deactivate JS_Cpp
+
+  RS_Cpp -> RS_Cpp: SortRenderables(cullingResults)
+
+  loop for each visible ModelCpp in sorted order
+    RS_Cpp -> Mod_Cs: GetNativePtr()
+    activate Mod_Cs
+    Mod_Cs --> RS_Cpp: mod_cpp_ptr
+    deactivate Mod_Cs
+
+    RS_Cpp -> mod_cpp_ptr: GetMesh()
+    activate Mod_Cpp
+    Mod_Cpp --> RS_Cpp: msh_cpp_ptr
+    deactivate Mod_Cpp
+
+    RS_Cpp -> msh_cpp_ptr: GetVertexBuffer()
+    activate Msh_Cpp
+    Msh_Cpp --> RS_Cpp: vb_ptr
+    deactivate Msh_Cpp
+
+    RS_Cpp -> RC_Cpp: SetVertexBuffer(vb_ptr)
+    activate RC_Cpp
+    RC_Cpp --> RS_Cpp:
+    deactivate RC_Cpp
+
+    RS_Cpp -> msh_cpp_ptr: GetIndexBuffer()
+    activate Msh_Cpp
+    Msh_Cpp --> RS_Cpp: ib_ptr
+    deactivate Msh_Cpp
+
+    RS_Cpp -> RC_Cpp: SetIndexBuffer(ib_ptr)
+    activate RC_Cpp
+    RC_Cpp --> RS_Cpp:
+    deactivate RC_Cpp
+
+    RS_Cpp -> mod_cpp_ptr: GetMaterial(0) ' Assuming first material for simplicity
+    activate Mod_Cpp
+    Mod_Cpp --> RS_Cpp: mat_cpp_ptr
+    deactivate Mod_Cpp
+
+    RS_Cpp -> mat_cpp_ptr: Bind(RC_Cpp)
+    activate Mat_Cpp
+    Mat_Cpp -> RC_Cpp: SetShaderProgram(...)
+    activate RC_Cpp
+    RC_Cpp --> Mat_Cpp:
+    deactivate RC_Cpp
+    Mat_Cpp -> RC_Cpp: SetTexture(...)
+    activate RC_Cpp
+    RC_Cpp --> Mat_Cpp:
+    deactivate RC_Cpp
+    Mat_Cpp -> RC_Cpp: SetSampler(...)
+    activate RC_Cpp
+    RC_Cpp --> Mat_Cpp:
+    deactivate RC_Cpp
+    Mat_Cpp -> RC_Cpp: SetUniformBuffer(...)
+    activate RC_Cpp
+    RC_Cpp --> Mat_Cpp:
+    deactivate RC_Cpp
+    Mat_Cpp --> RS_Cpp:
+    deactivate Mat_Cpp
+
+    RS_Cpp -> RC_Cpp: DrawIndexed(...)
+    activate RC_Cpp
+    RC_Cpp --> RS_Cpp:
+    deactivate RC_Cpp
+  end
+
+  RS_Cpp -> PPM_Cpp: ApplyEffects(RC_Cpp, ...)
+  activate PPM_Cpp
+  PPM_Cpp --> RS_Cpp:
+  deactivate PPM_Cpp
+
+  RS_Cpp -> GD_Cpp: EndFrame()
+  activate GD_Cpp
+  GD_Cpp --> RS_Cpp:
+  deactivate GD_Cpp
+
+  RS_Cpp --> EC_Cpp:
+  deactivate RS_Cpp
+  EC_Cpp --> NC:
+  deactivate EC_Cpp
+  NC --> App_Cs:
+  deactivate NC
+end
+@enduml

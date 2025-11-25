@@ -1,0 +1,89 @@
+@startuml
+autonumber
+
+participant "AppExample (Low-Level C++)" as App
+participant "IWindow" as Window
+participant "IGraphicsDevice" as GraphicsDevice
+participant "IRenderContext" as RenderContext
+
+App -> Window: Create("Piece App", 1280, 720)
+activate Window
+Window --> App: windowPtr
+deactivate Window
+
+App -> GraphicsDevice: new ConcreteGraphicsDevice()
+activate GraphicsDevice
+GraphicsDevice --> App: graphicsDevicePtr
+deactivate GraphicsDevice
+
+App -> GraphicsDevice: Init(windowPtr)
+activate GraphicsDevice
+GraphicsDevice --> App:
+deactivate GraphicsDevice
+
+loop Application Loop (until Window ShouldClose)
+  App -> Window: PollEvents()
+  activate Window
+  Window --> App:
+  deactivate Window
+
+  App -> GraphicsDevice: BeginFrame()
+  activate GraphicsDevice
+  GraphicsDevice --> App:
+  deactivate GraphicsDevice
+
+  App -> GraphicsDevice: GetImmediateContext()
+  activate GraphicsDevice
+  GraphicsDevice --> App: renderContextPtr
+  deactivate GraphicsDevice
+
+  App -> RenderContext: Clear(0.1f, 0.1f, 0.1f, 1.0f)
+  activate RenderContext
+  RenderContext --> App:
+  deactivate RenderContext
+
+  App -> RenderContext: SetViewport(0, 0, 1280, 720)
+  activate RenderContext
+  RenderContext --> App:
+  deactivate RenderContext
+
+  ' Basic drawing commands (conceptual)
+  App -> RenderContext: SetVertexBuffer(...)
+  activate RenderContext
+  RenderContext --> App:
+  deactivate RenderContext
+
+  App -> RenderContext: SetIndexBuffer(...)
+  activate RenderContext
+  RenderContext --> App:
+  deactivate RenderContext
+
+  App -> RenderContext: SetShaderProgram(...)
+  activate RenderContext
+  RenderContext --> App:
+  deactivate RenderContext
+
+  App -> RenderContext: DrawIndexed(...)
+  activate RenderContext
+  RenderContext --> App:
+  deactivate RenderContext
+
+  App -> GraphicsDevice: EndFrame()
+  activate GraphicsDevice
+  GraphicsDevice --> App:
+  deactivate GraphicsDevice
+
+  App -> Window: SwapBuffers()
+  activate Window
+  Window --> App:
+  deactivate Window
+
+  App -> Window: ShouldClose()
+  activate Window
+  Window --> App: false/true
+  deactivate Window
+end
+
+App -> GraphicsDevice: ~ConcreteGraphicsDevice() ' Destruction of graphics device
+App -> Window: ~ConcreteWindow() ' Destruction of window
+@enduml

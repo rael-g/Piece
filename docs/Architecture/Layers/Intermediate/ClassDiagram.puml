@@ -1,0 +1,237 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+package "Intermediate C++ Layer" {
+
+  class ResourceManagerCpp {
+    - graphicsDevice: IGraphicsDevice*
+    - resourceCache: unordered_map<string, std::unique_ptr<void>> ' Storing generic std::unique_ptrs
+    + ResourceManagerCpp(IGraphicsDevice* device)
+    + LoadMesh(path: const char*): MeshCpp* <<extern "C">>
+    + LoadMaterial(name: const char*): MaterialCpp* <<extern "C">>
+    + LoadTexture(path: const char*): ITexture* <<extern "C">> ' Returns RAL resource directly
+    + LoadShaderProgram(vtxPath: const char*, fragPath: const char*): IShaderProgram* <<extern "C">> ' Returns RAL resource directly
+    + ~ResourceManagerCpp()
+  }
+
+  class MaterialCpp {
+    - shaderProgram: IShaderProgram*
+    - textures: unordered_map<string, ITexture*>
+    - samplers: unordered_map<string, ISampler*>
+    - uniformBuffers: unordered_map<string, IUniformBuffer*>
+    + MaterialCpp(ResourceManagerCpp* rm)
+    + SetFloat(name: const char*, value: float): void <<extern "C">>
+    + SetVector3(name: const char*, value: Vector3): void <<extern "C">>
+    + SetMatrix4x4(name: const char*, value: Matrix4x4): void <<extern "C">>
+    + SetTexture(name: const char*, texturePtr: ITexture*): void <<extern "C">>
+    + SetSampler(name: const char*, samplerPtr: ISampler*): void <<extern "C">>
+    + SetShaderProgram(shaderProgramPtr: IShaderProgram*): void <<extern "C">>
+    + ~MaterialCpp()
+  }
+
+  class MeshCpp {
+    - vertexBuffer: std::unique_ptr<IVertexBuffer>
+    - indexBuffer: std::unique_ptr<IIndexBuffer>
+    + MeshCpp(IGraphicsDevice* gd, const string& path) ' Example of creation
+    + GetVertexBuffer(): IVertexBuffer*
+    + GetIndexBuffer(): IIndexBuffer*
+    + ~MeshCpp()
+  }
+
+  class ModelCpp {
+    - mesh: MeshCpp*
+    - materials: vector<MaterialCpp*>
+    - transform: Matrix4x4 ' Internal C++ math type
+    + ModelCpp(MeshCpp* mesh)
+    + SetTransform(transform: Matrix4x4): void <<extern "C">>
+    + GetTransform(outTransform: Matrix4x4*): void <<extern "C">>
+    + AddMaterial(materialPtr: MaterialCpp*): void <<extern "C">>
+    + GetMaterial(index: uint32_t, outMatPtr: MaterialCpp**): void <<extern "C">>
+    + GetMaterialCount(): uint32_t <<extern "C">>
+    + ~ModelCpp()
+  }
+
+  class CameraCpp {
+    - viewMatrix: Matrix4x4
+    - projMatrix: Matrix4x4
+    - position: Vector3
+    - lookAt: Vector3
+    + CameraCpp()
+    + SetPosition(position: Vector3): void <<extern "C">>
+    + GetPosition(outPosition: Vector3*): void <<extern "C">>
+    + SetLookAt(lookAt: Vector3): void <<extern "C">>
+    + GetLookAt(outLookAt: Vector3*): void <<extern "C">>
+    + SetProjection(fov: float, aspect: float, near: float, far: float): void <<extern "C">>
+    + GetViewMatrix(outMatrix: Matrix4x4*): void <<extern "C">>
+    + GetProjectionMatrix(outMatrix: Matrix4x4*): void <<extern "C">>
+    + ~CameraCpp()
+  }
+
+  class LightCpp {
+    - type: LightType ' Enum
+    - color: Vector3
+    - intensity: float
+    - position: Vector3 ' For point/spot
+    - direction: Vector3 ' For directional/spot
+    + LightCpp(LightType type)
+    + SetColor(color: Vector3): void <<extern "C">>
+    + GetColor(outColor: Vector3*): void <<extern "C">>
+    + SetIntensity(intensity: float): void <<extern "C">>
+    + GetIntensity(outIntensity: float*): void <<extern "C">>
+    + SetPosition(position: Vector3): void <<extern "C">>
+    + GetPosition(outPosition: Vector3*): void <<extern "C">>
+    + SetDirection(direction: Vector3): void <<extern "C">>
+    + GetDirection(outDirection: Vector3*): void <<extern "C">>
+    + GetType(): LightType <<extern "C">>
+    + ~LightCpp()
+  }
+
+  enum LightType {
+    Directional, Point, Spot
+  }
+
+  class RenderSystemCpp {
+    - graphicsDevice: IGraphicsDevice*
+    - renderContext: IRenderContext*
+    + RenderSystemCpp(IGraphicsDevice* gd, IRenderContext* rc)
+    + RenderFrame(cameraPtr: CameraCpp*, modelsPtr: ModelCpp**, numModels: size_t): void <<extern "C">>
+    + ~RenderSystemCpp()
+  }
+
+  class PostProcessingManagerCpp {
+    + PostProcessingManagerCpp()
+    + AddEffect(effectPtr: PostProcessEffectCpp*): void <<extern "C">>
+    + ApplyEffects(rcPtr: IRenderContext*, sourceTexPtr: ITexture*, targetFboPtr: IFrameBuffer*): void <<extern "C">>
+    + ~PostProcessingManagerCpp()
+  }
+
+  class PostProcessEffectCpp {
+    - shaderProgram: IShaderProgram*
+    + PostProcessEffectCpp(IShaderProgram* sp, const string& name)
+    + Apply(rcPtr: IRenderContext*, sourceTexPtr: ITexture*, targetFboPtr: IFrameBuffer*): void <<extern "C">>
+    + ~PostProcessEffectCpp()
+  }
+
+  class JobSystem {
+    + JobSystem()
+    + Submit(job: Job*): void
+    + Wait(job: Job*): void
+    + ~JobSystem()
+  }
+
+  class PhysicsSystemCpp {
+    - physicsWorld: IPhysicsWorld*
+    - jobSystem: JobSystem*
+    + PhysicsSystemCpp(IPhysicsWorld* world, JobSystem* js)
+    + Update(deltaTime: float): void <<extern "C">>
+    + ~PhysicsSystemCpp()
+  }
+
+  class EngineCore {
+    - graphicsDevice: IGraphicsDevice*
+    - physicsWorld: IPhysicsWorld*
+    - window: IWindow*
+    - renderSystem: RenderSystemCpp*
+    - resourceManager: ResourceManagerCpp*
+    - physicsSystem: PhysicsSystemCpp*
+    - jobSystem: JobSystem*
+    + Engine_InitializeFromLibraries(graphicsLibraryPath: const char*, physicsLibraryPath: const char*): EngineCore* <<extern "C">>
+    + Engine_Destroy(core: EngineCore*): void <<extern "C">>
+    + Engine_RenderFrame(core: EngineCore*): void <<extern "C">>
+    + Engine_UpdatePhysics(core: EngineCore*, deltaTime: float): void <<extern "C">>
+  }
+
+  ' Relationships
+  EngineCore *-- "1" IGraphicsDevice
+  EngineCore *-- "1" IPhysicsWorld
+  EngineCore *-- "1" IWindow
+  EngineCore *-- "1" RenderSystemCpp
+  EngineCore *-- "1" ResourceManagerCpp
+  EngineCore *-- "1" PhysicsSystemCpp
+  EngineCore *-- "1" JobSystem
+
+  PhysicsSystemCpp "1" *-- "1" IPhysicsWorld
+  PhysicsSystemCpp "1" *-- "1" JobSystem
+  
+  ResourceManagerCpp "1" *-- "1" JobSystem
+
+  RenderSystemCpp "1" *-- "1" JobSystem
+
+
+  ' Mapping of Intermediate C++ to RAL (C++)
+  ResourceManagerCpp "1" *-- "1" IGraphicsDevice
+  MaterialCpp "1" *-- "1" IShaderProgram : uses
+  MaterialCpp "1" *-- "many" ITexture : uses
+  MaterialCpp "1" *-- "many" ISampler : uses
+  MaterialCpp "1" *-- "many" IUniformBuffer : uses
+  MeshCpp "1" *-- "1" IVertexBuffer : uses
+  MeshCpp "1" *-- "1" IIndexBuffer : uses
+  RenderSystemCpp "1" *-- "1" IGraphicsDevice
+  RenderSystemCpp "1" *-- "1" IRenderContext
+  PostProcessingManagerCpp "1" *-- "1" IRenderContext : uses
+  PostProcessingManagerCpp "1" *-- "many" PostProcessEffectCpp : owns
+  PostProcessEffectCpp "1" *-- "1" IShaderProgram : uses
+
+  ' Relationships between Intermediate C++ classes
+  RenderSystemCpp ..> CameraCpp
+  RenderSystemCpp ..> LightCpp
+  RenderSystemCpp "1" -- "many" ModelCpp
+
+  ModelCpp "1" *-- "1" MeshCpp
+  ModelCpp "1" -- "many" MaterialCpp
+
+  LightCpp "1" -- "1" LightType
+  ' Explicitly add relationships for resource loading from ResourceManager
+  ResourceManagerCpp ..> MeshCpp : creates
+  ResourceManagerCpp ..> MaterialCpp : creates
+  ResourceManagerCpp ..> ITexture : creates
+  ResourceManagerCpp ..> IShaderProgram : creates
+}
+
+package "Render Abstraction Layer (RAL)" {
+  ' Existing RAL interfaces remain
+  interface IGraphicsDevice {
+    + Init(window: IWindow*): void
+    + BeginFrame(): void
+    + EndFrame(): void
+    + GetImmediateContext(): IRenderContext*
+    + CreateVertexBuffer(data: const void*, size: uint32_t, layout: const VertexLayout&): std::unique_ptr<IVertexBuffer>
+    + CreateIndexBuffer(data: const uint32_t*, count: uint32_t): std::unique_ptr<IIndexBuffer>
+    + CreateShaderModule(stage: ShaderStage, source: const string&): std::unique_ptr<IShader>
+    + CreateShaderProgram(shaderModules: const vector<IShader*>&): std::unique_ptr<IShaderProgram>
+    + CreateTexture(type: TextureType, width: uint32_t, height: uint32_t, depth: uint32_t, format: TextureFormat, data: const void* = nullptr): std::unique_ptr<ITexture>
+    + CreateSampler(minFilter: TextureFilter, magFilter: TextureFilter, sWrap: TextureWrap, tWrap: TextureWrap): std::unique_ptr<ISampler>
+    + CreateComputeBuffer(size: uint32_t, usage: BufferUsage, data: const void* = nullptr): std::unique_ptr<IComputeBuffer>
+    + CreateIndirectDrawBuffer(size: uint32_t, data: const void* = nullptr): std::unique_ptr<IIndirectDrawBuffer>
+    + CreateAccelerationStructure(info: const AccelerationStructureBuildInfo&): std::unique_ptr<IAccelerationStructure>
+    + CreateFrameBuffer(width: uint32_t, height: uint32_t): std::unique_ptr<IFrameBuffer>
+    + CreateUniformBuffer(size: uint32_t, data: const void* = nullptr): std::unique_ptr<IUniformBuffer>
+  }
+  interface IRenderContext
+  interface IVertexBuffer
+  interface IIndexBuffer
+  interface IShader
+  interface IShaderProgram
+  interface ITexture
+  interface IUniformBuffer
+  interface ISampler
+  interface IComputeBuffer
+  interface IIndirectDrawBuffer
+  interface IAccelerationStructure
+  interface IFrameBuffer
+
+  ' Existing enums and structs remain
+  enum TextureFormat
+  enum DepthFunc
+  enum BlendMode
+  enum CullMode
+  enum TextureFilter
+  enum TextureWrap
+  enum ShaderStage
+  enum TextureType
+  enum BufferUsage
+  struct AccelerationStructureBuildInfo
+}
+
+@enduml

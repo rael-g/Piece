@@ -1,0 +1,208 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+package "Visual Editor C# (AvaloniaUI)" {
+
+  class EditorApplication {
+    - editorState: EditorState
+    - gameEngine: GameEngine // Engine instance for the viewport
+    - viewportPanel: ViewportPanel
+    - hierarchyPanel: HierarchyPanel
+    - inspectorPanel: InspectorPanel
+    - assetBrowserPanel: AssetBrowserPanel
+    // ... other panels and systems
+    + Run(): void
+    + SaveProject(): void
+    + LoadProject(path): void
+  }
+
+  class EditorState {
+    - currentProject: Project
+    - activeScene: Scene
+    - selectedObjects: List<object>
+    - commandHistory: UndoRedoSystem
+    + CurrentProject: Project
+    + ActiveScene: Scene
+    + SelectedObjects: List<object>
+    + Undo(): void
+    + Redo(): void
+  }
+
+  class Project {
+    - name: string
+    - path: string
+    - scenes: List<Scene>
+    - assets: List<AssetInfo>
+    + Save(): void
+    + Load(): void
+  }
+
+  class AssetInfo {
+    - path: string
+    - type: string
+    // ... metadata
+  }
+
+  class UndoRedoSystem {
+    - commandStack: List<IEditorCommand>
+    + Execute(command): void
+    + Undo(): void
+    + Redo(): void
+  }
+
+  interface IEditorCommand {
+    + Execute(): void
+    + Unexecute(): void
+  }
+
+  class ViewportPanel {
+    - editorCamera: Camera // Editor-specific camera
+    - gameEngine: GameEngine // Engine instance for rendering
+    + OnRender(): void // Renders scene and gizmos
+    + HandleInput(): void // Navigation, selection
+  }
+
+  class HierarchyPanel {
+    + DisplaySceneTree(scene: Scene): void
+    + OnNodeSelected(node): void
+    + OnNodeMoved(node, newParent): void
+  }
+
+  class InspectorPanel {
+    + InspectObject(obj: object): void
+    + OnPropertyChanged(property, newValue): void
+  }
+
+  class AssetBrowserPanel {
+    + DisplayAssets(project: Project): void
+    + OnAssetSelected(asset): void
+    + ImportAsset(path): void
+  }
+
+  class ConsolePanel {
+    + DisplayLogs(): void
+  }
+
+  class Toolbar {
+    + OnPlayClicked(): void
+    + OnStopClicked(): void
+    + OnSaveClicked(): void
+  }
+
+  // --- Editing Systems ---
+  class SelectionSystem {
+    + Select(obj): void
+    + Deselect(obj): void
+  }
+
+  class GizmoSystem {
+    + DrawGizmos(selectedObjects, editorCamera): void
+    + HandleGizmoInput(): void
+  }
+
+  class SerializationSystem {
+    + SerializeScene(scene): string
+    + DeserializeScene(data): Scene
+    + SaveProject(project): void
+    + LoadProject(path): Project
+  }
+
+  // --- High-Level C# Framework (Wrappers & Core) ---
+  // (Represented here as classes for simplicity, but are wrappers or part of the framework)
+  class GameEngine << (C#,Yellow) >> {
+    + Render(scene, camera): void
+    // ... other game engine methods
+  }
+  class Scene << (C#,LightGreen) >> {
+    + RootNode: Node
+    + Save(path): void
+    + Load(path): Scene
+  }
+  class Node << (C#,LightGreen) >> {
+    + AddComponent<T>(): T
+    + RemoveComponent<T>(): void
+    + GetProperties(): List<EditorPropertyInfo>
+  }
+  class Component << (C#,LightGreen) >> {
+    + GetProperties(): List<EditorPropertyInfo>
+  }
+  class TransformComponent << (C#,LightGreen) >> {}
+  class MeshRendererComponent << (C#,LightGreen) >> {}
+  class CameraComponent << (C#,LightGreen) >> {}
+  class LightComponent << (C#,LightGreen) >> {}
+  class ScriptComponent << (C#,LightGreen) >> {}
+
+  class AssetManager << (C#,LightGreen) >> {
+    + ImportAsset(sourcePath, destPath): AssetInfo
+  }
+  class Camera << (C#,LightGreen) >> {
+    + SetEditorMode(bool): void
+  }
+  class Light << (C#,LightGreen) >> {
+    // May have specific methods for gizmo rendering
+  }
+
+  struct EditorPropertyInfo {
+    + Name: string
+    + Type: Type
+    + Value: object
+    // ... min/max, UI hints
+  }
+
+  // --- Relationships ---
+  EditorApplication "1" *-- "1" EditorState
+  EditorApplication "1" *-- "1" GameEngine
+  EditorApplication "1" -- "1" ViewportPanel
+  EditorApplication "1" -- "1" HierarchyPanel
+  EditorApplication "1" -- "1" InspectorPanel
+  EditorApplication "1" -- "1" AssetBrowserPanel
+  EditorApplication "1" -- "1" ConsolePanel
+  EditorApplication "1" -- "1" Toolbar
+
+  EditorState "1" *-- "1" Project
+  EditorState "1" *-- "1" UndoRedoSystem
+  EditorState "1" *-- "1" SelectionSystem
+
+  UndoRedoSystem "1" *-- "many" IEditorCommand
+
+  ViewportPanel "1" *-- "1" Camera
+  ViewportPanel "1" *-- "1" GizmoSystem
+  ViewportPanel "1" *-- "1" GameEngine // Uses GameEngine for scene rendering
+  ViewportPanel ..> EditorState // Accesses ActiveScene, SelectedObjects
+
+  HierarchyPanel ..> EditorState // Accesses ActiveScene
+  InspectorPanel ..> EditorState // Accesses SelectedObjects
+  AssetBrowserPanel ..> EditorState
+  AssetBrowserPanel ..> AssetManager // Calls AssetManager.ImportAsset
+
+  SelectionSystem ..> EditorState
+
+  // Editor -> High-Level C# Framework
+  EditorApplication ..> GameEngine
+  EditorApplication ..> AssetManager
+
+  Scene "1" *-- "1" Node : root
+  Node "1" -- "many" Component : components
+  Node "1" -- "many" Node : children
+
+  Component <|-- TransformComponent
+  Component <|-- MeshRendererComponent
+  Component <|-- CameraComponent
+  Component <|-- LightComponent
+  Component <|-- ScriptComponent
+
+  GameEngine "1" -- "1" Scene
+  GameEngine "1" -- "1" Camera
+  GameEngine "1" -- "many" Light
+
+  // Relationships representing API exposure for the editor
+  Node ..> EditorPropertyInfo
+  Component ..> EditorPropertyInfo
+
+  SerializationSystem ..> Scene
+  SerializationSystem ..> Node
+  SerializationSystem ..> Component
+
+}
+@enduml

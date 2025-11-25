@@ -1,0 +1,224 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+package "High-Level C# Layer (Framework)" {
+
+  class GameEngine {
+    - inputManager: InputManager
+    - sceneManager: SceneManager
+    - assetManager: AssetManager
+    - renderManager: RenderManager
+    - aiSystem: AISystem
+    + Initialize(): void
+    + Run(): void
+    + Update(GameTime gameTime): void
+    + Draw(GameTime gameTime): void
+  }
+
+  class SceneManager {
+    - currentScene: Scene
+    + CurrentScene: Scene
+    + LoadScene(sceneName): void
+  }
+
+  class Scene {
+    - rootNode: Node
+    - activeCamera: CameraWrapper
+    - lights: List<LightWrapper>
+    - postProcessingManager: PostProcessingManager
+    + AddNode(node): void
+    + RemoveNode(node): void
+    + Update(GameTime gameTime): void
+    + Draw(RenderManager renderManager): void
+  }
+
+  abstract class Node {
+    - name: string
+    - parent: Node
+    - children: List<Node>
+    - components: List<Component>
+    - transform: TransformComponent
+    + AddChild(node): void
+    + RemoveChild(node): void
+    + AddComponent(component): void
+    + GetComponent<T>(): T
+    + Update(GameTime gameTime): void
+    + Draw(RenderManager renderManager): void
+  }
+
+  abstract class Component {
+    - owner: Node
+    + Start(): void
+    + Update(GameTime gameTime): void
+    + Draw(RenderManager renderManager): void
+  }
+
+  class TransformComponent {
+    + Position: Vector3
+    + Rotation: Quaternion
+    + Scale: Vector3
+    + WorldMatrix: Matrix4x4
+  }
+
+  class MeshRendererComponent {
+    - mesh: MeshWrapper
+    - material: MaterialWrapper
+    + Mesh: MeshWrapper
+    + Material: MaterialWrapper
+    + Draw(RenderManager renderManager): void
+  }
+
+  class CameraComponent {
+    - camera: CameraWrapper
+    + Camera: CameraWrapper
+  }
+
+  class LightComponent {
+    - light: LightWrapper
+    + Light: LightWrapper
+  }
+
+  class ScriptComponent {
+    ' Developers can inherit from this.
+    ' Can also act as a "Bridge Component"
+    ' for other languages (Lua, Python).
+    + OnStart(): void
+    + OnUpdate(GameTime gameTime): void
+  }
+
+  class AISystem {
+    + Update(gameTime: GameTime): void
+    + RegisterComponent(btComponent: BehaviorTreeComponent): void
+  }
+
+  class BehaviorTreeComponent {
+    - behaviorTreeAsset: BehaviorTree
+    + Execute(): void
+  }
+
+  class InputManager {
+    - gameActions: Dictionary<GameAction, InputState>
+    + Update(): void
+    + IsActionPressed(action): bool
+    + GetMousePosition(): Vector2
+  }
+
+  enum GameAction {
+    MoveForward, Jump, Attack, ...
+  }
+
+  class AssetManager {
+    - resourceManager: ResourceManagerWrapper
+    + Load<T>(path): T
+    + Unload(path): void
+  }
+
+  class RenderManager {
+    - renderSystem: RenderSystemWrapper
+    + Render(Scene scene, CameraWrapper activeCamera): void
+  }
+
+  class GameTime {
+    + DeltaTime: float
+    + TotalTime: float
+  }
+
+  class PostProcessingManager {
+    - ppmCpp: PostProcessingManagerWrapper
+    - effects: List<PostProcessEffect>
+    + PostProcessingManager()
+    + AddEffect(effect): void
+    + ApplyEffects(renderContext, source, target): void
+  }
+
+  class PostProcessEffect {
+    - ppeCpp: PostProcessEffectWrapper
+    + PostProcessEffect(shaderProgram, name)
+    + Apply(renderContext, source, target): void
+  }
+
+  interface ResourceManagerWrapper << (C#,LightGreen) >>
+  interface MaterialWrapper << (C#,LightGreen) >>
+  interface MeshWrapper << (C#,LightGreen) >>
+  interface ModelWrapper << (C#,LightGreen) >>
+  interface CameraWrapper << (C#,LightGreen) >>
+  interface LightWrapper << (C#,LightGreen) >>
+  interface RenderSystemWrapper << (C#,LightGreen) >>
+  interface PostProcessingManagerWrapper << (C#,LightGreen) >>
+  interface PostProcessEffectWrapper << (C#,LightGreen) >>
+  interface TextureWrapper << (C#,LightGreen) >>
+  interface SamplerWrapper << (C#,LightGreen) >>
+  interface ShaderProgramWrapper << (C#,LightGreen) >>
+  interface FrameBufferWrapper << (C#,LightGreen) >>
+
+  ' Enum for LightType, already defined in C# wrapper
+  enum LightType << (C#,LightGreen) >> {
+    Directional, Point, Spot
+  }
+
+
+  // --- Relationships ---
+  GameEngine "1" *-- "1" InputManager
+  GameEngine "1" *-- "1" SceneManager
+  GameEngine "1" *-- "1" AssetManager
+  GameEngine "1" *-- "1" RenderManager
+  GameEngine "1" *-- "1" AISystem
+
+  AISystem "1" -- "many" BehaviorTreeComponent : manages
+
+  SceneManager "1" *-- "1" Scene
+  Scene "1" *-- "1" Node : rootNode
+
+  Node "1" *-- "1" TransformComponent
+  Node "1" -- "many" Component : components
+  Node "1" -- "many" Node : children
+
+  Component <|-- TransformComponent
+  Component <|-- MeshRendererComponent
+  Component <|-- CameraComponent
+  Component <|-- LightComponent
+  Component <|-- ScriptComponent
+  Component <|-- BehaviorTreeComponent
+
+  MeshRendererComponent "1" *-- "1" MeshWrapper : uses
+  MeshRendererComponent "1" *-- "1" MaterialWrapper : uses
+
+  CameraComponent "1" *-- "1" CameraWrapper : uses
+  LightComponent "1" *-- "1" LightWrapper : uses
+
+  AssetManager "1" *-- "1" ResourceManagerWrapper
+  AssetManager ..> MeshWrapper : loads
+  AssetManager ..> MaterialWrapper : loads
+  AssetManager ..> TextureWrapper : loads
+  AssetManager ..> ShaderProgramWrapper : loads
+
+  RenderManager "1" *-- "1" RenderSystemWrapper
+  RenderManager ..> Scene
+  RenderManager ..> CameraWrapper
+  RenderManager ..> MeshRendererComponent : draws
+
+  Scene ..> CameraWrapper : activeCamera
+  Scene "1" -- "many" LightWrapper : lights
+  Scene "1" *-- "1" PostProcessingManager ' C# high-level manager
+
+  PostProcessingManager "1" *-- "many" PostProcessEffect ' C# high-level effects
+  PostProcessingManager "1" *-- "1" PostProcessingManagerWrapper ' C# wrapper for C++ PPM
+  PostProcessEffect "1" *-- "1" PostProcessEffectWrapper ' C# wrapper for C++ PPE
+  PostProcessEffect "1" *-- "1" ShaderProgramWrapper ' C# wrapper for C++ SP
+
+  MaterialWrapper "1" *-- "1" ShaderProgramWrapper
+  MaterialWrapper "1" *-- "many" TextureWrapper
+  MaterialWrapper "1" *-- "many" SamplerWrapper
+  LightWrapper "1" -- "1" LightType
+
+  ' Dependencies of the Intermediate Layer (C# wrappers)
+  RenderManager ..> CameraWrapper
+  RenderManager ..> LightWrapper
+  RenderManager ..> MeshWrapper
+  RenderManager ..> MaterialWrapper
+  RenderManager ..> ShaderProgramWrapper
+  RenderManager ..> TextureWrapper
+  RenderManager ..> FrameBufferWrapper ' For post-processing
+}
+@enduml

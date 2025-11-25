@@ -1,0 +1,200 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+package "Low-Level C++ Backend" {
+
+  package "Window Abstraction Layer (WAL)" {
+    interface IWindow {
+      + Create(title: const std::string&, width: int, height: int): void
+      + PollEvents(): void
+      + SwapBuffers(): void
+      + ShouldClose() const: bool
+      + GetNativeWindow() const: void*
+      + IsKeyPressed(keycode: KeyCode) const: bool
+      + IsMouseButtonPressed(button: KeyCode) const: bool
+      + GetMousePosition() const: std::pair<float, float>
+      + GetMouseX() const: float
+      + GetMouseY() const: float
+    }
+
+    enum KeyCode {
+      // ... (input keys)
+    }
+
+    IWindow "1" -- "many" KeyCode : uses
+  }
+
+  package "Render Abstraction Layer (RAL)" {
+    interface IGraphicsDevice {
+      + Init(window: IWindow*): void
+      + BeginFrame(): void
+      + EndFrame(): void
+      + GetImmediateContext(): IRenderContext*
+      + CreateVertexBuffer(data: const void*, size: uint32_t, layout: const VertexLayout&): std::unique_ptr<IVertexBuffer>
+      + CreateIndexBuffer(data: const uint32_t*, count: uint32_t): std::unique_ptr<IIndexBuffer>
+      + CreateShaderModule(stage: ShaderStage, source: const std::string&): std::unique_ptr<IShader>
+      + CreateShaderProgram(shaderModules: const std::vector<IShader*>&): std::unique_ptr<IShaderProgram>
+      + CreateTexture(type: TextureType, width: uint32_t, height: uint32_t, depth: uint32_t, format: TextureFormat, data: const void* = nullptr): std::unique_ptr<ITexture>
+      + CreateSampler(minFilter: TextureFilter, magFilter: TextureFilter, sWrap: TextureWrap, tWrap: TextureWrap): std::unique_ptr<ISampler>
+      + CreateComputeBuffer(size: uint32_t, usage: BufferUsage, data: const void* = nullptr): std::unique_ptr<IComputeBuffer>
+      + CreateIndirectDrawBuffer(size: uint32_t, data: const void* = nullptr): std::unique_ptr<IIndirectDrawBuffer>
+      + CreateAccelerationStructure(info: const AccelerationStructureBuildInfo&): std::unique_ptr<IAccelerationStructure>
+      + CreateFrameBuffer(width: uint32_t, height: uint32_t): std::unique_ptr<IFrameBuffer>
+      + CreateUniformBuffer(size: uint32_t, data: const void* = nullptr): std::unique_ptr<IUniformBuffer>
+    }
+
+    interface IRenderContext {
+      + Clear(r: float, g: float, b: float, a: float): void
+      + SetViewport(x: int, y: int, width: int, height: int): void
+      + BindFrameBuffer(framebuffer: IFrameBuffer*): void
+      + SetVertexBuffer(vertexBuffer: IVertexBuffer*): void
+      + SetIndexBuffer(indexBuffer: IIndexBuffer*): void
+      + SetShaderProgram(shaderProgram: IShaderProgram*): void
+      + SetTexture(texture: ITexture*, slot: uint32_t): void
+      + SetSampler(sampler: ISampler*, slot: uint32_t): void
+      + SetUniformBuffer(uniformBuffer: IUniformBuffer*, bindingPoint: uint32_t): void
+      + SetStorageBuffer(computeBuffer: IComputeBuffer*, bindingPoint: uint32_t): void
+      + SetAccelerationStructure(as: IAccelerationStructure*): void
+      + SetDepthTest(enable: bool): void
+      + SetDepthFunc(func: DepthFunc): void
+      + SetDepthMask(enable: bool): void
+      + SetBlendMode(mode: BlendMode): void
+      + SetCullMode(mode: CullMode): void
+      + DrawIndexed(indexCount: uint32_t, startIndex: uint32_t, baseVertex: int32_t): void
+      + DrawArrays(vertexCount: uint32_t, startVertex: uint32_t): void
+      + DrawIndexedInstanced(indexCount: uint32_t, instanceCount: uint32_t, startIndex: uint32_t, baseVertex: int32_t, baseInstance: uint32_t): void
+      + DrawArraysInstanced(vertexCount: uint32_t, instanceCount: uint32_t, startVertex: uint32_t, baseInstance: uint32_t): void
+      + DispatchCompute(groupX: uint32_t, groupY: uint32_t, groupZ: uint32_t): void
+      + DispatchMesh(groupX: uint32_t, groupY: uint32_t, groupZ: uint32_t): void
+      + TraceRays(width: uint32_t, height: uint32_t, depth: uint32_t = 1): void
+      + SetVariableRateShading(settings: const VRSSettings&): void
+    }
+
+    interface IVertexBuffer {
+      + Bind() const: void
+      + Unbind() const: void
+      + SetData(data: const void*, size: uint32_t): void
+      + GetSize() const: uint32_t
+      + GetLayout() const: const VertexLayout&
+    }
+
+    interface IIndexBuffer {
+      + Bind() const: void
+      + Unbind() const: void
+      + SetData(data: const uint32_t*, count: uint32_t): void
+      + GetCount() const: uint32_t
+    }
+
+    interface IShader {
+      + ~IShader()
+    }
+
+    interface IShaderProgram {
+      + Bind() const: void
+      + Unbind() const: void
+      + SetUniformInt(name: const std::string&, value: int): void
+      + SetUniformFloat(name: const std::string&, value: float): void
+      + SetUniformFloat2(name: const std::string&, v0: float, v1: float): void
+      + SetUniformFloat3(name: const std::string&, v0: float, v1: float, v2: float): void
+      + SetUniformFloat4(name: const std::string&, v0: float, v1: float, v2: float, v3: float): void
+      + SetUniformMat4(name: const std::string&, matrix: const float*): void
+    }
+
+    interface ITexture {
+      + Bind(slot: uint32_t = 0) const: void
+      + Unbind() const: void
+      + GetWidth() const: uint32_t
+      + GetHeight() const: uint32_t
+      + GetNativeID() const: void*
+    }
+
+    interface IFrameBuffer {
+      + Bind() const: void
+      + Unbind() const: void
+      + GetColorAttachment(index: uint32_t = 0) const: ITexture*
+      + GetDepthAttachment() const: ITexture*
+      + Resize(width: uint32_t, height: uint32_t): void
+    }
+
+    interface IUniformBuffer {
+      + SetData(data: const void*, size: uint32_t): void
+      + GetSize() const: uint32_t
+    }
+
+    interface ISampler {
+      + Bind(slot: uint32_t = 0) const: void
+      + Unbind() const: void
+    }
+
+    interface IComputeBuffer {
+      + SetData(data: const void*, size: uint32_t): void
+      + GetSize() const: uint32_t
+    }
+
+    interface IIndirectDrawBuffer {
+      + SetData(data: const void*, size: uint32_t): void
+      + GetSize() const: uint32_t
+    }
+
+    interface IAccelerationStructure {
+      + Build(info: const AccelerationStructureBuildInfo&): void
+      + Update(info: const AccelerationStructureBuildInfo&): void
+    }
+
+    ' Common RAL Types and Enums
+    enum TextureFormat {
+      RGBA8,
+      RGB8,
+      R8,
+      Depth24Stencil8
+    }
+    enum DepthFunc
+    enum BlendMode
+    enum CullMode
+    enum TextureFilter
+    enum TextureWrap
+    enum ShaderStage
+    enum TextureType
+    enum BufferUsage
+    struct AccelerationStructureBuildInfo
+    struct VertexLayout
+    struct VertexLayoutElement
+    struct VertexDataType
+    struct GeometryData
+
+    IGraphicsDevice "1" -- "1" IRenderContext : creates >
+    IGraphicsDevice ..> IWindow
+    IGraphicsDevice ..> TextureFormat
+    IGraphicsDevice ..> VertexLayout
+    IGraphicsDevice ..> ShaderStage
+    IGraphicsDevice ..> TextureType
+    IGraphicsDevice ..> BufferUsage
+    IGraphicsDevice ..> AccelerationStructureBuildInfo
+
+    IRenderContext ..> IFrameBuffer
+    IRenderContext ..> IVertexBuffer
+    IRenderContext ..> IIndexBuffer
+    IRenderContext ..> IShaderProgram
+    IRenderContext ..> ITexture
+    IRenderContext ..> ISampler
+    IRenderContext ..> IUniformBuffer
+    IRenderContext ..> IComputeBuffer
+    IRenderContext ..> IAccelerationStructure
+    IRenderContext ..> DepthFunc
+    IRenderContext ..> BlendMode
+    IRenderContext ..> CullMode
+
+    IVertexBuffer ..> VertexLayout
+
+    IShaderProgram ..> std::string
+    ITexture ..> IGraphicsDevice
+    IFrameBuffer ..> ITexture
+
+    ISampler ..> TextureFilter
+    ISampler ..> TextureWrap
+
+    IAccelerationStructure ..> AccelerationStructureBuildInfo
+  }
+}
+@enduml
