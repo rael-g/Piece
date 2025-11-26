@@ -86,6 +86,21 @@
   Enable hot-reloading of C++ code during development to accelerate iteration times and improve developer workflow.
   ```
 
+### Implement Multi-Platform Strategy
+  - tags: [multi-platform, core, infrastructure, strategy]
+  - priority: high
+  - steps:
+      - [ ] Phase 1 (Desktop Expansion): Implement macOS and Linux WAL/RAL backends.
+      - [ ] Phase 2 (Mobile Platforms): Implement Android (Vulkan/OpenGL ES) and iOS (Metal) WAL/RAL backends, integrate toolchains/runtimes.
+      - [ ] Phase 3 (Web Browsers): Implement WebAssembly/WebGL WAL/RAL backends via Emscripten, integrate C# runtime (e.g., Blazor WASM).
+      - [ ] Phase 4 (Console Platforms): Research and initiate development for PS5, Xbox Series, Nintendo Switch WAL/RAL backends (requires SDKs/licenses).
+      - [ ] Extend CMake build system for cross-compilation across all target platforms.
+      - [ ] Adapt C# Framework (input, system services, runtime) for each target platform.
+      - [ ] Implement platform-specific performance profiling and optimization.
+  ```md
+  Execute the defined Multi-Platform Strategy to expand the Piece Engine's support to a broad range of platforms including desktop, mobile, web, and consoles. This involves developing platform-specific low-level backends, adapting the build system, and integrating appropriate C# runtimes.
+  ```
+
 ## To Do (Goals for v1.0.0 - Minimal Viable Engine)
 
 ### Phase 0: Logging Integration Setup

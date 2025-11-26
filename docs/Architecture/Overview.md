@@ -98,6 +98,32 @@ The multi-layered architecture of the Piece Engine, founded on the principles of
 
 The future vision includes the expansion of backend implementations (Vulkan, DirectX), the enhancement of editing tools, and the continuous optimization of communication between layers, always maintaining modularity and extensibility as core principles.
 
+## Multi-Platform Strategy
 
+The Piece Engine's core philosophy of "Maximum Modularity and Extensibility" and its "Modular Component Architecture" provide an ideal foundation for supporting a wide array of platforms, including desktop (Windows, macOS, Linux), consoles (PS5, Xbox Series, Nintendo Switch), mobile (Android, iOS), and web browsers. Our strategy for achieving broad multi-platform support leverages the engine's layered design, dynamic backend loading, and the clear separation of concerns inherent in its architecture.
 
+**Strategic Pillars for Multi-Platform Support:**
+
+1.  **Platform-Specific Low-Level Backends (WAL/RAL/PAL):**
+    *   **Approach:** Implement dedicated C++ dynamic libraries (`.dll` or `.so`) for each target platform to fulfill the `WAL`, `RAL`, and `PAL` interfaces. This ensures optimal performance and direct interaction with native platform APIs, such as windowing systems, graphics APIs (e.g., DirectX, Vulkan, Metal, OpenGL ES), and physics engines.
+    *   **Leveraging Modularity:** The engine's existing `Service Locator` pattern (C++) and Dependency Injection system (C#) will be utilized to dynamically load and inject the appropriate platform-specific backends at runtime, as orchestrated by the High-Level C# Framework.
+
+2.  **Robust Cross-Compilation and Toolchain Integration:**
+    *   **Approach:** Extend the existing CMake-based build system to support cross-compilation for diverse target environments. This includes integrating with platform-specific Software Development Kits (SDKs) and toolchains (e.g., Android NDK, Xcode for iOS/macOS, Emscripten for WebAssembly, and proprietary console SDKs).
+    *   **Automation:** Establish CI/CD pipelines to automate builds and tests for each target platform, ensuring consistent quality and rapid iteration.
+
+3.  **Adaptation of the High-Level C# Framework:**
+    *   **Approach:** Ensure the High-Level C# Framework (game logic, UI, asset management) is compatible with target platform runtimes. This may involve integrating with specific .NET implementations (e.g., Mono/Xamarin for mobile, Blazor WebAssembly for web, or console-specific .NET versions).
+    *   **Input & System Services:** Adapt and extend the C# input management system to handle platform-specific input mechanisms (e.g., touch gestures, specialized console controller features) and integrate with other platform-specific system services as needed.
+
+**Phased Rollout Strategy:**
+
+The expansion to new platforms will follow a phased approach, prioritizing platforms based on strategic importance and development effort:
+
+*   **Phase 1 (Desktop Expansion):** Enhance existing desktop support to include robust macOS and Linux backends, leveraging GLFW's cross-platform capabilities where appropriate, or native APIs for deeper integration.
+*   **Phase 2 (Mobile Platforms):** Develop dedicated WAL/RAL backends for Android (Vulkan/OpenGL ES) and iOS (Metal) and integrate with their respective build systems and C# runtimes.
+*   **Phase 3 (Web Browsers):** Target WebAssembly/WebGL via Emscripten for web deployment, ensuring C# framework compatibility (e.g., Blazor WASM) and efficient interop.
+*   **Phase 4 (Console Platforms):** Initiate development for consoles (PS5, Xbox Series, Nintendo Switch), recognizing the significant effort required for proprietary SDK integration, specialized backends, and strict certification processes. This phase will be contingent on securing necessary development kits and licenses.
+
+This strategic roadmap ensures a systematic and modular approach to multi-platform support, building upon the engine's architectural strengths to provide developers with extensive deployment options.
 
