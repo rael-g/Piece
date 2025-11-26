@@ -1,7 +1,6 @@
 #ifndef PIECE_PAL_IPHYSICS_BODY_H_
 #define PIECE_PAL_IPHYSICS_BODY_H_
 
-
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 

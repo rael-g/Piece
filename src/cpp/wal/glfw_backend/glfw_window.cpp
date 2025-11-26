@@ -4,10 +4,8 @@
 namespace Piece { namespace WAL {
 
 GlfwWindow::GlfwWindow() : window_(nullptr) {
-    
     if (!glfwInit()) {
         std::cerr << "Failed to initialize GLFW" << std::endl;
-        
     }
 }
 
@@ -37,7 +35,6 @@ bool GlfwWindow::Init(int width, int height, const std::string& title) {
     }
 
     glfwMakeContextCurrent(window_);
-    
     glfwSwapInterval(1);
 
     return true;
@@ -60,7 +57,6 @@ bool GlfwWindow::ShouldClose() const {
 void* GlfwWindow::GetNativeWindow() const {
     return static_cast<void*>(window_);
 }
-
 
 bool GlfwWindow::IsKeyPressed(KeyCode keycode) const {
     if (window_) {

@@ -7,8 +7,6 @@
 #include <ral/igraphics_device.h>
 #include <pal/iphysics_world.h>
 
-
-
 namespace Piece { namespace Intermediate {
 
 #include "piece_intermediate_exports.h"
@@ -25,8 +23,6 @@ private:
     std::unique_ptr<WAL::IWindow> window_;
     std::unique_ptr<RAL::IGraphicsDevice> graphics_device_;
     std::unique_ptr<PAL::IPhysicsWorld> physics_world_;
-
-
 };
 
 }} // namespace Piece::Intermediate

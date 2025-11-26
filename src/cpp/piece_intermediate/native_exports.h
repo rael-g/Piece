@@ -10,9 +10,6 @@ namespace Piece { namespace Intermediate {
 }} // namespace Piece::Intermediate
 
 extern "C" {
-
-
-
     __declspec(dllexport) void PieceIntermediate_SetGraphicsDeviceFactory(
         Piece::Intermediate::IGraphicsDeviceFactory* factory_ptr,
         const NativeVulkanOptions* options
@@ -28,17 +25,11 @@ extern "C" {
         const NativePhysicsOptions* options
     );
 
-
-
     __declspec(dllexport) EngineCore* Engine_Initialize();
-
-
 
     __declspec(dllexport) void Engine_Destroy(EngineCore* core_ptr);
 
-
     __declspec(dllexport) void Engine_Update(EngineCore* core_ptr, float delta_time);
-
 
     __declspec(dllexport) void Engine_Render(EngineCore* core_ptr);
 }

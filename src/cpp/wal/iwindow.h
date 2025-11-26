@@ -6,11 +6,9 @@
 
 namespace Piece { namespace WAL {
 
-
 enum class KeyCode : int {
     Unknown = -1,
 
-    
     kSpace         = 32,
     kApostrophe    = 39, /* ' */
     kComma         = 44, /* , */
@@ -134,7 +132,6 @@ enum class KeyCode : int {
     kRightSuper    = 347,
     kMenu          = 348,
 
-
     kMouse1        = 0,
     kMouse2        = 1,
     kMouse3        = 2,
@@ -146,11 +143,9 @@ enum class KeyCode : int {
     kLastMouseButton = kMouse8
 };
 
-
 class IWindow {
 public:
     virtual ~IWindow() = default;
-
 
     virtual bool Init(int width, int height, const std::string& title) = 0;
     
@@ -158,7 +153,6 @@ public:
     virtual void SwapBuffers() = 0;
     virtual bool ShouldClose() const = 0;
     virtual void* GetNativeWindow() const = 0;
-
 
     virtual bool IsKeyPressed(KeyCode keycode) const = 0;
     virtual bool IsMouseButtonPressed(KeyCode button) const = 0;

@@ -4,10 +4,7 @@
 #include <memory>
 #include "iphysics_body.h"
 
-
-
 namespace Piece { namespace PAL {
-
 
 class IPhysicsWorld {
 public:

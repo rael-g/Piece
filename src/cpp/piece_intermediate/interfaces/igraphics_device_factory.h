@@ -2,8 +2,6 @@
 #define PIECE_INTERMEDIATE_GRAPHICS_DEVICE_FACTORY_H_
 
 #include <memory>
-
-
 #include <ral/igraphics_device.h>
 #include <wal/iwindow.h>
 

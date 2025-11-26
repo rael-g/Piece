@@ -6,12 +6,10 @@
 
 namespace Piece { namespace RAL {
 
-
 class IVertexBuffer;
 class IIndexBuffer;
 class IShader;
 class IShaderProgram;
-
 
 class IGraphicsDevice {
 public:
@@ -22,7 +20,6 @@ public:
     virtual void EndFrame() = 0;
 
     virtual IRenderContext* GetImmediateContext() = 0;
-
 
     virtual std::unique_ptr<IVertexBuffer> CreateVertexBuffer() = 0;
     virtual std::unique_ptr<IIndexBuffer> CreateIndexBuffer() = 0;

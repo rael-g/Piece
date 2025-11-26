@@ -15,10 +15,8 @@ public:
         return instance;
     }
 
-
     ServiceLocator(const ServiceLocator&) = delete;
     ServiceLocator& operator=(const ServiceLocator&) = delete;
-
 
     void SetGraphicsDeviceFactory(std::unique_ptr<IGraphicsDeviceFactory> factory) {
         graphics_device_factory_ = std::move(factory);
@@ -29,7 +27,6 @@ public:
     void SetPhysicsWorldFactory(std::unique_ptr<IPhysicsWorldFactory> factory) {
         physics_world_factory_ = std::move(factory);
     }
-
 
     IGraphicsDeviceFactory* GetGraphicsDeviceFactory() const {
         return graphics_device_factory_.get();

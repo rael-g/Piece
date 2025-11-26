@@ -11,7 +11,6 @@ GlfwWindowFactory::GlfwWindowFactory(const NativeWindowOptions* options) {
         options_.initial_window_height = 600;
         options_.window_flags = 0;
         options_.window_title = "Default Piece Engine Window";
-
     }
 }
 
