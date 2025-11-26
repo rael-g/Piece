@@ -111,10 +111,10 @@
       - [x] Define C-compatible API in `NativeExports.h` for core engine functions to be consumed by C#.
       - [x] Implement `EngineCore` C++ class, relying on `ServiceLocator` for backend instantiation.
       - [ ] **WAL (GLFW Backend):**
-          - [ ] Fully implement `IWindow` interface.
-          - [ ] Implement `GlfwWindow` class.
-          - [ ] Implement `IWindowFactory` and `GlfwWindowFactory`.
-          - [ ] Export `CreateGlfwWindowFactory()` C-style function from `gfx_glfw` DLL.
+          - [x] Fully implement `IWindow` interface.
+          - [x] Implement `GlfwWindow` class.
+          - [x] Implement `IWindowFactory` and `GlfwWindowFactory`.
+          - [x] Export `CreateGlfwWindowFactory()` C-style function from `gfx_glfw` DLL.
       - [ ] **RAL (OpenGL Backend):**
           - [ ] Fully implement `IGraphicsDevice`, `IRenderContext` interfaces.
           - [ ] Implement `OpenGLGraphicsDevice` and `OpenGLRenderContext` classes.
