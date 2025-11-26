@@ -113,13 +113,13 @@
       - [x] Implement `EngineCore` C++ class, relying on `ServiceLocator` for backend instantiation.
       - [x] Write integration tests for `EngineCore` and `ServiceLocator`.
       - [ ] **WAL (GLFW Backend):**
-          - [ ] Fully implement `IWindow` interface.
-          - [ ] Implement `GlfwWindow` class.
-          - [ ] Write integration tests for `GlfwWindow`.
-          - [ ] Implement `IWindowFactory` and `GlfwWindowFactory`.
-          - [ ] Write unit tests for `GlfwWindowFactory`.
-          - [ ] Export `CreateGlfwWindowFactory()` C-style function from `gfx_glfw` DLL.
-          - [ ] Write integration tests for `CreateGlfwWindowFactory` export.
+          - [x] Fully implement `IWindow` interface.
+          - [x] Implement `GlfwWindow` class.
+          - [x] Write integration tests for `GlfwWindow`.
+          - [x] Implement `IWindowFactory` and `GlfwWindowFactory`.
+          - [x] Write unit tests for `GlfwWindowFactory`.
+          - [x] Export `CreateGlfwWindowFactory()` C-style function from `gfx_glfw` DLL.
+          - [x] Write integration tests for `CreateGlfwWindowFactory` export.
       - [ ] **RAL (OpenGL Backend):**
           - [ ] Fully implement `IGraphicsDevice`, `IRenderContext` interfaces.
           - [ ] Implement `OpenGLGraphicsDevice` and `OpenGLRenderContext` classes.

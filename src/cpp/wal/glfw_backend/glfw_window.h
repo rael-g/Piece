@@ -6,7 +6,9 @@
 
 namespace Piece { namespace WAL {
 
-class GlfwWindow : public IWindow {
+#include "wal_glfw_backend_exports.h"
+
+class WAL_GLFW_BACKEND_API GlfwWindow : public IWindow {
 public:
     GlfwWindow();
     virtual ~GlfwWindow();

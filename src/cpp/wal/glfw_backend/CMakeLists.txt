@@ -4,6 +4,8 @@ add_library(wal_glfw_backend SHARED
     glfw_exports.cpp
 )
 
+target_compile_definitions(wal_glfw_backend PRIVATE WAL_GLFW_BACKEND_BUILD_DLL)
+
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 target_include_directories(wal_glfw_backend PUBLIC

@@ -7,7 +7,9 @@
 
 namespace Piece { namespace Intermediate {
 
-class GlfwWindowFactory : public IWindowFactory {
+#include "wal_glfw_backend_exports.h"
+
+class WAL_GLFW_BACKEND_API GlfwWindowFactory : public IWindowFactory {
 public:
     GlfwWindowFactory(const NativeWindowOptions* options);
     virtual ~GlfwWindowFactory() = default;
