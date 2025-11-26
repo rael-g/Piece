@@ -123,7 +123,7 @@
           - [ ] Implement `IGraphicsDeviceFactory` and `OpenGLGraphicsDeviceFactory`.
           - [ ] Export `CreateOpenGLGraphicsDeviceFactory()` C-style function from `gfx_opengl` DLL.
       - [ ] **PAL (Minimal Backend):**
-          - [ ] Define `IPhysicsWorld` and `IPhysicsBody` interfaces.
+          - [-] Define `IPhysicsWorld` and `IPhysicsBody` interfaces.
           - [ ] Implement a minimal physics backend (e.g., a basic collision detection placeholder or simple AABB physics).
           - [ ] Implement `IPhysicsWorldFactory` and its minimal backend implementation.
           - [ ] Export C-style factory function for the minimal PAL backend.
