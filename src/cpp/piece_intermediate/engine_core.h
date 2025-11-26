@@ -9,6 +9,8 @@
 
 namespace Piece { namespace Intermediate {
 
+void InitializeLogger();
+
 #include "piece_intermediate_exports.h"
 
 class PIECE_INTERMEDIATE_API EngineCore {

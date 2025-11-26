@@ -11,4 +11,5 @@ target_include_directories(piece_intermediate PUBLIC
     ${CMAKE_SOURCE_DIR}/src/cpp
 )
 find_package(fmt CONFIG REQUIRED)
-target_link_libraries(piece_intermediate PUBLIC wal ral pal fmt::fmt)
+find_package(spdlog CONFIG REQUIRED)
+target_link_libraries(piece_intermediate PUBLIC wal ral pal fmt::fmt spdlog::spdlog)

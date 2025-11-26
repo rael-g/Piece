@@ -3,6 +3,7 @@
     "glfw3",
     "glm",
     "fmt",
-    "gtest"
+    "gtest",
+    "spdlog"
   ]
 }

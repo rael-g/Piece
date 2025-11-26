@@ -33,6 +33,10 @@ extern "C" {
     PIECE_INTERMEDIATE_API void Engine_Update(EngineCore* core_ptr, float delta_time);
 
     PIECE_INTERMEDIATE_API void Engine_Render(EngineCore* core_ptr);
+
+    typedef void (*LogCallback)(int level, const char* message);
+    PIECE_INTERMEDIATE_API void PieceIntermediate_RegisterLogCallback(LogCallback callback);
+    PIECE_INTERMEDIATE_API void PieceIntermediate_Log(int level, const char* message);
 }
 
 #endif // NATIVE_EXPORTS_H
