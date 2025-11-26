@@ -15,11 +15,11 @@ public:
         return instance;
     }
 
-    // Deleted copy constructor and assignment operator (moved to public as per Google Style for better error messages)
+
     ServiceLocator(const ServiceLocator&) = delete;
     ServiceLocator& operator=(const ServiceLocator&) = delete;
 
-    // Setters for factory interfaces
+
     void SetGraphicsDeviceFactory(std::unique_ptr<IGraphicsDeviceFactory> factory) {
         graphics_device_factory_ = std::move(factory);
     }
@@ -30,7 +30,7 @@ public:
         physics_world_factory_ = std::move(factory);
     }
 
-    // Getters for factory interfaces
+
     IGraphicsDeviceFactory* GetGraphicsDeviceFactory() const {
         return graphics_device_factory_.get();
     }
@@ -42,7 +42,7 @@ public:
     }
 
 private:
-    ServiceLocator() = default; // Private constructor for singleton
+    ServiceLocator() = default;
 
     std::unique_ptr<IGraphicsDeviceFactory> graphics_device_factory_;
     std::unique_ptr<IWindowFactory> window_factory_;

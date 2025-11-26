@@ -11,7 +11,7 @@ namespace Piece { namespace Intermediate {
 class IWindowFactory {
 public:
     virtual ~IWindowFactory() = default;
-    // Method to create an IWindow instance
+
     virtual std::unique_ptr<WAL::IWindow> CreateWindow(const NativeWindowOptions* options) = 0;
 };
 

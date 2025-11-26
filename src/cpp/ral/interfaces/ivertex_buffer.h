@@ -1,7 +1,7 @@
 #ifndef PIECE_RAL_INTERFACES_IVERTEX_BUFFER_H_
 #define PIECE_RAL_INTERFACES_IVERTEX_BUFFER_H_
 
-#include <cstdint> // For uint32_t
+#include <cstdint>
 
 namespace Piece { namespace RAL {
 

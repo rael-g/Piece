@@ -4,11 +4,10 @@
 namespace Piece { namespace WAL {
 
 GlfwWindow::GlfwWindow() : window_(nullptr) {
-    // GLFW initialization should ideally happen once per application.
-    // We'll manage it here for simplicity for now.
+    
     if (!glfwInit()) {
         std::cerr << "Failed to initialize GLFW" << std::endl;
-        // Handle error appropriately
+        
     }
 }
 
@@ -17,7 +16,7 @@ GlfwWindow::~GlfwWindow() {
         glfwDestroyWindow(window_);
         window_ = nullptr;
     }
-    glfwTerminate(); // Terminate GLFW when all windows are destroyed
+    glfwTerminate();
 }
 
 bool GlfwWindow::Init(int width, int height, const std::string& title) {
@@ -25,8 +24,6 @@ bool GlfwWindow::Init(int width, int height, const std::string& title) {
         std::cerr << "Window already initialized." << std::endl;
         return false;
     }
-
-    // Set GLFW window hints (e.g., OpenGL version, resizable)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -40,7 +37,7 @@ bool GlfwWindow::Init(int width, int height, const std::string& title) {
     }
 
     glfwMakeContextCurrent(window_);
-    // Enable VSync
+    
     glfwSwapInterval(1);
 
     return true;
@@ -64,7 +61,7 @@ void* GlfwWindow::GetNativeWindow() const {
     return static_cast<void*>(window_);
 }
 
-// Input Methods
+
 bool GlfwWindow::IsKeyPressed(KeyCode keycode) const {
     if (window_) {
         return glfwGetKey(window_, static_cast<int>(keycode)) == GLFW_PRESS;

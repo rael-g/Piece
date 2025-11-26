@@ -1,7 +1,7 @@
 #ifndef PIECE_PAL_IPHYSICS_BODY_H_
 #define PIECE_PAL_IPHYSICS_BODY_H_
 
-// For glm types (e.g., vec3, quat)
+
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 

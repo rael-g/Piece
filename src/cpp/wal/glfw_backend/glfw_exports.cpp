@@ -1,5 +1,5 @@
-#include <piece_intermediate/native_exports.h> // For NativeWindowOptions and the C-style API
-#include "glfw_window_factory.h"      // For the GlfwWindowFactory implementation
+#include <piece_intermediate/native_exports.h>
+#include "glfw_window_factory.h"
 
 
 

@@ -4,11 +4,11 @@ add_library(piece_intermediate SHARED
 )
 
 target_include_directories(piece_intermediate PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR} # For internal headers like "engine_core.h"
-    ${CMAKE_CURRENT_SOURCE_DIR}/core # For internal headers like "core/service_locator.h"
-    ${CMAKE_CURRENT_SOURCE_DIR}/interfaces # For internal headers like "interfaces/igraphics_device_factory.h"
-    # Explicitly add roots for angle bracket includes
-    ${CMAKE_SOURCE_DIR}/src/cpp # Allows <wal/iwindow.h>, <ral/igraphics_device.h>, <pal/iphysics_world.h>, etc.
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/core
+    ${CMAKE_CURRENT_SOURCE_DIR}/interfaces
+
+    ${CMAKE_SOURCE_DIR}/src/cpp
 )
 
 # Link against interface libraries and vcpkg dependencies

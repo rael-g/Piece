@@ -7,12 +7,11 @@ GlfwWindowFactory::GlfwWindowFactory(const NativeWindowOptions* options) {
     if (options) {
         options_ = *options;
     } else {
-        // Default options if none provided
         options_.initial_window_width = 800;
         options_.initial_window_height = 600;
         options_.window_flags = 0;
         options_.window_title = "Default Piece Engine Window";
-        std::cerr << "Warning: GlfwWindowFactory created with null options, using defaults." << std::endl;
+
     }
 }
 

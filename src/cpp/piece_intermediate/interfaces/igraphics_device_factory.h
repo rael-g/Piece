@@ -3,7 +3,7 @@
 
 #include <memory>
 
-// Forward declarations for low-level interfaces
+
 #include <ral/igraphics_device.h>
 #include <wal/iwindow.h>
 
@@ -14,8 +14,7 @@ namespace Piece { namespace Intermediate {
 class IGraphicsDeviceFactory {
 public:
     virtual ~IGraphicsDeviceFactory() = default;
-    // Method to create an IGraphicsDevice instance
-    // Assumes IWindow is needed for context and options can be passed.
+
     virtual std::unique_ptr<RAL::IGraphicsDevice> CreateGraphicsDevice(WAL::IWindow* window, const NativeVulkanOptions* options) = 0;
 };
 

@@ -1,16 +1,16 @@
 #ifndef PIECE_WAL_IWINDOW_H_
 #define PIECE_WAL_IWINDOW_H_
 
-#include <utility> // For std::pair
+#include <utility>
 #include <string>
 
 namespace Piece { namespace WAL {
 
-// Enum for common keyboard keys
+
 enum class KeyCode : int {
     Unknown = -1,
 
-    // Keyboard keys
+    
     kSpace         = 32,
     kApostrophe    = 39, /* ' */
     kComma         = 44, /* , */
@@ -134,7 +134,7 @@ enum class KeyCode : int {
     kRightSuper    = 347,
     kMenu          = 348,
 
-    /* Mouse buttons */
+
     kMouse1        = 0,
     kMouse2        = 1,
     kMouse3        = 2,
@@ -151,16 +151,15 @@ class IWindow {
 public:
     virtual ~IWindow() = default;
 
-    // The Init method can be used for post-construction setup that requires the window to exist.
-    // It takes width, height, and title as basic parameters. More options can be added as needed.
+
     virtual bool Init(int width, int height, const std::string& title) = 0;
     
     virtual void PollEvents() = 0;
     virtual void SwapBuffers() = 0;
     virtual bool ShouldClose() const = 0;
-    virtual void* GetNativeWindow() const = 0; // For integration with the graphics API
+    virtual void* GetNativeWindow() const = 0;
 
-    // Input Methods
+
     virtual bool IsKeyPressed(KeyCode keycode) const = 0;
     virtual bool IsMouseButtonPressed(KeyCode button) const = 0;
     virtual std::pair<float, float> GetMousePosition() const = 0;

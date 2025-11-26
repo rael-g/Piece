@@ -11,7 +11,7 @@ namespace Piece { namespace Intermediate {
 class IPhysicsWorldFactory {
 public:
     virtual ~IPhysicsWorldFactory() = default;
-    // Method to create an IPhysicsWorld instance
+
     virtual std::unique_ptr<PAL::IPhysicsWorld> CreatePhysicsWorld(const NativePhysicsOptions* options) = 0;
 };
 
