@@ -118,7 +118,7 @@
       - [ ] **RAL (OpenGL Backend):**
           - [x] Fully implement `IGraphicsDevice`, `IRenderContext` interfaces.
           - [ ] Implement `OpenGLGraphicsDevice` and `OpenGLRenderContext` classes.
-          - [ ] Implement core RAL resource interfaces: `IVertexBuffer`, `IIndexBuffer`, `IShader`, `IShaderProgram`.
+          - [x] Implement core RAL resource interfaces: `IVertexBuffer`, `IIndexBuffer`, `IShader`, `IShaderProgram`.
           - [ ] Implement OpenGL-specific resource classes.
           - [ ] Implement `IGraphicsDeviceFactory` and `OpenGLGraphicsDeviceFactory`.
           - [ ] Export `CreateOpenGLGraphicsDeviceFactory()` C-style function from `gfx_opengl` DLL.
