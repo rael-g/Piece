@@ -57,6 +57,16 @@ jobs:
       run: cmake --build --preset linux-debug
       working-directory: ${{ github.workspace }}
 
+    - name: Run C++ Tests (Windows)
+      if: startsWith(matrix.os, 'windows')
+      run: ctest --preset windows-debug
+      working-directory: ${{ github.workspace }}
+
+    - name: Run C++ Tests (Linux)
+      if: startsWith(matrix.os, 'ubuntu')
+      run: ctest --preset linux-debug
+      working-directory: ${{ github.workspace }}
+
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:
@@ -69,3 +79,7 @@ jobs:
     - name: Build C# Projects
       run: dotnet build --configuration Debug --no-restore
       working-directory: ${{ github.workspace }}/src/csharp
+
+    - name: Run C# Tests
+      run: dotnet test --no-build --configuration Debug
+      working-directory: ${{ github.workspace }}/src/csharp/Piece.Tests.CSharp
