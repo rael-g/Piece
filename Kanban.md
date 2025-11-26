@@ -116,7 +116,7 @@
           - [x] Implement `IWindowFactory` and `GlfwWindowFactory`.
           - [x] Export `CreateGlfwWindowFactory()` C-style function from `gfx_glfw` DLL.
       - [ ] **RAL (OpenGL Backend):**
-          - [ ] Fully implement `IGraphicsDevice`, `IRenderContext` interfaces.
+          - [x] Fully implement `IGraphicsDevice`, `IRenderContext` interfaces.
           - [ ] Implement `OpenGLGraphicsDevice` and `OpenGLRenderContext` classes.
           - [ ] Implement core RAL resource interfaces: `IVertexBuffer`, `IIndexBuffer`, `IShader`, `IShaderProgram`.
           - [ ] Implement OpenGL-specific resource classes.
