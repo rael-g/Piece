@@ -138,7 +138,9 @@ We welcome contributions to the Piece Engine! Please adhere to the following gui
 *   **Example-Driven Development:** Start by defining clear examples for new features or bug fixes.
 *   **Conventional Commits:** Ensure all your commit messages follow the Conventional Commits specification.
 *   **GitHub Flow:** Create feature branches for your work and submit Pull Requests to the `main` branch.
-*   **Code Style:** Follow existing code style conventions (C++ and C#).
+*   **Code Style:**
+    *   **C++:** Adheres to the [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html) and is enforced by `clang-format`.
+    *   **C#:** Follows standard .NET coding conventions.
 *   **Testing:** Write comprehensive unit and integration tests for your changes.
 
 *Refer to `docs/Development/ExampleDrivenDevelopment.md` and `docs/Development/VersioningStrategy.md` for more details on development practices.*

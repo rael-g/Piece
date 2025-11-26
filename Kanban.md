@@ -92,12 +92,12 @@
   - tags: [v1.0.0, setup, foundation, build]
   - priority: high
   - steps:
-      - [ ] Finalize root `CMakeLists.txt` for C++ project structure.
-      - [ ] Finalize `CMakePresets.json` for standardized build configurations (Windows, Linux, Debug, Release).
-      - [ ] Finalize `vcpkg.json` for C++ dependencies (e.g., GLFW, GLM).
-      - [ ] Set up initial `src/csharp/Piece.sln` with `Piece.Engine` and `Piece.Editor` projects.
-      - [ ] Establish `Piece.Intermediate.Abstractions` C# project for P/Invoke interfaces and factory definitions.
-      - [ ] Implement `Safe Interop Encapsulation` for all P/Invoke boundaries in dedicated C# interop projects.
+      - [x] Finalize root `CMakeLists.txt` for C++ project structure.
+      - [x] Finalize `CMakePresets.json` for standardized build configurations (Windows, Linux, Debug, Release).
+      - [x] Finalize `vcpkg.json` for C++ dependencies (e.g., GLFW, GLM).
+      - [x] Set up initial `src/csharp/Piece.sln` with `Piece.Engine` and `Piece.Editor` projects.
+      - [x] Establish `Piece.Intermediate.Abstractions` C# project for P/Invoke interfaces and factory definitions.
+      - [-] Implement `Safe Interop Encapsulation` for all P/Invoke boundaries in dedicated C# interop projects.
       - [ ] Implement basic CI/CD pipeline (GitHub Actions) for automated builds and tests on PRs and `main` branch.
   ```md
   Establish the complete foundational build system for both C++ and C# components, ensuring proper project structure, dependency management, interop safety, and automated build processes.
