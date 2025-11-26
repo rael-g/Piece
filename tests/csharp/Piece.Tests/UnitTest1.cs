@@ -1,4 +1,4 @@
-﻿namespace Piece.Tests.CSharp;
+﻿namespace Piece.Tests;
 
 public class UnitTest1
 {

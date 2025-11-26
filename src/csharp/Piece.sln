@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Piece.Intermediate.Abstract
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Piece.Core.Interop", "Piece.Core.Interop\Piece.Core.Interop.csproj", "{F74EC89C-06E0-4553-A921-B957EC2B54B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Piece.Tests.CSharp", "Piece.Tests.CSharp\Piece.Tests.CSharp.csproj", "{F65FA44B-F0F1-44E8-888D-D101E1EA3A2B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Piece.Tests", "..\..\tests\csharp\Piece.Tests\Piece.Tests.csproj", "{F65FA44B-F0F1-44E8-888D-D101E1EA3A2B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
