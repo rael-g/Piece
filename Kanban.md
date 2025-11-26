@@ -98,7 +98,7 @@
       - [x] Set up initial `src/csharp/Piece.sln` with `Piece.Engine` and `Piece.Editor` projects.
       - [x] Establish `Piece.Intermediate.Abstractions` C# project for P/Invoke interfaces and factory definitions.
       - [-] Implement `Safe Interop Encapsulation` for all P/Invoke boundaries in dedicated C# interop projects.
-      - [ ] Implement basic CI/CD pipeline (GitHub Actions) for automated builds and tests on PRs and `main` branch.
+      - [x] Implement basic CI/CD pipeline (GitHub Actions) for automated builds and tests on PRs and `main` branch.
   ```md
   Establish the complete foundational build system for both C++ and C# components, ensuring proper project structure, dependency management, interop safety, and automated build processes.
   ```
@@ -107,9 +107,9 @@
   - tags: [v1.0.0, c++, low-level, intermediate, wal, ral, pal]
   - priority: high
   - steps:
-      - [ ] Implement C++ `ServiceLocator` (singleton) for backend factory injection.
-      - [ ] Define C-compatible API in `NativeExports.h` for core engine functions to be consumed by C#.
-      - [ ] Implement `EngineCore` C++ class, relying on `ServiceLocator` for backend instantiation.
+      - [x] Implement C++ `ServiceLocator` (singleton) for backend factory injection.
+      - [x] Define C-compatible API in `NativeExports.h` for core engine functions to be consumed by C#.
+      - [x] Implement `EngineCore` C++ class, relying on `ServiceLocator` for backend instantiation.
       - [ ] **WAL (GLFW Backend):**
           - [ ] Fully implement `IWindow` interface.
           - [ ] Implement `GlfwWindow` class.
