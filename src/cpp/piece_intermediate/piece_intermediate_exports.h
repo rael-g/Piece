@@ -7,8 +7,12 @@
     #else
         #define PIECE_INTERMEDIATE_API __declspec(dllimport)
     #endif
-#else
-    #define PIECE_INTERMEDIATE_API
+#else // Non-Windows platforms
+    #ifdef PIECE_INTERMEDIATE_BUILD_DLL
+        #define PIECE_INTERMEDIATE_API __attribute__((visibility("default")))
+    #else
+        #define PIECE_INTERMEDIATE_API
+    #endif
 #endif
 
 #endif // PIECE_INTERMEDIATE_EXPORTS_H_
