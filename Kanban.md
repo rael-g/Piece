@@ -107,23 +107,29 @@
   - tags: [v1.0.0, c++, low-level, intermediate, wal, ral, pal]
   - priority: high
   - steps:
-      - [x] Implement C++ `ServiceLocator` (singleton) for backend factory injection.
+      - [ ] Implement C++ `ServiceLocator` (singleton) for backend factory injection.
+      - [ ] Write unit tests for `ServiceLocator`.
       - [x] Define C-compatible API in `NativeExports.h` for core engine functions to be consumed by C#.
-      - [x] Implement `EngineCore` C++ class, relying on `ServiceLocator` for backend instantiation.
+      - [ ] Implement `EngineCore` C++ class, relying on `ServiceLocator` for backend instantiation.
+      - [ ] Write integration tests for `EngineCore` and `ServiceLocator`.
       - [ ] **WAL (GLFW Backend):**
-          - [x] Fully implement `IWindow` interface.
-          - [x] Implement `GlfwWindow` class.
-          - [x] Implement `IWindowFactory` and `GlfwWindowFactory`.
-          - [x] Export `CreateGlfwWindowFactory()` C-style function from `gfx_glfw` DLL.
+          - [ ] Fully implement `IWindow` interface.
+          - [ ] Implement `GlfwWindow` class.
+          - [ ] Write integration tests for `GlfwWindow`.
+          - [ ] Implement `IWindowFactory` and `GlfwWindowFactory`.
+          - [ ] Write unit tests for `GlfwWindowFactory`.
+          - [ ] Export `CreateGlfwWindowFactory()` C-style function from `gfx_glfw` DLL.
+          - [ ] Write integration tests for `CreateGlfwWindowFactory` export.
       - [ ] **RAL (OpenGL Backend):**
-          - [x] Fully implement `IGraphicsDevice`, `IRenderContext` interfaces.
+          - [ ] Fully implement `IGraphicsDevice`, `IRenderContext` interfaces.
           - [ ] Implement `OpenGLGraphicsDevice` and `OpenGLRenderContext` classes.
-          - [x] Implement core RAL resource interfaces: `IVertexBuffer`, `IIndexBuffer`, `IShader`, `IShaderProgram`.
+          - [ ] Implement core RAL resource interfaces: `IVertexBuffer`, `IIndexBuffer`, `IShader`, `IShaderProgram`.
           - [ ] Implement OpenGL-specific resource classes.
           - [ ] Implement `IGraphicsDeviceFactory` and `OpenGLGraphicsDeviceFactory`.
           - [ ] Export `CreateOpenGLGraphicsDeviceFactory()` C-style function from `gfx_opengl` DLL.
       - [ ] **PAL (Minimal Backend):**
           - [-] Define `IPhysicsWorld` and `IPhysicsBody` interfaces.
+          - [ ] Write tests for PAL interfaces through a minimal backend implementation.
           - [ ] Implement a minimal physics backend (e.g., a basic collision detection placeholder or simple AABB physics).
           - [ ] Implement `IPhysicsWorldFactory` and its minimal backend implementation.
           - [ ] Export C-style factory function for the minimal PAL backend.
