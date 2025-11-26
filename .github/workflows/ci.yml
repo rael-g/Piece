@@ -1,0 +1,64 @@
+name: CI Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  VCPKG_ROOT: '${{ github.workspace }}/vcpkg' # Specify VCPKG_ROOT
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        submodules: true # If your project uses submodules for vcpkg or anything else
+
+    - name: Bootstrap vcpkg
+      run: |
+        git clone https://github.com/microsoft/vcpkg.git "${{ env.VCPKG_ROOT }}"
+        "${{ env.VCPKG_ROOT }}/bootstrap-vcpkg.${{ startsWith(matrix.os, 'windows') && 'bat' || 'sh' }}"
+        "${{ env.VCPKG_ROOT }}/vcpkg" integrate install
+      shell: bash
+
+    - name: Configure CMake (Windows Debug)
+      if: startsWith(matrix.os, 'windows')
+      run: cmake --preset windows-debug
+      working-directory: ${{ github.workspace }}
+
+    - name: Configure CMake (Linux Debug)
+      if: startsWith(matrix.os, 'ubuntu')
+      run: cmake --preset linux-debug
+      working-directory: ${{ github.workspace }}
+      
+    - name: Build C++ Projects (Windows)
+      if: startsWith(matrix.os, 'windows')
+      run: cmake --build --preset windows-debug
+      working-directory: ${{ github.workspace }}
+
+    - name: Build C++ Projects (Linux)
+      if: startsWith(matrix.os, 'ubuntu')
+      run: cmake --build --preset linux-debug
+      working-directory: ${{ github.workspace }}
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x' # Use the .NET 9.0 SDK
+
+    - name: Restore NuGet packages
+      run: dotnet restore
+      working-directory: ${{ github.workspace }}/src/csharp
+
+    - name: Build C# Projects
+      run: dotnet build --configuration Debug --no-restore
+      working-directory: ${{ github.workspace }}/src/csharp
