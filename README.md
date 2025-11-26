@@ -141,6 +141,7 @@ We welcome contributions to the Piece Engine! Please adhere to the following gui
 *   **Code Style:**
     *   **C++:** Adheres to the [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html) and is enforced by `clang-format`.
     *   **C#:** Follows standard .NET coding conventions.
+    *   **Comments:** Follows the "Clean Code" philosophy. Comments should explain *why* something is done, not *what* is being done. Avoid obvious or redundant comments; the code should be self-documenting.
 *   **Testing:** Write comprehensive unit and integration tests for your changes.
 
 *Refer to `docs/Development/ExampleDrivenDevelopment.md` and `docs/Development/VersioningStrategy.md` for more details on development practices.*
