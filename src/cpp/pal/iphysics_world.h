@@ -2,6 +2,7 @@
 #define PIECE_PAL_IPHYSICS_WORLD_H_
 
 #include <memory>
+#include "iphysics_body.h"
 
 
 
@@ -14,6 +15,7 @@ public:
 
     virtual void Init() = 0;
     virtual void Step(float delta_time) = 0;
+    virtual std::unique_ptr<IPhysicsBody> CreatePhysicsBody() = 0;
 };
 
 }} // namespace Piece::PAL

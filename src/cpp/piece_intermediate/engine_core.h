@@ -11,7 +11,9 @@
 
 namespace Piece { namespace Intermediate {
 
-class EngineCore {
+#include "piece_intermediate_exports.h"
+
+class PIECE_INTERMEDIATE_API EngineCore {
 public:
     EngineCore();
     ~EngineCore();

@@ -107,11 +107,11 @@
   - tags: [v1.0.0, c++, low-level, intermediate, wal, ral, pal]
   - priority: high
   - steps:
-      - [ ] Implement C++ `ServiceLocator` (singleton) for backend factory injection.
-      - [ ] Write unit tests for `ServiceLocator`.
+      - [x] Implement C++ `ServiceLocator` (singleton) for backend factory injection.
+      - [x] Write unit tests for `ServiceLocator`.
       - [x] Define C-compatible API in `NativeExports.h` for core engine functions to be consumed by C#.
-      - [ ] Implement `EngineCore` C++ class, relying on `ServiceLocator` for backend instantiation.
-      - [ ] Write integration tests for `EngineCore` and `ServiceLocator`.
+      - [x] Implement `EngineCore` C++ class, relying on `ServiceLocator` for backend instantiation.
+      - [x] Write integration tests for `EngineCore` and `ServiceLocator`.
       - [ ] **WAL (GLFW Backend):**
           - [ ] Fully implement `IWindow` interface.
           - [ ] Implement `GlfwWindow` class.

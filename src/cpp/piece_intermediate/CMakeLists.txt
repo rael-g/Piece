@@ -3,6 +3,8 @@ add_library(piece_intermediate SHARED
     core/service_locator.cpp
 )
 
+target_compile_definitions(piece_intermediate PRIVATE PIECE_INTERMEDIATE_BUILD_DLL)
+
 target_include_directories(piece_intermediate PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/core
