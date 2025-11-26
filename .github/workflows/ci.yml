@@ -33,6 +33,11 @@ jobs:
       run: sudo apt-get update && sudo apt-get install -y libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config
       shell: bash
 
+    - name: Install Xvfb
+      if: startsWith(matrix.os, 'ubuntu')
+      run: sudo apt-get update && sudo apt-get install -y xvfb x11-utils
+      shell: bash
+
     - name: Bootstrap vcpkg
       run: |
         git clone https://github.com/microsoft/vcpkg.git "${{ env.VCPKG_ROOT }}"
@@ -64,7 +69,7 @@ jobs:
 
     - name: Run C++ Tests (Linux)
       if: startsWith(matrix.os, 'ubuntu')
-      run: ctest --preset linux-debug
+      run: xvfb-run ctest --preset linux-debug
       working-directory: ${{ github.workspace }}
 
     - name: Setup .NET SDK
