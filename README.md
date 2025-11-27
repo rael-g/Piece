@@ -139,8 +139,16 @@ We welcome contributions to the Piece Engine! Please adhere to the following gui
 *   **Conventional Commits:** Ensure all your commit messages follow the Conventional Commits specification.
 *   **GitHub Flow:** Create feature branches for your work and submit Pull Requests to the `main` branch.
 *   **Code Style:**
-    *   **C++:** Adheres to the [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html) and is enforced by `clang-format`.
-    *   **C#:** Follows standard .NET coding conventions.
+    *   **General:** Please ensure all code is formatted correctly *before* committing. This helps maintain consistency and readability across the codebase.
+    *   **C++:** Adheres to the Microsoft C++ Style Guide. Formatting is enforced using `clang-format`. To format C++ code:
+        ```bash
+        cmake --build build --target format_cpp
+        ```
+        Ensure `clang-format` is installed and accessible in your system's PATH.
+    *   **C#:** Follows standard .NET coding conventions. To format C# code:
+        ```bash
+        dotnet format
+        ```
     *   **Comments:** Follows the "Clean Code" philosophy. Comments should explain *why* something is done, not *what* is being done. Avoid obvious or redundant comments; the code should be self-documenting.
 *   **Testing:** Write comprehensive unit and integration tests for your changes.
 
@@ -151,5 +159,3 @@ We welcome contributions to the Piece Engine! Please adhere to the following gui
 This project is licensed under the [MIT License](LICENSE).
 
 ---
-
-*This README was generated automatically based on the project's documentation by Gemini, an AI assistant.*

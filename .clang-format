@@ -1,23 +1,4 @@
----
-Language: Cpp
-# Set to Google to use Google's C++ style guide
-Style: Google
-# Use 4 spaces for indentation
-IndentWidth: 4
-# Put braces on the same line as the control statement
-BreakBeforeBraces: Attach
-# Allow short functions to be on a single line
-AllowShortFunctionsOnASingleLine: Inline
-# Always put empty lines before access modifiers (public, private, protected)
-EmptyLineBeforeAccessModifier: Always
-# Always add a space between the template keyword and the opening angle bracket
-SpaceBeforeTemplateBracket: false
-# Align consecutive assignments
-AlignConsecutiveAssignments: true
-# Align consecutive declarations
-AlignConsecutiveDeclarations: true
-# Align consecutive comments
-AlignConsecutiveComments: true
-# Align trailing comments
-AlignTrailingComments: true
----
+﻿---
+BasedOnStyle: Microsoft
+...
+
