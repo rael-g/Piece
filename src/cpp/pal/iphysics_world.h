@@ -2,12 +2,17 @@
 #define PIECE_PAL_IPHYSICS_WORLD_H_
 
 #include <memory>
+
 #include "iphysics_body.h"
 
-namespace Piece { namespace PAL {
+namespace Piece
+{
+namespace PAL
+{
 
-class IPhysicsWorld {
-public:
+class IPhysicsWorld
+{
+  public:
     virtual ~IPhysicsWorld() = default;
 
     virtual void Init() = 0;
@@ -15,6 +20,7 @@ public:
     virtual std::unique_ptr<IPhysicsBody> CreatePhysicsBody() = 0;
 };
 
-}} // namespace Piece::PAL
+} // namespace PAL
+} // namespace Piece
 
-#endif  // PIECE_PAL_IPHYSICS_WORLD_H_
+#endif // PIECE_PAL_IPHYSICS_WORLD_H_

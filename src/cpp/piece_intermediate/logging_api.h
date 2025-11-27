@@ -4,13 +4,13 @@
 
 namespace Piece
 {
-    enum class LogLevel : uint8_t
-    {
-        Trace = 0,
-        Debug,
-        Info,
-        Warning,
-        Error,
-        Fatal
-    };
-}
+enum class LogLevel : uint8_t
+{
+    Trace = 0,
+    Debug,
+    Info,
+    Warning,
+    Error,
+    Fatal
+};
+} // namespace Piece

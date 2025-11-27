@@ -5,19 +5,22 @@
 
 struct EngineCore;
 
-struct NativeWindowOptions {
+struct NativeWindowOptions
+{
     int initial_window_width;
     int initial_window_height;
     uint32_t window_flags; // e.g., resizable, fullscreen, etc.
-    const char* window_title;
+    const char *window_title;
 };
 
-struct NativeVulkanOptions {
+struct NativeVulkanOptions
+{
     uint32_t enable_validation_layers; // Boolean as int/uint
     int max_frames_in_flight;
 };
 
-struct NativePhysicsOptions {
+struct NativePhysicsOptions
+{
     float fixed_delta_time;
     uint32_t max_physics_steps;
 };

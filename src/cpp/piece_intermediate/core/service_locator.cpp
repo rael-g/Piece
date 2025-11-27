@@ -1,4 +1,8 @@
 #include "service_locator.h"
 
-namespace Piece { namespace Intermediate {
-}} // namespace Piece::Intermediate
+namespace Piece
+{
+namespace Intermediate
+{
+}
+} // namespace Piece

@@ -1,11 +1,13 @@
 #pragma once
 
-#include <spdlog/sinks/base_sink.h>
 #include <spdlog/details/null_mutex.h>
-#include "native_exports.h" 
+#include <spdlog/sinks/base_sink.h>
 
-namespace Piece {
-    enum class LogLevel : uint8_t;
+#include "native_exports.h"
+
+namespace Piece
+{
+enum class LogLevel : uint8_t;
 }
 
 inline Piece::LogLevel spdlog_level_to_piece_log_level(spdlog::level::level_enum spd_level)
@@ -26,26 +28,28 @@ inline Piece::LogLevel spdlog_level_to_piece_log_level(spdlog::level::level_enum
         return Piece::LogLevel::Fatal;
     case spdlog::level::off:
     default:
-        return Piece::LogLevel::Trace; 
+        return Piece::LogLevel::Trace;
     }
 }
 
-namespace Piece { namespace Intermediate {
-
-template<typename Mutex>
-class InteropSink : public spdlog::sinks::base_sink<Mutex>
+namespace Piece
 {
-protected:
-    void sink_it_(const spdlog::details::log_msg& msg) override
+namespace Intermediate
+{
+
+template <typename Mutex> class InteropSink : public spdlog::sinks::base_sink<Mutex>
+{
+  protected:
+    void sink_it_(const spdlog::details::log_msg &msg) override
     {
         spdlog::memory_buf_t formatted;
         spdlog::sinks::base_sink<Mutex>::formatter_->format(msg, formatted);
 
-        formatted.push_back('\0'); 
-        const char* message = formatted.data();
+        formatted.push_back('\0');
+        const char *message = formatted.data();
 
         int level = static_cast<int>(spdlog_level_to_piece_log_level(msg.level));
-        
+
         PieceIntermediate_Log(level, message);
     }
 
@@ -57,4 +61,5 @@ protected:
 using InteropSink_mt = InteropSink<std::mutex>;
 using InteropSink_st = InteropSink<spdlog::details::null_mutex>;
 
-}} // namespace Piece::Intermediate
+} // namespace Intermediate
+} // namespace Piece

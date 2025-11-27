@@ -1,20 +1,25 @@
 #ifndef PIECE_INTERMEDIATE_IPHYSICS_WORLD_FACTORY_H_
 #define PIECE_INTERMEDIATE_IPHYSICS_WORLD_FACTORY_H_
 
-#include <memory>
-
 #include <pal/iphysics_world.h>
 #include <piece_intermediate/native_interop_types.h>
 
-namespace Piece { namespace Intermediate {
+#include <memory>
 
-class IPhysicsWorldFactory {
-public:
+namespace Piece
+{
+namespace Intermediate
+{
+
+class IPhysicsWorldFactory
+{
+  public:
     virtual ~IPhysicsWorldFactory() = default;
 
-    virtual std::unique_ptr<PAL::IPhysicsWorld> CreatePhysicsWorld(const NativePhysicsOptions* options) = 0;
+    virtual std::unique_ptr<PAL::IPhysicsWorld> CreatePhysicsWorld(const NativePhysicsOptions *options) = 0;
 };
 
-}} // namespace Piece::Intermediate
+} // namespace Intermediate
+} // namespace Piece
 
-#endif  // PIECE_INTERMEDIATE_IPHYSICS_WORLD_FACTORY_H_
+#endif // PIECE_INTERMEDIATE_IPHYSICS_WORLD_FACTORY_H_

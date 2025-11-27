@@ -1,12 +1,20 @@
 #include "glfw_window_factory.h"
+
 #include <iostream>
 
-namespace Piece { namespace Intermediate {
+namespace Piece
+{
+namespace Intermediate
+{
 
-GlfwWindowFactory::GlfwWindowFactory(const NativeWindowOptions* options) {
-    if (options) {
+GlfwWindowFactory::GlfwWindowFactory(const NativeWindowOptions *options)
+{
+    if (options)
+    {
         options_ = *options;
-    } else {
+    }
+    else
+    {
         options_.initial_window_width = 800;
         options_.initial_window_height = 600;
         options_.window_flags = 0;
@@ -14,15 +22,19 @@ GlfwWindowFactory::GlfwWindowFactory(const NativeWindowOptions* options) {
     }
 }
 
-std::unique_ptr<WAL::IWindow> GlfwWindowFactory::CreateWindow(const NativeWindowOptions* options) {
+std::unique_ptr<WAL::IWindow> GlfwWindowFactory::CreateWindow(const NativeWindowOptions *options)
+{
     auto window = std::make_unique<WAL::GlfwWindow>();
-    const NativeWindowOptions* actualOptions = options ? options : &options_;
+    const NativeWindowOptions *actualOptions = options ? options : &options_;
 
-    if (!window->Init(actualOptions->initial_window_width, actualOptions->initial_window_height, std::string(actualOptions->window_title))) {
+    if (!window->Init(actualOptions->initial_window_width, actualOptions->initial_window_height,
+                      std::string(actualOptions->window_title)))
+    {
         std::cerr << "Error: Failed to initialize GlfwWindow." << std::endl;
         return nullptr;
     }
     return window;
 }
 
-}} // namespace Piece::Intermediate
+} // namespace Intermediate
+} // namespace Piece

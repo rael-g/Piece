@@ -1,12 +1,11 @@
-namespace Piece.Core.Interop
+namespace Piece.Core.Interop;
+
+public enum LogLevel : int
 {
-    public enum LogLevel : int
-    {
-        Trace = 0,
-        Debug,
-        Info,
-        Warning,
-        Error,
-        Fatal
-    }
+    Trace = 0,
+    Debug,
+    Info,
+    Warning,
+    Error,
+    Fatal
 }
