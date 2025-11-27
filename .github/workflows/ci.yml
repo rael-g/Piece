@@ -87,4 +87,4 @@ jobs:
 
     - name: Run C# Tests
       run: dotnet test --no-build --configuration Debug
-      working-directory: ${{ github.workspace }}/src/csharp/Piece.Tests.CSharp
+      working-directory: ${{ github.workspace }}

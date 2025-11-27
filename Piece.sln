@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Piece.Engine", "Piece.Engine\Piece.Engine.csproj", "{C6B0D9F5-A379-4B2C-B1D6-0AC543699773}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Piece.Engine", "src\csharp\Piece.Engine\Piece.Engine.csproj", "{C6B0D9F5-A379-4B2C-B1D6-0AC543699773}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Piece.Editor", "Piece.Editor\Piece.Editor.csproj", "{3E390D2C-5665-4A31-A9DC-C04132111699}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Piece.Editor", "src\csharp\Piece.Editor\Piece.Editor.csproj", "{3E390D2C-5665-4A31-A9DC-C04132111699}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Piece.Intermediate.Abstractions", "Piece.Intermediate.Abstractions\Piece.Intermediate.Abstractions.csproj", "{5C017C5E-7FFA-4DC0-894D-E64F62E898C9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Piece.Intermediate.Abstractions", "src\csharp\Piece.Intermediate.Abstractions\Piece.Intermediate.Abstractions.csproj", "{5C017C5E-7FFA-4DC0-894D-E64F62E898C9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Piece.Core.Interop", "Piece.Core.Interop\Piece.Core.Interop.csproj", "{F74EC89C-06E0-4553-A921-B957EC2B54B6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Piece.Core.Interop", "src\csharp\Piece.Core.Interop\Piece.Core.Interop.csproj", "{F74EC89C-06E0-4553-A921-B957EC2B54B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Piece.Tests", "..\..\tests\csharp\Piece.Tests\Piece.Tests.csproj", "{F65FA44B-F0F1-44E8-888D-D101E1EA3A2B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Piece.Tests", "tests\csharp\Piece.Tests\Piece.Tests.csproj", "{F65FA44B-F0F1-44E8-888D-D101E1EA3A2B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
