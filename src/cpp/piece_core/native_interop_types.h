@@ -3,6 +3,11 @@
 
 #include <stdint.h>
 
+namespace Piece
+{
+namespace Core
+{
+
 struct EngineCore;
 
 struct NativeWindowOptions
@@ -24,5 +29,8 @@ struct NativePhysicsOptions
     float fixed_delta_time;
     uint32_t max_physics_steps;
 };
+
+} // namespace Core
+} // namespace Piece
 
 #endif // PIECE_NATIVE_INTEROP_TYPES_H

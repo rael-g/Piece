@@ -7,7 +7,7 @@ namespace Piece
 namespace Core
 {
 
-GlfwWindowFactory::GlfwWindowFactory(const NativeWindowOptions *options)
+GlfwWindowFactory::GlfwWindowFactory(const Piece::Core::NativeWindowOptions *options)
 {
     if (options)
     {
@@ -22,10 +22,10 @@ GlfwWindowFactory::GlfwWindowFactory(const NativeWindowOptions *options)
     }
 }
 
-std::unique_ptr<WAL::IWindow> GlfwWindowFactory::CreateWindow(const NativeWindowOptions *options)
+std::unique_ptr<WAL::IWindow> GlfwWindowFactory::CreateWindow(const Piece::Core::NativeWindowOptions *options)
 {
     auto window = std::make_unique<WAL::GlfwWindow>();
-    const NativeWindowOptions *actualOptions = options ? options : &options_;
+    const Piece::Core::NativeWindowOptions *actualOptions = options ? options : &options_;
 
     if (!window->Init(actualOptions->initial_window_width, actualOptions->initial_window_height,
                       std::string(actualOptions->window_title)))

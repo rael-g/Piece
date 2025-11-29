@@ -1,4 +1,4 @@
-namespace Piece.Intermediate.Abstractions;
+namespace Piece.Core.Abstractions;
 
 // This interface is a placeholder to represent the concept of a factory
 // for a native C++ IGraphicsDevice. It would typically be implemented

@@ -3,6 +3,8 @@
 #include <wal/glfw_backend/glfw_window.h>
 #include <wal/glfw_backend/glfw_window_factory.h>
 
+using namespace Piece::Core; // Added this line
+
 // Test fixture for GlfwWindow
 class GlfwWindowTest : public ::testing::Test
 {

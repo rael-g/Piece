@@ -6,7 +6,7 @@
 extern "C"
 {
 
-    WAL_GLFW_BACKEND_API Piece::Core::IWindowFactory *CreateGlfwWindowFactory(const NativeWindowOptions *options)
+    WAL_GLFW_BACKEND_API Piece::Core::IWindowFactory *CreateGlfwWindowFactory(const Piece::Core::NativeWindowOptions *options)
     {
         return new Piece::Core::GlfwWindowFactory(options);
     }

@@ -49,20 +49,20 @@ class MockPhysicsWorld : public Piece::PAL::IPhysicsWorld
 class MockWindowFactory : public Piece::Core::IWindowFactory
 {
   public:
-    MOCK_METHOD(std::unique_ptr<Piece::WAL::IWindow>, CreateWindow, (const NativeWindowOptions *options), (override));
+    MOCK_METHOD(std::unique_ptr<Piece::WAL::IWindow>, CreateWindow, (const Piece::Core::NativeWindowOptions *options), (override));
 };
 
 class MockGraphicsDeviceFactory : public Piece::Core::IGraphicsDeviceFactory
 {
   public:
     MOCK_METHOD(std::unique_ptr<Piece::RAL::IGraphicsDevice>, CreateGraphicsDevice,
-                (Piece::WAL::IWindow * window, const NativeVulkanOptions *options), (override));
+                (Piece::WAL::IWindow * window, const Piece::Core::NativeVulkanOptions *options), (override));
 };
 
 class MockPhysicsWorldFactory : public Piece::Core::IPhysicsWorldFactory
 {
   public:
-    MOCK_METHOD(std::unique_ptr<Piece::PAL::IPhysicsWorld>, CreatePhysicsWorld, (const NativePhysicsOptions *options),
+    MOCK_METHOD(std::unique_ptr<Piece::PAL::IPhysicsWorld>, CreatePhysicsWorld, (const Piece::Core::NativePhysicsOptions *options),
                 (override));
 };
 

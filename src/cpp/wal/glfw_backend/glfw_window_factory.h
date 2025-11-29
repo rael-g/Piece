@@ -16,14 +16,14 @@ namespace Core
 class WAL_GLFW_BACKEND_API GlfwWindowFactory : public IWindowFactory
 {
   public:
-    GlfwWindowFactory(const NativeWindowOptions *options);
+    GlfwWindowFactory(const Piece::Core::NativeWindowOptions *options);
     virtual ~GlfwWindowFactory() = default;
 
-    virtual std::unique_ptr<WAL::IWindow> CreateWindow(const NativeWindowOptions *options) override;
+    virtual std::unique_ptr<WAL::IWindow> CreateWindow(const Piece::Core::NativeWindowOptions *options) override;
 
   private:
     // Store the options if needed for later use or validation
-    NativeWindowOptions options_;
+    Piece::Core::NativeWindowOptions options_;
 };
 
 } // namespace Core

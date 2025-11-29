@@ -18,12 +18,12 @@ class IPhysicsWorldFactory;
 extern "C"
 {
     PIECE_CORE_API void PieceCore_SetGraphicsDeviceFactory(Piece::Core::IGraphicsDeviceFactory *factory_ptr,
-                                                           const NativeVulkanOptions *options);
+                                                           const Piece::Core::NativeVulkanOptions *options);
 
     PIECE_CORE_API void PieceCore_SetWindowFactory(Piece::Core::IWindowFactory *factory_ptr,
-                                                   const NativeWindowOptions *options);
+                                                   const Piece::Core::NativeWindowOptions *options);
     PIECE_CORE_API void PieceCore_SetPhysicsWorldFactory(Piece::Core::IPhysicsWorldFactory *factory_ptr,
-                                                         const NativePhysicsOptions *options);
+                                                         const Piece::Core::NativePhysicsOptions *options);
 
     PIECE_CORE_API Piece::Core::EngineCore *Engine_Initialize();
 

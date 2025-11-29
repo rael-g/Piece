@@ -56,7 +56,7 @@ EngineCore::EngineCore()
         return;
     }
 
-    NativeWindowOptions defaultWindowOptions = {800, 600, 0, "Piece Engine Window"};
+    Piece::Core::NativeWindowOptions defaultWindowOptions = {800, 600, 0, "Piece Engine Window"};
     window_ = windowFactory->CreateWindow(&defaultWindowOptions);
     if (!window_)
     {
@@ -65,7 +65,7 @@ EngineCore::EngineCore()
     }
     spdlog::info("IWindow created.");
 
-    NativeVulkanOptions defaultVulkanOptions = {0, 2};
+    Piece::Core::NativeVulkanOptions defaultVulkanOptions = {0, 2};
     graphics_device_ = graphicsFactory->CreateGraphicsDevice(window_.get(), &defaultVulkanOptions);
     if (!graphics_device_)
     {
@@ -74,7 +74,7 @@ EngineCore::EngineCore()
     }
     spdlog::info("IGraphicsDevice created.");
 
-    NativePhysicsOptions defaultPhysicsOptions = {1.0f / 60.0f, 4};
+    Piece::Core::NativePhysicsOptions defaultPhysicsOptions = {1.0f / 60.0f, 4};
     physics_world_ = physicsFactory->CreatePhysicsWorld(&defaultPhysicsOptions);
     if (!physics_world_)
     {
@@ -117,7 +117,7 @@ extern "C"
 {
 
     void PieceCore_SetGraphicsDeviceFactory(Piece::Core::IGraphicsDeviceFactory *factoryPtr,
-                                            const NativeVulkanOptions *options)
+                                            const Piece::Core::NativeVulkanOptions *options)
     {
         if (!is_valid_factory_ptr(factoryPtr))
         {
@@ -129,7 +129,7 @@ extern "C"
         spdlog::info("PieceCore_SetGraphicsDeviceFactory called.");
     }
 
-    void PieceCore_SetWindowFactory(Piece::Core::IWindowFactory *factoryPtr, const NativeWindowOptions *options)
+    void PieceCore_SetWindowFactory(Piece::Core::IWindowFactory *factoryPtr, const Piece::Core::NativeWindowOptions *options)
     {
         if (!is_valid_factory_ptr(factoryPtr))
         {
@@ -141,7 +141,7 @@ extern "C"
     }
 
     void PieceCore_SetPhysicsWorldFactory(Piece::Core::IPhysicsWorldFactory *factoryPtr,
-                                          const NativePhysicsOptions *options)
+                                          const Piece::Core::NativePhysicsOptions *options)
     {
         if (!is_valid_factory_ptr(factoryPtr))
         {
