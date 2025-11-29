@@ -1,15 +1,15 @@
-#ifndef PIECE_INTERMEDIATE_SERVICE_LOCATOR_H_
-#define PIECE_INTERMEDIATE_SERVICE_LOCATOR_H_
+#ifndef PIECE_CORE_SERVICE_LOCATOR_H_
+#define PIECE_CORE_SERVICE_LOCATOR_H_
 
-#include <piece_intermediate/interfaces/igraphics_device_factory.h>
-#include <piece_intermediate/interfaces/iphysics_world_factory.h>
-#include <piece_intermediate/interfaces/iwindow_factory.h>
+#include <piece_core/interfaces/igraphics_device_factory.h>
+#include <piece_core/interfaces/iphysics_world_factory.h>
+#include <piece_core/interfaces/iwindow_factory.h>
 
 #include <memory>
 
 namespace Piece
 {
-namespace Intermediate
+namespace Core
 {
 
 class ServiceLocator
@@ -58,7 +58,7 @@ class ServiceLocator
     std::unique_ptr<IPhysicsWorldFactory> physics_world_factory_;
 };
 
-} // namespace Intermediate
+} // namespace Core
 } // namespace Piece
 
-#endif // PIECE_INTERMEDIATE_SERVICE_LOCATOR_H_
+#endif // PIECE_CORE_SERVICE_LOCATOR_H_

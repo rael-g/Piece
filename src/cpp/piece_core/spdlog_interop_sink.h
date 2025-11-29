@@ -34,7 +34,7 @@ inline Piece::LogLevel spdlog_level_to_piece_log_level(spdlog::level::level_enum
 
 namespace Piece
 {
-namespace Intermediate
+namespace Core
 {
 
 template <typename Mutex> class InteropSink : public spdlog::sinks::base_sink<Mutex>
@@ -50,7 +50,7 @@ template <typename Mutex> class InteropSink : public spdlog::sinks::base_sink<Mu
 
         int level = static_cast<int>(spdlog_level_to_piece_log_level(msg.level));
 
-        PieceIntermediate_Log(level, message);
+        PieceCore_Log(level, message);
     }
 
     void flush_() override
@@ -61,5 +61,5 @@ template <typename Mutex> class InteropSink : public spdlog::sinks::base_sink<Mu
 using InteropSink_mt = InteropSink<std::mutex>;
 using InteropSink_st = InteropSink<spdlog::details::null_mutex>;
 
-} // namespace Intermediate
+} // namespace Core
 } // namespace Piece

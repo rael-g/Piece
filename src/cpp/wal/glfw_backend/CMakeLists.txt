@@ -16,7 +16,7 @@ target_include_directories(wal_glfw_backend PUBLIC
 
 # Find GLFW provided by vcpkg
 find_package(glfw3 CONFIG REQUIRED)
-target_link_libraries(wal_glfw_backend PUBLIC wal piece_intermediate glfw)
+target_link_libraries(wal_glfw_backend PUBLIC wal piece_core glfw)
 
 # Install rules
 include(GNUInstallDirs)

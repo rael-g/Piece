@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
-#include <piece_intermediate/core/service_locator.h>
+#include <piece_core/core/service_locator.h>
 
 TEST(ServiceLocatorTest, IsSingleton)
 {
-    using namespace Piece::Intermediate;
+    using namespace Piece::Core;
 
     ServiceLocator &instance1 = ServiceLocator::Get();
     ServiceLocator &instance2 = ServiceLocator::Get();
@@ -17,7 +17,7 @@ TEST(ServiceLocatorTest, IsSingleton)
 
 TEST(ServiceLocatorTest, CanSetAndGetFactories)
 {
-    using namespace Piece::Intermediate;
+    using namespace Piece::Core;
 
     ServiceLocator &sl = ServiceLocator::Get();
 

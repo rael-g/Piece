@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Piece.Engine", "src\csharp\Piece.Engine\Piece.Engine.csproj", "{C6B0D9F5-A379-4B2C-B1D6-0AC543699773}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Piece.Framework", "src\csharp\Piece.Framework\Piece.Framework.csproj", "{C6B0D9F5-A379-4B2C-B1D6-0AC543699773}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Piece.Editor", "src\csharp\Piece.Editor\Piece.Editor.csproj", "{3E390D2C-5665-4A31-A9DC-C04132111699}"
 EndProject

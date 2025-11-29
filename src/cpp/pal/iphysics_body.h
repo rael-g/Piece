@@ -12,7 +12,7 @@ namespace PAL
 class IPhysicsBody
 {
   public:
-	virtual ~IPhysicsBody() = default;
+    virtual ~IPhysicsBody() = default;
 
     virtual void SetPosition(const glm::vec3 &position) = 0;
     virtual glm::vec3 GetPosition() const = 0;

@@ -4,7 +4,7 @@
 
 namespace Piece
 {
-namespace Intermediate
+namespace Core
 {
 
 GlfwWindowFactory::GlfwWindowFactory(const NativeWindowOptions *options)
@@ -36,5 +36,5 @@ std::unique_ptr<WAL::IWindow> GlfwWindowFactory::CreateWindow(const NativeWindow
     return window;
 }
 
-} // namespace Intermediate
+} // namespace Core
 } // namespace Piece

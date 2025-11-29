@@ -1,12 +1,12 @@
-# Design Document - Intermediate Layer of the Piece Engine (C++)
+# Design Document - Piece.Core (C++)
 
 ## 1. Introduction
 
-This document details the architectural design of the intermediate layer of the Piece graphics engine. For an overview of the engine's multi-layered architecture and its guiding philosophy of **Modular Component Architecture**, please refer to the [Piece Engine General Design Document](../OVERVIEW.md).
+This document details the architectural design of the Piece.Core of the Piece graphics engine. For an overview of the engine's multi-layered architecture and its guiding philosophy of **Modular Component Architecture**, please refer to the [Piece Engine General Design Document](../OVERVIEW.md).
 
-Implemented in **C++**, this layer will act as a high-performance orchestrator between the low-level C++ backend (WAL/RAL) and the high-level C# layer (where game logic will reside). Its main objective is to abstract the complexity of the backend, provide a rich and optimized API, and manage essential resources for scene rendering, offering it efficiently to the C# layer.
+Implemented in **C++**, this layer will act as a high-performance orchestrator between the low-level C++ backend (WAL/RAL) and the Piece.Framework (C#), where game logic will reside. Its main objective is to abstract the complexity of the backend, provide a rich and optimized API, and manage essential resources for scene rendering, offering it efficiently to the C# layer.
 
-## 2. Responsibilities of the Intermediate Layer (C++)
+## 2. Responsibilities of the Piece.Core (C++)
 
 *   **RAL Abstraction and Orchestration:** Translate high-level concepts into appropriate calls and sequences of operations for the C++ RAL interfaces (`IGraphicsDevice`, `IRenderContext`, `IVertexBuffer`, etc.), orchestrating the rendering pipeline.
 *   **GPU Resource Management:** Allocate, maintain the lifecycle, and release resources such as buffers, textures, shaders, samplers. Implement a robust resource caching system and asynchronous loading, mapping disk assets to `std::unique_ptr`s of RAL resources.
@@ -14,21 +14,21 @@ Implemented in **C++**, this layer will act as a high-performance orchestrator b
 *   **Visual Entities and Components Management:** Maintain an optimized representation of renderable objects in the world, their transformations, and their visual properties, linking them to Meshes and Materials.
 *   **Implementation of High-Level Concepts (C++):** Provide optimized C++ classes for concepts such as `Material`, `Mesh`, `Model`, `Camera`, `Light`, `RenderSystem`, `PostProcessingManager`, etc., which internally use the RAL interfaces.
 
-## 3. Interaction of the Intermediate C++ Layer with the C++ Backend
+## 3. Interaction of the Piece.Core (C++) with the C++ Backend
 
-The intermediate layer, being implemented in C++, interacts directly with the RAL (Render Abstraction Layer) and WAL (Window Abstraction Layer) interfaces of the low-level backends. This interaction is direct and performant, without interop overhead, as both layers are in C++.
+The Piece.Core, being implemented in C++, interacts directly with the RAL (Render Abstraction Layer) and WAL (Window Abstraction Layer) interfaces of the low-level backends. This interaction is direct and performant, without interop overhead, as both layers are in C++.
 
-However, the *instances* of these low-level backend interfaces (e.g., `IGraphicsDevice`, `IWindow`, `IPhysicsWorld`) are not created directly by the intermediate layer. Instead, they are obtained through the C++ `ServiceLocator`. The `ServiceLocator` provides C++ factory interfaces (e.g., `IGraphicsDeviceFactory`) that have been pre-configured and supplied by the high-level C# application via its .NET DI system. This ensures maximum efficiency and control over GPU resources and low-level operations, while centralizing the choice of backend implementation in the C# host.
+However, the *instances* of these low-level backend interfaces (e.g., `IGraphicsDevice`, `IWindow`, `IPhysicsWorld`) are not created directly by the Piece.Core. Instead, they are obtained through the C++ `ServiceLocator`. The `ServiceLocator` provides C++ factory interfaces (e.g., `IGraphicsDeviceFactory`) that have been pre-configured and supplied by the Piece.Framework (C#) via its .NET DI system. This ensures maximum efficiency and control over GPU resources and low-level operations, while centralizing the choice of backend implementation in the C# host.
 
-## 4. Interaction with the High-Level Layer (C# via P/Invoke)
+## 4. Interaction with the Piece.Framework (C# via P/Invoke)
 
-The intermediate C++ layer will expose an optimized and C-compatible API to be consumed by the high-level C# layer. This C-compatible API will be accessed from C# via P/Invoke.
+The Piece.Core (C++) will expose an optimized and C-compatible API to be consumed by the Piece.Framework (C#). This C-compatible API will be accessed from C# via P/Invoke.
 
 ### 4.0. C++ Service Locator
 
-To enable the flexible injection and configuration of low-level C++ backends from the C# host application, the intermediate layer introduces a C++ `ServiceLocator`. This `ServiceLocator` acts as a central registry for C++ factory interfaces (e.g., `IGraphicsDeviceFactory`, `IWindowFactory`, `IPhysicsWorldFactory`) that are provided by the C# application at engine initialization.
+To enable the flexible injection and configuration of low-level C++ backends from the C# host application, the Piece.Core introduces a C++ `ServiceLocator`. This `ServiceLocator` acts as a central registry for C++ factory interfaces (e.g., `IGraphicsDeviceFactory`, `IWindowFactory`, `IPhysicsWorldFactory`) that are provided by the C# application at engine initialization.
 
-*   **Purpose:** To decouple the core intermediate layer from concrete backend implementations. Instead of directly loading backend DLLs or instantiating specific backend types, the intermediate layer requests factories from the `ServiceLocator` and uses them to create instances of `IGraphicsDevice`, `IWindow`, `IPhysicsWorld`, etc.
+*   **Purpose:** To decouple the core Piece.Core from concrete backend implementations. Instead of directly loading backend DLLs or instantiating specific backend types, the Piece.Core requests factories from the `ServiceLocator` and uses them to create instances of `IGraphicsDevice`, `IWindow`, `IPhysicsWorld`, etc.
 *   **Mechanism:** The `ServiceLocator` stores `std::unique_ptr`s to these C++ factory interfaces. The C# host resolves C# wrapper factories (which encapsulate raw C++ factory pointers) via its .NET DI container and uses P/Invoke functions to pass these raw pointers to the C++ `ServiceLocator`. The `ServiceLocator` then takes ownership of these C++ factory instances.
 *   **Location:** Defined in `src/cpp/Piece.Intermediate/core/service_locator.h`.
 
@@ -40,7 +40,7 @@ To enable the flexible injection and configuration of low-level C++ backends fro
 #include "../interfaces/iwindow_factory.h"
 #include "../interfaces/iphysics_world_factory.h"
 
-namespace Piece { namespace Intermediate {
+namespace Piece { namespace Core {
     class ServiceLocator {
     public:
         static ServiceLocator& Get() {
@@ -96,7 +96,7 @@ This C++ Service Locator acts as the crucial bridge for the .NET DI system to co
 
     // Forward declarations for opaque types and factory interfaces
     struct EngineCore;
-    namespace Piece { namespace Intermediate {
+    namespace Piece { namespace Core {
         class IGraphicsDeviceFactory;
         class IWindowFactory;
         class IPhysicsWorldFactory;
@@ -119,9 +119,9 @@ This C++ Service Locator acts as the crucial bridge for the .NET DI system to co
 
     extern "C" {
         // Functions for the C# layer to set C++ factory instances in the Service Locator
-        __declspec(dllexport) void PieceIntermediate_SetGraphicsDeviceFactory(void* factoryPtr, const NativeVulkanOptions* options);
-        __declspec(dllexport) void PieceIntermediate_SetWindowFactory(void* factoryPtr, const NativeWindowOptions* options);
-        __declspec(dllexport) void PieceIntermediate_SetPhysicsWorldFactory(void* factoryPtr, void* options); // Generic options pointer
+        __declspec(dllexport) void PieceCore_SetGraphicsDeviceFactory(void* factoryPtr, const NativeVulkanOptions* options);
+        __declspec(dllexport) void PieceCore_SetWindowFactory(void* factoryPtr, const NativeWindowOptions* options);
+        __declspec(dllexport) void PieceCore_SetPhysicsWorldFactory(void* factoryPtr, void* options); // Generic options pointer
 
         // Main engine initialization, now relying on Service Locator
         __declspec(dllexport) EngineCore* Engine_Initialize();
@@ -147,27 +147,27 @@ This C++ Service Locator acts as the crucial bridge for the .NET DI system to co
     public static class NativeCalls
     {
         // P/Invoke for setting C++ factories in the Service Locator
-        [DllImport("PieceIntermediate.dll")]
-        public static extern void PieceIntermediate_SetGraphicsDeviceFactory(IntPtr factoryPtr, ref NativeVulkanOptions options);
+        [DllImport("PieceCore.dll")]
+        public static extern void PieceCore_SetGraphicsDeviceFactory(IntPtr factoryPtr, ref NativeVulkanOptions options);
 
-        [DllImport("PieceIntermediate.dll")]
-        public static extern void PieceIntermediate_SetWindowFactory(IntPtr factoryPtr, ref NativeWindowOptions options);
+        [DllImport("PieceCore.dll")]
+        public static extern void PieceCore_SetWindowFactory(IntPtr factoryPtr, ref NativeWindowOptions options);
 
-        [DllImport("PieceIntermediate.dll")]
-        public static extern void PieceIntermediate_SetPhysicsWorldFactory(IntPtr factoryPtr, IntPtr optionsPtr); // For more complex options
+        [DllImport("PieceCore.dll")]
+        public static extern void PieceCore_SetPhysicsWorldFactory(IntPtr factoryPtr, IntPtr optionsPtr); // For more complex options
 
         // Main engine initialization, now relying on Service Locator
-        [DllImport("PieceIntermediate.dll")]
+        [DllImport("PieceCore.dll")]
         public static extern IntPtr Engine_Initialize();
 
-        [DllImport("PieceIntermediate.dll")]
+        [DllImport("PieceCore.dll")]
         public static extern void Engine_Destroy(IntPtr corePtr);
 
         // Example for other exposed objects and methods
-        [DllImport("PieceIntermediate.dll")]
+        [DllImport("PieceCore.dll")]
         public static extern IntPtr RenderSystem_Create();
 
-        [DllImport("PieceIntermediate.dll")]
+        [DllImport("PieceCore.dll")]
         public static extern void RenderSystem_RenderFrame(IntPtr renderSystemPtr, IntPtr cameraPtr, IntPtr scenePtr);
 
         // ... and so on for all exposed objects and methods
@@ -195,7 +195,7 @@ This C++ Service Locator acts as the crucial bridge for the .NET DI system to co
     *   The C# layer will be responsible for allocating unmanaged memory for strings (`Marshal.StringToHGlobalAnsi`) and structs, and then freeing them.
 ### 4.3. High-Level C# Wrappers
 
-*   C# classes (e.g., `Material`, `Mesh`, `Model`, `Camera`, `RenderSystem`) that mirror the concepts of the intermediate C++ layer.
+*   C# classes (e.g., `Material`, `Mesh`, `Model`, `Camera`, `RenderSystem`) that mirror the concepts of the Piece.Core.
 *   These C# classes will contain an `IntPtr` for the corresponding C++ instance.
 *   Their methods will invoke the static functions in `NativeCalls` to interact with the underlying C++ instance.
 *   Will implement `IDisposable` to ensure proper release of C++ resources (calling `_Destroy` functions via P/Invoke).
@@ -231,7 +231,7 @@ public class RenderSystem : IDisposable
 
 ### 4.4. Dynamic Backend Injection (C# DI-driven Plugin Pattern)
 
-The strategy for integrating low-level C++ backends (like graphics APIs or physics engines) has evolved to fully embrace the .NET Dependency Injection system. The C++ intermediate layer *no longer* directly loads backend DLLs (e.g., `gfx_opengl.dll`, `physics_jolt.dll`) via `LoadLibrary` or similar mechanisms. Instead, the responsibility for backend selection, loading, and configuration is orchestrated by the high-level C# application.
+The strategy for integrating low-level C++ backends (like graphics APIs or physics engines) has evolved to fully embrace the .NET Dependency Injection system. The Piece.Core *no longer* directly loads backend DLLs (e.g., `gfx_opengl.dll`, `physics_jolt.dll`) via `LoadLibrary` or similar mechanisms. Instead, the responsibility for backend selection, loading, and configuration is orchestrated by the high-level C# application.
 
 **The Workflow:**
 
@@ -249,15 +249,15 @@ The strategy for integrating low-level C++ backends (like graphics APIs or physi
     services.AddPieceVulkan(options => { options.EnableValidationLayers = true; });
     services.AddPieceGlfw(options => { options.InitialWindowWidth = 1280; });
     ```
-4.  **C++ Service Locator Population:** During the `GameEngine`'s C# initialization, it resolves the C# factory wrappers from its .NET DI container. It then uses P/Invoke to call `PieceIntermediate_SetXxxFactory()` functions (defined in `NativeExports.h`) on the `PieceIntermediate.dll`, passing the raw C++ factory pointers from the C# wrappers to the C++ `ServiceLocator`. This is also where the marshaled configuration options are passed.
-5.  **C++ Intermediate Layer Consumption:** When the intermediate layer requires an `IGraphicsDevice` or `IWindow`, it queries its internal `ServiceLocator` for the appropriate C++ factory instance and uses it to create the concrete object. The factories themselves use the configuration options they received during their creation.
+5.  **C++ Service Locator Population:** During the `GameEngine`'s C# initialization, it resolves the C# factory wrappers from its .NET DI container. It then uses P/Invoke to call `PieceCore_SetXxxFactory()` functions (defined in `NativeExports.h`) on the `PieceCore.dll`, passing the raw C++ factory pointers from the C# wrappers to the C++ `ServiceLocator`. This is also where the marshaled configuration options are passed.
+6.  **Piece.Core Consumption:** When the Piece.Core requires an `IGraphicsDevice` or `IWindow`, it queries its internal `ServiceLocator` for the appropriate C++ factory instance and uses it to create the concrete object. The factories themselves use the configuration options they received during their creation.
 
 This refined approach provides unparalleled flexibility and allows developers to manage C++ backend dependencies and configurations entirely within the familiar .NET ecosystem, truly embodying the principles of a modular component architecture.
 The conceptual C++ implementation snippet for `Engine_InitializeFromLibraries` is now obsolete and has been removed. The initialization logic for `EngineCore` will instead rely on the C++ `ServiceLocator`.
 
 ### 4.5. `EngineCore` Initialization and Service Resolution
 
-The `EngineCore` (or the main initialization routine of the intermediate layer) no longer receives concrete backend instances or library paths directly. Instead, its initialization process involves:
+The `EngineCore` (or the main initialization routine of the Piece.Core) no longer receives concrete backend instances or library paths directly. Instead, its initialization process involves:
 
 1.  **Accessing the `ServiceLocator`:** Retrieving the singleton instance of the C++ `ServiceLocator`.
 2.  **Resolving Factories:** Obtaining the configured C++ factory interfaces (e.g., `IGraphicsDeviceFactory`, `IWindowFactory`, `IPhysicsWorldFactory`) from the `ServiceLocator`. The `ServiceLocator` guarantees that these factories have already been set by the C# application via P/Invoke.
@@ -270,7 +270,7 @@ The `EngineCore` (or the main initialization routine of the intermediate layer) 
 #include "core/service_locator.h"
 #include <memory>
 
-namespace Piece { namespace Intermediate {
+namespace Piece { namespace Core {
     // Forward declarations (assuming RAL/WAL interfaces are in scope)
     // class IWindow;
     // class IGraphicsDevice;
@@ -317,9 +317,9 @@ namespace Piece { namespace Intermediate {
     }
 }}
 ```
-This new initialization approach fundamentally changes how the intermediate layer acquires its core backend components, shifting the control to the C# host via DI.
+This new initialization approach fundamentally changes how the Piece.Core acquires its core backend components, shifting the control to the C# host via DI.
 
-## 5. Main Components of the Intermediate Layer (C++)
+## 5. Main Components of the Piece.Core (C++)
 
 ### 5.0. `JobSystem` (Task-Based Multithreading)
 
@@ -403,7 +403,7 @@ This new initialization approach fundamentally changes how the intermediate laye
     *   **AI-Powered Upscaling:** Integrate and manage AI-based upscaling techniques (e.g., AMD FSR, NVIDIA DLSS, Intel XeSS) as a final step in the chain. This allows rendering the scene at a lower resolution and intelligently reconstructing it to the target resolution, providing a major performance boost.
 *   **Dependencies:** `IRenderContext`, `IFrameBuffer`, `IShaderProgram`, `ITexture`.
 
-## 6. High-Level Rendering Flow (Orchestrated by RenderSystem in C++)
+## 6. Piece.Framework Rendering Flow (Orchestrated by RenderSystem in Piece.Core)
 
 1.  **`GameLoop` (C#):** Calls `RenderSystem.RenderFrame(Camera activeCamera, Scene currentScene)` on the C# wrapper.
 2.  **`RenderSystem` (C++):**
@@ -439,21 +439,21 @@ The `ResourceManager` in C++ is fundamental. Instead of the C# engine user direc
 
 ## 8. Benefits of the Proposed Architecture
 
-The hybrid C++/C# architecture of the intermediate layer, now deeply integrated with the C# .NET Dependency Injection system, offers an ideal balance between performance, control, and flexibility, perfectly aligning with the Piece Engine's philosophy of **Modular Component Architecture**. This layer embodies the core principles of modularity and extensibility as described in the [Piece Engine General Design Document](../OVERVIEW.md).
+The hybrid C++/C# architecture of the Piece.Core, now deeply integrated with the C# .NET Dependency Injection system, offers an ideal balance between performance, control, and flexibility, perfectly aligning with the Piece Engine's philosophy of **Modular Component Architecture**. The Piece.Core embodies the core principles of modularity and extensibility as described in the [Piece Engine General Design Document](../OVERVIEW.md).
 
 In summary, this refined layer ensures:
-*   **Optimal Performance:** Critical performance-sensitive components and GPU resource management remain entirely in C++, minimizing P/Invoke overhead in tight loops.
+*   **Optimal Performance:** Critical performance-sensitive components and GPU resource management remain entirely in C++, minimizing P/Invoke overhead in tight loops. (Communication with Piece.Framework)
 *   **Low-Level Control:** Leverages C++'s flexibility and memory control for GPU resource management and optimizations, with RAII and `std::unique_ptr`.
-*   **Clean and Ergonomic C# API:** The complexity of RAL/PAL and interop details are fully encapsulated. C# game developers configure and interact with the engine using a familiar, high-level .NET DI pattern, allowing them to focus on game logic.
+*   **Clean and Ergonomic C# API:** Piece.Framework game developers configure and interact with the engine using a familiar, high-level .NET DI pattern, allowing them to focus on game logic.
 *   **Memory Safety:** RAL/PAL resources are managed with `std::unique_ptr` in the C++ layer, leveraging RAII to prevent leaks, with C# wrappers managing their corresponding native pointers.
-*   **Enhanced Modular Extensibility:** By delegating the selection and configuration of C++ backends and internal components to the C# host's DI system, the engine achieves an even higher degree of modularity. Developers can easily swap out entire backend implementations (e.g., OpenGL for Vulkan) or specific C++ sub-components simply by adjusting their C# application's DI configuration. This truly makes the C++ layers configurable components from the C# side, fully aligning with the principles of the Modular Component Architecture.
+*   **Enhanced Modular Extensibility:** By delegating the selection and configuration of C++ backends and internal components to the Piece.Framework's DI system, the engine achieves an even higher degree of modularity. Developers can easily swap out entire backend implementations (e.g., OpenGL for Vulkan) or specific C++ sub-components simply by adjusting their Piece.Framework application's DI configuration. This truly makes the C++ layers configurable components from the Piece.Framework side, fully aligning with the principles of the Modular Component Architecture.
 
 ## 9. Granular Extension Points
 
-The intermediate C++ layer is a critical hub for orchestration and management. Its architecture, now heavily integrated with the C# .NET DI system via the C++ `ServiceLocator`, allows for exceptionally granular extensibility through its adherence to the philosophy of **Modular Component Architecture**. For a complete discussion of this philosophy and extension points across all engine layers, please refer to the [Piece Engine General Design Document](../OVERVIEW.md).
+The Piece.Core is a critical hub for orchestration and management. Its architecture, now heavily integrated with the C# .NET DI system via the C++ `ServiceLocator`, allows for exceptionally granular extensibility through its adherence to the philosophy of **Modular Component Architecture**. For a complete discussion of this philosophy and extension points across all engine layers, please refer to the [Piece Engine General Design Document](../OVERVIEW.md).
 
 The main specific extension points of this layer now include:
 
-*   **Complete Replacement of the Intermediate Layer:** Allows the user to provide their own `MyCustomIntermediate.dll` that implements all C-compatible API functions, enabling a total re-engineering of resource management logic and the pipeline. This also implies that such a custom DLL would then internally define and manage its own factory resolution mechanism, or mimic the `ServiceLocator` pattern to integrate with the C# host's DI.
-*   **Partial Replacement / Extension of Internal Components (C# DI-driven):** Through the C++ `ServiceLocator`, whose factories are supplied by the C# application via .NET DI, users can inject their own implementations of core intermediate subsystems. For instance, a user could provide a custom `RenderSystemFactory` or `ResourceManagerFactory` (implemented in C++ and exposed via a C# wrapper and NuGet package). The intermediate layer would then request these custom factories from its `ServiceLocator` and use them to create the desired `RenderSystem` or `ResourceManager`.
+*   **Complete Replacement of the Piece.Core:** Allows the user to provide their own `MyCustomCore.dll` that implements all C-compatible API functions, enabling a total re-engineering of resource management logic and the pipeline. This also implies that such a custom DLL would then internally define and manage its own factory resolution mechanism, or mimic the `ServiceLocator` pattern to integrate with the Piece.Framework's DI.
+*   **Partial Replacement / Extension of Internal Components (C# DI-driven):** Through the C++ `ServiceLocator`, whose factories are supplied by the C# application via .NET DI, users can inject their own implementations of core intermediate subsystems. For instance, a user could provide a custom `RenderSystemFactory` or `ResourceManagerFactory` (implemented in C++ and exposed via a C# wrapper and NuGet package). The Piece.Core would then request these custom factories from its `ServiceLocator` and use them to create the desired `RenderSystem` or `ResourceManager`.
 *   **Extension of Functionalities via C++ Plugins:** Components can be designed to dynamically load DLLs that provide specific implementations for certain interfaces (e.g., a customized `ICullingStrategy`). This mechanism can also be integrated with the `ServiceLocator` pattern, where the C# host provides a factory that knows how to load and create instances from such specific plugin DLLs.

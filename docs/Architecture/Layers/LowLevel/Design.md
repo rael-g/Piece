@@ -9,7 +9,7 @@ The backend architecture is composed of two main abstraction layers:
 1.  **Window Abstraction Layer (WAL):** Provides a generic interface for managing windows, graphics contexts, and user inputs.
 2.  **Render Abstraction Layer (RAL):** Defines a common set of interfaces for low-level rendering resources and commands, regardless of the underlying graphics API (OpenGL, Vulkan, DirectX).
 
-This backend is the foundation upon which the intermediate layer (also in C++) and, subsequently, the high-level framework (C#) will be built. Communication with the intermediate layer will be direct, without interop overhead, as both are in C++.
+This backend is the foundation upon which the Piece.Core (C++) and, subsequently, the Piece.Framework (C#) will be built. Communication with the Piece.Core will be direct, without interop overhead, as both are in C++.
 
 ### Proposed Directory Structure for the Backend (inside `src/`)
 
@@ -68,7 +68,7 @@ public:
 ```
 **Note:** The `IWindow` interface provides a polling model for input, sufficient for the low-level layer. A more robust event system could be built in higher layers.
 
-The `NativeWindowOptions` struct, defined in the intermediate layer's `NativeExports.h`, would be marshaled from C# and passed to the factory and eventually to the window's constructor/Init method.
+The `NativeWindowOptions` struct, defined in the Piece.Core's `NativeExports.h`, would be marshaled from C# and passed to the factory and eventually to the window's constructor/Init method.
 
 ## 3. Render Abstraction Layer (RAL)
 
@@ -105,7 +105,7 @@ public:
     virtual std::unique_ptr<IUniformBuffer> CreateUniformBuffer(uint32_t size, const void* data = nullptr) = 0;
 };
 ```
-**Note:** Factory methods return `std::unique_ptr` to ensure ownership and lifecycle of C++ resources in a safe and idiomatic way. The `NativeVulkanOptions` struct would be defined in the intermediate layer's `NativeExports.h` and marshaled from C# for configuration.
+**Note:** Factory methods return `std::unique_ptr` to ensure ownership and lifecycle of C++ resources in a safe and idiomatic way. The `NativeVulkanOptions` struct would be defined in the Piece.Core's `NativeExports.h` and marshaled from C# for configuration.
 
 ### 3.2. `IRenderContext` (Rendering Context)
 
@@ -373,7 +373,7 @@ public:
     // ... other factory methods for shapes, joints, etc.
 };
 ```
-**Note:** Factory methods return `std::unique_ptr` for safe ownership and lifecycle management, similar to RAL. The `NativePhysicsOptions` struct would be defined in the intermediate layer's `NativeExports.h` and marshaled from C# for configuration.
+**Note:** Factory methods return `std::unique_ptr` for safe ownership and lifecycle management, similar to RAL. The `NativePhysicsOptions` struct would be defined in the Piece.Core's `NativeExports.h` and marshaled from C# for configuration.
 
 ### 4.2. `IPhysicsBody` (Physics Body)
 
@@ -491,7 +491,7 @@ src/
 
 ## 6. Usage Example (Removed from Core Backend Design)
 
-The C++ backend usage example has been moved to the intermediate layer design document, where the interaction between the intermediate layer and the backend will be detailed.
+The C++ backend usage example has been moved to the Piece.Core design document, where the interaction between the Piece.Core and the backend will be detailed.
 
 ## 7. Observations and Conclusions (Analysis of Modern Graphics Engines)
 
@@ -557,14 +557,14 @@ The WAL/RAL/PAL architecture is designed for extreme modularity, enabling the co
         }
     }
     ```
-*   **C# Orchestration:** The high-level C# application, via its .NET DI configuration, resolves a C# wrapper for this factory. This C# wrapper then loads the native DLL, calls the exported factory function (passing marshaled options), and eventually pushes the resulting C++ factory pointer to the intermediate layer's `ServiceLocator`.
+*   **C# Orchestration:** The Piece.Framework (C#) application, via its .NET DI configuration, resolves a C# wrapper for this factory. This C# wrapper then loads the native DLL, calls the exported factory function (passing marshaled options), and eventually pushes the resulting C++ factory pointer to the Piece.Core's `ServiceLocator`.
 
 ### 8.2 Partial Replacement of RAL/WAL/PAL Implementations (C# DI-driven Abstract Factories)
 
 *   **Mechanism:** To allow the user to replace only a specific type of RAL/WAL/PAL resource (e.g., a custom `IVertexBuffer` implementation, or an `IPhysicsMaterial` behavior) within an existing backend, the respective C++ factory interfaces (e.g., `IGraphicsDeviceFactory`, `IPhysicsWorldFactory`) can be designed to accept *internal factory interfaces* for these sub-components.
 *   **Example:** An `IGraphicsDeviceFactory` might accept an `IVertexBufferFactory` during its construction. This `IVertexBufferFactory` itself could be another C++ object, managed and provided by the C# DI system.
     ```cpp
-    // Vertex Buffer Factory Interface (defined in intermediate layer or common abstractions)
+    // Vertex Buffer Factory Interface (defined in Piece.Core or common abstractions)
     class IVertexBufferFactory {
     public:
         virtual ~IVertexBufferFactory() = default;
@@ -589,4 +589,4 @@ These granular extension points transform the backend into a true set of **inter
 
 ---
 
-**Note:** This document describes only the low-level C++ backend (WAL/RAL/PAL). For an overview of the engine's multi-layered architecture and the guiding philosophy of **Modular Component Architecture**, please refer to the [Piece Engine General Design Document](../OVERVIEW.md). The intermediate C++ layer and the high-level C# framework are detailed in their respective design documents.
+**Note:** This document describes only the low-level C++ backend (WAL/RAL/PAL). For an overview of the engine's multi-layered architecture and the guiding philosophy of **Modular Component Architecture**, please refer to the [Piece Engine General Design Document](../OVERVIEW.md). The Piece.Core (C++) and the Piece.Framework (C#) are detailed in their respective design documents.

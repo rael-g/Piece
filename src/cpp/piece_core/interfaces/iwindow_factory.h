@@ -1,14 +1,14 @@
-#ifndef PIECE_INTERMEDIATE_IWINDOW_FACTORY_H_
-#define PIECE_INTERMEDIATE_IWINDOW_FACTORY_H_
+#ifndef PIECE_CORE_IWINDOW_FACTORY_H_
+#define PIECE_CORE_IWINDOW_FACTORY_H_
 
-#include <piece_intermediate/native_interop_types.h>
+#include <piece_core/native_interop_types.h>
 #include <wal/iwindow.h>
 
 #include <memory>
 
 namespace Piece
 {
-namespace Intermediate
+namespace Core
 {
 
 class IWindowFactory
@@ -19,7 +19,7 @@ class IWindowFactory
     virtual std::unique_ptr<WAL::IWindow> CreateWindow(const NativeWindowOptions *options) = 0;
 };
 
-} // namespace Intermediate
+} // namespace Core
 } // namespace Piece
 
-#endif // PIECE_INTERMEDIATE_IWINDOW_FACTORY_H_
+#endif // PIECE_CORE_IWINDOW_FACTORY_H_

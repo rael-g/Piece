@@ -1,7 +1,7 @@
-#ifndef PIECE_INTERMEDIATE_GRAPHICS_DEVICE_FACTORY_H_
-#define PIECE_INTERMEDIATE_GRAPHICS_DEVICE_FACTORY_H_
+#ifndef PIECE_CORE_GRAPHICS_DEVICE_FACTORY_H_
+#define PIECE_CORE_GRAPHICS_DEVICE_FACTORY_H_
 
-#include <piece_intermediate/native_exports.h>
+#include <piece_core/native_exports.h>
 #include <ral/igraphics_device.h>
 #include <wal/iwindow.h>
 
@@ -9,7 +9,7 @@
 
 namespace Piece
 {
-namespace Intermediate
+namespace Core
 {
 
 class IGraphicsDeviceFactory
@@ -21,7 +21,7 @@ class IGraphicsDeviceFactory
                                                                        const NativeVulkanOptions *options) = 0;
 };
 
-} // namespace Intermediate
+} // namespace Core
 } // namespace Piece
 
-#endif // PIECE_INTERMEDIATE_GRAPHICS_DEVICE_FACTORY_H_
+#endif // PIECE_CORE_GRAPHICS_DEVICE_FACTORY_H_

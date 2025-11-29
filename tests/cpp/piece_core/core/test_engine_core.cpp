@@ -1,8 +1,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <pal/iphysics_body.h>
-#include <piece_intermediate/core/service_locator.h>
-#include <piece_intermediate/engine_core.h>
+#include <piece_core/core/service_locator.h>
+#include <piece_core/engine_core.h>
 #include <ral/interfaces/iindex_buffer.h>
 #include <ral/interfaces/ishader.h>
 #include <ral/interfaces/ishader_program.h>
@@ -46,20 +46,20 @@ class MockPhysicsWorld : public Piece::PAL::IPhysicsWorld
 };
 
 // Mocks for factories
-class MockWindowFactory : public Piece::Intermediate::IWindowFactory
+class MockWindowFactory : public Piece::Core::IWindowFactory
 {
   public:
     MOCK_METHOD(std::unique_ptr<Piece::WAL::IWindow>, CreateWindow, (const NativeWindowOptions *options), (override));
 };
 
-class MockGraphicsDeviceFactory : public Piece::Intermediate::IGraphicsDeviceFactory
+class MockGraphicsDeviceFactory : public Piece::Core::IGraphicsDeviceFactory
 {
   public:
     MOCK_METHOD(std::unique_ptr<Piece::RAL::IGraphicsDevice>, CreateGraphicsDevice,
                 (Piece::WAL::IWindow * window, const NativeVulkanOptions *options), (override));
 };
 
-class MockPhysicsWorldFactory : public Piece::Intermediate::IPhysicsWorldFactory
+class MockPhysicsWorldFactory : public Piece::Core::IPhysicsWorldFactory
 {
   public:
     MOCK_METHOD(std::unique_ptr<Piece::PAL::IPhysicsWorld>, CreatePhysicsWorld, (const NativePhysicsOptions *options),
@@ -83,11 +83,10 @@ class EngineCoreTest : public ::testing::Test
 
         // Register mock factories with the ServiceLocator
         // The ServiceLocator will take ownership of the factories
-        Piece::Intermediate::ServiceLocator::Get().SetWindowFactory(
-            std::unique_ptr<MockWindowFactory>(window_factory_mock));
-        Piece::Intermediate::ServiceLocator::Get().SetGraphicsDeviceFactory(
+        Piece::Core::ServiceLocator::Get().SetWindowFactory(std::unique_ptr<MockWindowFactory>(window_factory_mock));
+        Piece::Core::ServiceLocator::Get().SetGraphicsDeviceFactory(
             std::unique_ptr<MockGraphicsDeviceFactory>(graphics_factory_mock));
-        Piece::Intermediate::ServiceLocator::Get().SetPhysicsWorldFactory(
+        Piece::Core::ServiceLocator::Get().SetPhysicsWorldFactory(
             std::unique_ptr<MockPhysicsWorldFactory>(physics_factory_mock));
     }
 
@@ -112,8 +111,7 @@ TEST_F(EngineCoreTest, InitializationCreatesBackends)
     EXPECT_CALL(*physics_factory_mock, CreatePhysicsWorld(::testing::_))
         .WillOnce(::testing::Return(std::unique_ptr<MockPhysicsWorld>(physics_mock)));
 
-    // Create the EngineCore instance, which should trigger the factory calls
-    Piece::Intermediate::EngineCore engine_core;
+    Piece::Core::EngineCore engine_core;
 }
 
 TEST_F(EngineCoreTest, UpdateAndRenderCallsBackendMethods)
@@ -130,7 +128,7 @@ TEST_F(EngineCoreTest, UpdateAndRenderCallsBackendMethods)
     EXPECT_CALL(*physics_mock, Step(::testing::_)).Times(1);
 
     // Create EngineCore
-    Piece::Intermediate::EngineCore engine_core;
+    Piece::Core::EngineCore engine_core;
 
     // Call Update and Render
     engine_core.Update(0.016f);

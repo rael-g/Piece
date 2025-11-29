@@ -14,9 +14,8 @@
 
 namespace Piece
 {
-namespace Intermediate
+namespace Core
 {
-
 static std::shared_ptr<spdlog::logger> g_logger;
 
 void InitializeLogger()
@@ -24,7 +23,7 @@ void InitializeLogger()
     std::vector<spdlog::sink_ptr> sinks;
     sinks.push_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
     sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_mt>("PieceEngine.log", 1024 * 1024 * 5, 3));
-    sinks.push_back(std::make_shared<Piece::Intermediate::InteropSink_mt>());
+    sinks.push_back(std::make_shared<Piece::Core::InteropSink_mt>());
 
     g_logger = std::make_shared<spdlog::logger>("PieceEngine", begin(sinks), end(sinks));
     spdlog::set_default_logger(g_logger);
@@ -106,7 +105,7 @@ void EngineCore::Render()
     }
 }
 
-} // namespace Intermediate
+} // namespace Core
 } // namespace Piece
 
 template <typename T> bool is_valid_factory_ptr(T *ptr)
@@ -117,69 +116,67 @@ template <typename T> bool is_valid_factory_ptr(T *ptr)
 extern "C"
 {
 
-    void PieceIntermediate_SetGraphicsDeviceFactory(Piece::Intermediate::IGraphicsDeviceFactory *factoryPtr,
-                                                    const NativeVulkanOptions *options)
+    void PieceCore_SetGraphicsDeviceFactory(Piece::Core::IGraphicsDeviceFactory *factoryPtr,
+                                            const NativeVulkanOptions *options)
     {
         if (!is_valid_factory_ptr(factoryPtr))
         {
             spdlog::error("Invalid IGraphicsDeviceFactory pointer received.");
             return;
         }
-        Piece::Intermediate::ServiceLocator::Get().SetGraphicsDeviceFactory(
-            std::unique_ptr<Piece::Intermediate::IGraphicsDeviceFactory>(factoryPtr));
-        spdlog::info("PieceIntermediate_SetGraphicsDeviceFactory called.");
+        Piece::Core::ServiceLocator::Get().SetGraphicsDeviceFactory(
+            std::unique_ptr<Piece::Core::IGraphicsDeviceFactory>(factoryPtr));
+        spdlog::info("PieceCore_SetGraphicsDeviceFactory called.");
     }
 
-    void PieceIntermediate_SetWindowFactory(Piece::Intermediate::IWindowFactory *factoryPtr,
-                                            const NativeWindowOptions *options)
+    void PieceCore_SetWindowFactory(Piece::Core::IWindowFactory *factoryPtr, const NativeWindowOptions *options)
     {
         if (!is_valid_factory_ptr(factoryPtr))
         {
             spdlog::error("Invalid IWindowFactory pointer received.");
             return;
         }
-        Piece::Intermediate::ServiceLocator::Get().SetWindowFactory(
-            std::unique_ptr<Piece::Intermediate::IWindowFactory>(factoryPtr));
-        spdlog::info("PieceIntermediate_SetWindowFactory called.");
+        Piece::Core::ServiceLocator::Get().SetWindowFactory(std::unique_ptr<Piece::Core::IWindowFactory>(factoryPtr));
+        spdlog::info("PieceCore_SetWindowFactory called.");
     }
 
-    void PieceIntermediate_SetPhysicsWorldFactory(Piece::Intermediate::IPhysicsWorldFactory *factoryPtr,
-                                                  const NativePhysicsOptions *options)
+    void PieceCore_SetPhysicsWorldFactory(Piece::Core::IPhysicsWorldFactory *factoryPtr,
+                                          const NativePhysicsOptions *options)
     {
         if (!is_valid_factory_ptr(factoryPtr))
         {
             spdlog::error("Invalid IPhysicsWorldFactory pointer received.");
             return;
         }
-        Piece::Intermediate::ServiceLocator::Get().SetPhysicsWorldFactory(
-            std::unique_ptr<Piece::Intermediate::IPhysicsWorldFactory>(factoryPtr));
-        spdlog::info("PieceIntermediate_SetPhysicsWorldFactory called.");
+        Piece::Core::ServiceLocator::Get().SetPhysicsWorldFactory(
+            std::unique_ptr<Piece::Core::IPhysicsWorldFactory>(factoryPtr));
+        spdlog::info("PieceCore_SetPhysicsWorldFactory called.");
     }
 
-    EngineCore *Engine_Initialize()
+    Piece::Core::EngineCore *Engine_Initialize()
     {
         static bool loggerInitialized = false;
         if (!loggerInitialized)
         {
-            Piece::Intermediate::InitializeLogger();
+            Piece::Core::InitializeLogger();
             loggerInitialized = true;
         }
         spdlog::info("Engine_Initialize called. Attempting to create EngineCore...");
-        Piece::Intermediate::EngineCore *core = new Piece::Intermediate::EngineCore();
+        Piece::Core::EngineCore *core = new Piece::Core::EngineCore();
         if (!core)
         {
             spdlog::error("Failed to allocate EngineCore.");
             return nullptr;
         }
-        return reinterpret_cast<EngineCore *>(core);
+        return reinterpret_cast<Piece::Core::EngineCore *>(core);
     }
 
-    void Engine_Destroy(EngineCore *corePtr)
+    void Engine_Destroy(Piece::Core::EngineCore *corePtr)
     {
         spdlog::info("Engine_Destroy called.");
         if (corePtr)
         {
-            delete reinterpret_cast<Piece::Intermediate::EngineCore *>(corePtr);
+            delete reinterpret_cast<Piece::Core::EngineCore *>(corePtr);
         }
         else
         {
@@ -187,25 +184,25 @@ extern "C"
         }
     }
 
-    void Engine_Update(EngineCore *corePtr, float deltaTime)
+    void Engine_Update(Piece::Core::EngineCore *corePtr, float deltaTime)
     {
         if (corePtr)
         {
-            reinterpret_cast<Piece::Intermediate::EngineCore *>(corePtr)->Update(deltaTime);
+            reinterpret_cast<Piece::Core::EngineCore *>(corePtr)->Update(deltaTime);
         }
     }
 
-    void Engine_Render(EngineCore *corePtr)
+    void Engine_Render(Piece::Core::EngineCore *corePtr)
     {
         if (corePtr)
         {
-            reinterpret_cast<Piece::Intermediate::EngineCore *>(corePtr)->Render();
+            reinterpret_cast<Piece::Core::EngineCore *>(corePtr)->Render();
         }
     }
 
     static LogCallback s_log_callback = nullptr;
 
-    PIECE_INTERMEDIATE_API void PieceIntermediate_RegisterLogCallback(LogCallback callback)
+    PIECE_CORE_API void PieceCore_RegisterLogCallback(LogCallback callback)
     {
         s_log_callback = callback;
         if (s_log_callback)
@@ -218,7 +215,7 @@ extern "C"
         }
     }
 
-    PIECE_INTERMEDIATE_API void PieceIntermediate_Log(int level, const char *message)
+    PIECE_CORE_API void PieceCore_Log(int level, const char *message)
     {
         if (s_log_callback)
         {

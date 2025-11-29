@@ -1,47 +1,47 @@
-# Design Document - High-Level Layer of the Piece Engine (C# Framework)
+# Design Document - Piece.Framework (C# Framework)
 
 ## 1. Introduction
 
-This document details the architectural design of the high-level layer of the Piece graphics engine. For an overview of the engine's multi-layered architecture and [Piece Engine General Design Document](../OVERVIEW.md).
+This document details the architectural design of the Piece.Framework of the Piece graphics engine. For an overview of the engine's multi-layered architecture and [Piece Engine General Design Document](../OVERVIEW.md).
 
-This C# framework serves as the primary, feature-rich **reference implementation** of the engine's core C# interfaces (e.g., `IEngine`, `IScene`, `INode`). Its main purpose is to provide a very high-level API for game developers, abstracting the complexity of the intermediate C++ layer and enabling rapid development for PC platforms (Windows, Linux).
+This C# framework serves as the primary, feature-rich **reference implementation** of the engine's core C# interfaces (e.g., `IEngine`, `IScene`, `INode`). Its main purpose is to provide a very high-level API for game developers, abstracting the complexity of the Piece.Core (C++) and enabling rapid development for PC platforms (Windows, Linux).
 
-By implementing a shared interface contract, it allows tools like the Visual Editor to remain decoupled from the concrete implementation. This ensures that a different high-level layer (e.g., a C++/Lua backend for consoles) could be created in the future and still be managed by the same toolset, fulfilling the engine's core philosophy of modularity.
+By implementing a shared interface contract, it allows tools like the Visual Editor to remain decoupled from the concrete implementation. This ensures that a different Piece.Framework (e.g., a C++/Lua backend for consoles) could be created in the future and still be managed by the same toolset, fulfilling the engine's core philosophy of modularity.
 
 Its objective is to provide an accessible and powerful high-level API for game developers, with features and capabilities supporting both 2D and 3D development.
 
 ## 2. Design Philosophy
 
-The high-level layer is the C# developer's "playground," applying the Piece Engine's philosophy of **Modular Component Architecture** with maximum flexibility. This layer embodies the core principles of modularity and extensibility as described in the [Piece Engine General Design Document](../OVERVIEW.md).
+The Piece.Framework is the C# developer's "playground," applying the Piece Engine's philosophy of **Modular Component Architecture** with maximum flexibility. This layer embodies the core principles of modularity and extensibility as described in the [Piece Engine General Design Document](../OVERVIEW.md).
 
 In this layer, the key principles are manifested through:
 *   **Composition over Inheritance:** Functionality added to game objects via composition of `Component`s.
 *   **Node-Based Scene Graph:** Hierarchical organization of the game world.
 *   **Data-Driven:** Systems and components configurable via data.
 *   **Clean and Idiomatic C# Interface:** Abstraction of C++ complexity to focus on game logic.
-## 3. Interaction with the Intermediate C++ Layer
+## 3. Interaction with the Piece.Core (C++)
 
-The high-level C# layer plays a crucial role in configuring the intermediate C++ layer. Instead of merely consuming a fixed C-compatible API, the C# layer leverages its .NET Dependency Injection (DI) system to resolve C# wrapper factories (e.g., `VulkanGraphicsDeviceFactory`, `GlfwWindowFactory`) for various C++ backends. These C# wrappers encapsulate `IntPtr`s to actual C++ factory instances (e.g., `IGraphicsDeviceFactory*`, `IWindowFactory*`) residing in the native backend DLLs. During the engine's initialization, the high-level C# layer uses P/Invoke to pass these C++ factory pointers, along with any relevant configuration options, to a C++ Service Locator in the intermediate layer. This fundamentally shifts the responsibility of backend selection and configuration from hardcoded C++ logic to the flexible .NET DI system. Once configured, the intermediate C++ layer can then use these provided C++ factories to create concrete `IGraphicsDevice`, `IWindow`, and other low-level C++ objects.
+The Piece.Framework plays a crucial role in configuring the Piece.Core (C++). Instead of merely consuming a fixed C-compatible API, the C# layer leverages its .NET Dependency Injection (DI) system to resolve C# wrapper factories (e.g., `VulkanGraphicsDeviceFactory`, `GlfwWindowFactory`) for various C++ backends. These C# wrappers encapsulate `IntPtr`s to actual C++ factory instances (e.g., `IGraphicsDeviceFactory*`, `IWindowFactory*`) residing in the native backend DLLs. During the engine's initialization, the C# layer uses P/Invoke to pass these C++ factory pointers, along with any relevant configuration options, to a C++ Service Locator in the Piece.Core. This fundamentally shifts the responsibility of backend selection and configuration from hardcoded C++ logic to the flexible .NET DI system. Once configured, the Piece.Core can then use these provided C++ factories to create concrete `IGraphicsDevice`, `IWindow`, and other low-level C++ objects.
 
 ### 3.1. Safe Interop Strategy: Encapsulating Unsafe Code
 
 To maintain the overall safety and robustness of the C# framework, any operations involving raw pointers (`IntPtr`), `unsafe` code blocks, or direct memory manipulation necessary for P/Invoke with the C++ layer will be strictly encapsulated.
 
 *   **Dedicated Interop Projects:** All `unsafe` code and direct P/Invoke calls will reside within dedicated C# projects (e.g., `Piece.Interop`, `Piece.Vulkan.Interop`, `Piece.GLFW.Interop`). These projects will be compiled with the `AllowUnsafeBlocks` flag enabled.
-*   **Safe API Exposure:** These dedicated interop projects will expose a **safe, managed API** to the higher-level C# framework. This means they will provide C# classes and methods that hide the `IntPtr` handling and `unsafe` operations behind safe abstractions.
+*   **Safe API Exposure:** These dedicated interop projects will expose a **safe, managed API** to the Piece.Framework. This means they will provide C# classes and methods that hide the `IntPtr` handling and `unsafe` operations behind safe abstractions.
 *   **Reduced Surface Area:** By confining `unsafe` code to specific, small, and well-defined modules, the surface area for potential memory errors or undefined behavior is significantly reduced. This makes auditing, testing, and maintenance of these critical interop sections much easier.
 *   **Framework Safety:** The main C# framework (`Piece.Engine`) and its components will *not* be marked as `unsafe`. They will consume the safe, managed APIs exposed by the interop projects, ensuring that the vast majority of the engine's C# codebase remains type-safe and benefits from .NET's memory safety guarantees.
 
-This strategy ensures that the power and performance of C++ can be leveraged while maintaining a high degree of safety and maintainability within the C# high-level framework.
+This strategy ensures that the power and performance of C++ can be leveraged while maintaining a high degree of safety and maintainability within the Piece.Framework.
 
-## 4. Main Components of the High-Level Framework (C#)
+## 4. Main Components of the Piece.Framework (C#)
 
 ### 4.1. `GameEngine`
 
 *   **Responsibilities:**
     *   Main entry point of the game, managing the lifecycle (initialization, update, drawing).
     *   Maintains references to central systems like `InputManager`, `SceneManager`, and `AssetManager`.
-    *   **Orchestrates the initialization of the intermediate C++ layer:** This involves resolving C# factory wrappers (e.g., `IGraphicsDeviceFactory`, `IWindowFactory`) from the .NET DI container. It then uses P/Invoke to pass the native C++ factory pointers (obtained from these C# wrappers), along with any associated configuration options, to the C++ Service Locator within the intermediate layer.
+    *   **Orchestrates the initialization of the Piece.Core (C++) layer:** This involves resolving C# factory wrappers (e.g., `IGraphicsDeviceFactory`, `IWindowFactory`) from the .NET DI container. It then uses P/Invoke to pass the native C++ factory pointers (obtained from these C# wrappers), along with any associated configuration options, to the C++ Service Locator within the Piece.Core.
     *   Manages the game loop (`Update`, `Draw`).
 *   **Dependencies:** `InputManager`, `SceneManager`, `AssetManager`, resolved C# factory wrappers for C++ backends (e.g., `IGraphicsDeviceFactory`, `IWindowFactory`), C# wrappers for `RenderSystem`, `ResourceManager` (for initialization).
 
@@ -98,7 +98,7 @@ This strategy ensures that the power and performance of C++ can be leveraged whi
 
 *   **Responsibilities:**
     *   Orchestrate the high-level rendering process.
-    *   Uses the C# `RenderSystem` wrapper from the intermediate layer.
+    *   Uses the C# `RenderSystem` wrapper from the Piece.Core.
     *   Collects `RenderableComponent`s from visible nodes, performs high-level culling/sorting, and passes data to `RenderSystemCpp` (via C# wrapper).
 *   **Interaction:** Called by `GameEngine.Draw()`.
 
@@ -137,18 +137,18 @@ This strategy ensures that the power and performance of C++ can be leveraged whi
 To create rich and believable worlds, the framework will be expanded with a foundation for advanced Artificial Intelligence.
 
 *   **`AISystem` (C# Class):**
-    *   **Responsibilities:** A central system responsible for managing and executing AI behaviors throughout the scene. It would discover all AI-enabled components and orchestrate their updates, potentially distributing the workload using the `JobSystem` from the intermediate C++ layer for high performance with many agents.
+    *   **Responsibilities:** A central system responsible for managing and executing AI behaviors throughout the scene. It would discover all AI-enabled components and orchestrate their updates, potentially distributing the workload using the `JobSystem` from the Piece.Core (C++) for high performance with many agents.
     *   **Interaction:** Managed by the `GameEngine` or `Scene`, it operates on components like `BehaviorTreeComponent`.
 
 *   **`BehaviorTreeComponent` (C# Component):**
     *   **Responsibilities:** Attached to a `Node`, this component would execute a Behavior Tree asset. It allows developers to design complex NPC logic (e.g., patrol, attack, flee) in a visual, modular, and reactive way. This moves beyond simple state machines and aligns with modern AI design.
     *   **Interaction:** The `AISystem` would call `Update()` on this component, which would then traverse its behavior tree and execute the appropriate logic.
 
-## 5. High-Level Game Loop Flow (Simplified)
+## 5. Piece.Framework Game Loop Flow (Simplified)
 
 1.  **`GameEngine.Run()`:**
     *   Initializes itself and its systems (`InputManager`, `AssetManager`, `SceneManager`, `AISystem`).
-    *   Initializes the intermediate C++ layer (creates `ResourceManagerCpp`, `RenderSystemCpp`, etc., obtaining their `IntPtr`s).
+    *   Initializes the Piece.Core (C++) (creates `ResourceManagerCpp`, `RenderSystemCpp`, etc., obtaining their `IntPtr`s).
     *   Enters the main loop:
         *   `GameEngine.Update()`
         *   `GameEngine.Draw()`
@@ -158,7 +158,7 @@ To create rich and believable worlds, the framework will be expanded with a foun
     *   `SceneManager.CurrentScene.Update(gameTime)` (updates all nodes and their components, including the `AISystem`).
 
 3.  **`GameEngine.Draw(GameTime gameTime)`:**
-    *   Calls `RenderManager.Render(SceneManager.CurrentScene, GameEngine.CurrentCamera)` (passing high-level C# objects).
+    *   Calls `RenderManager.Render(SceneManager.CurrentScene, GameEngine.CurrentCamera)` (passing Piece.Framework C# objects).
 
 4.  **`RenderManager.Render(Scene currentScene, Camera activeCamera)`:**
     *   Collects `MeshRendererComponent`s and `LightComponent`s from visible `Node`s in the `currentScene`.
@@ -169,7 +169,7 @@ To create rich and believable worlds, the framework will be expanded with a foun
 ## 6. 2D/3D Unification
 
 *   **Node/Component:** The base `Node` and `Component` can be reused. `TransformComponent` can be generic enough (Vector3, Quaternion) for both 2D (using Z=0 for 2D) and 3D, or have specializations (`Transform2DComponent`, `Transform3DComponent`).
-*   **RenderManager:** Would contain logic to determine the rendering type (2D or 3D) and dispatch to specific paths in the intermediate C++ layer.
+*   **RenderManager:** Would contain logic to determine the rendering type (2D or 3D) and dispatch to specific paths in the Piece.Core (C++).
 *   **Specific Components:** `SpriteRendererComponent` for 2D, `MeshRendererComponent` for 3D.
 
 ## 7. Configuration via .NET Dependency Injection and Options
@@ -251,13 +251,13 @@ This configuration strategy provides a flexible, type-safe, and idiomatic .NET w
 
 ## 8. Granular Extension Points
 
-The high-level C# layer is the primary environment for game development, offering maximum flexibility and extensibility through its adherence to the philosophy of **Modular Component Architecture**. For a complete discussion of this philosophy and extension points across all engine layers, please refer to the [Piece Engine General Design Document](../OVERVIEW.md).
+The Piece.Framework is the primary environment for game development, offering maximum flexibility and extensibility through its adherence to the philosophy of **Modular Component Architecture**. For a complete discussion of this philosophy and extension points across all engine layers, please refer to the [Piece Engine General Design Document](../OVERVIEW.md).
 
 The main specific extension points of this layer include:
 
 ### 9.1. Dependency Injection (DI) with .NET
 
-The high-level C# framework is designed to be fully compatible with the .NET Dependency Injection (DI) system. This is the primary mechanism for configuring and extending the engine, allowing the complete or partial replacement of any core framework subsystem. Crucially, this extends to injecting specific implementations of **C++ backends** (like graphics APIs or physics engines) into the intermediate C++ layer. By configuring the DI container in the C# host application, developers can seamlessly swap native C++ components without modifying engine source code. This includes passing configuration options to these C++ components as detailed in Section 7.
+The Piece.Framework is designed to be fully compatible with the .NET Dependency Injection (DI) system. This is the primary mechanism for configuring and extending the engine, allowing the complete or partial replacement of any core framework subsystem. Crucially, this extends to injecting specific implementations of **C++ backends** (like graphics APIs or physics engines) into the intermediate C++ layer. By configuring the DI container in the C# host application, developers can seamlessly swap native C++ components without modifying engine source code. This includes passing configuration options to these C++ components as detailed in Section 7.
 
 ### 8.2. Extension via Component System
 
@@ -269,7 +269,7 @@ The visual editor itself, built in C#, will be extensible, allowing developers t
 
 ### 8.4. Multi-Language Support via Embedded Scripting
 
-Further embracing the philosophy of **Modular Component Architecture**, the C# framework supports the use of multiple scripting languages for game logic within the same project. This is achieved by hosting scripting language interpreters within specialized C# components, rather than by replacing the entire high-level framework. This approach ensures that the C# object model remains the single source of truth for the Visual Editor, maintaining architectural consistency.
+Further embracing the philosophy of **Modular Component Architecture**, the C# framework supports the use of multiple scripting languages for game logic within the same project. This is achieved by hosting scripting language interpreters within specialized C# components, rather than by replacing the entire Piece.Framework. This approach ensures that the C# object model remains the single source of truth for the Visual Editor, maintaining architectural consistency.
 
 #### The "Bridge Component" Pattern
 
@@ -281,7 +281,7 @@ To use a language like **Lua**, a developer would create a `LuaScriptComponent` 
     *   In its C# `Update()` method, it calls the corresponding `update()` function within the Lua script.
     *   It securely exposes necessary C# objects (like the parent `Node`) to the Lua environment, allowing the script to manipulate the game world (e.g., `node.transform.position = new_position`).
 
-Because the script's actions are channeled through a C# component, any state change happens within the C# object model, making the process transparent to the Visual Editor.
+Because the script's actions are channeled through a C# component, any state change happens within the C# object model, making the process transparent to the Visual Editor and the Piece.Framework.
 
 #### Available Interpreters
 
