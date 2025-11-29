@@ -1,145 +1,114 @@
 # Project Structure and Build System Design
 
-This document outlines the architectural decisions regarding the project structure, build system, and integration strategy for the Piece Engine. The design is centered around three core requirements:
-1.  **Hybrid Language Support:** Seamlessly integrate C++ for the core engine and C# for high-level logic and tools.
-2.  **IDE & Platform Agnosticism:** Allow any developer to contribute using their preferred editor (VSCode, Visual Studio, Vim, etc.) and operating system (Windows, Linux, macOS).
-3.  **Modular Component Architecture Philosophy:** The build system must support the engine's core philosophy of true modularity, where components, especially rendering backends, are plugins selected at runtime, not compile time.
+This document describes the architectural decisions regarding the project structure, build system, and integration strategy for the Piece Engine. The design is centered around three main requirements:
+1.  **Hybrid Language Support:** Integrate C++ for the core engine and C# for high-level logic and tools.
+2.  **IDE & Platform Agnosticism:** Allow any developer to contribute using their preferred editor (VSCode, Visual Studio, etc.) and operating system (Windows, Linux).
+3.  **Modular Component Architecture:** The build system must support the engine's core philosophy of modularity, where components (especially rendering backends) are plugins selected at runtime.
 
 ---
 
 ## 1. Directory Structure
 
-A monorepo structure will be used to keep all related code and scripts in a single, manageable location. The management of external C++ libraries will be handled by `vcpkg`, making a dedicated `external/` directory unnecessary.
+A monorepo structure is used to keep all related code and scripts in a single location. The management of external C++ libraries is handled by `vcpkg`, making a dedicated `external/` directory unnecessary.
 
 ```
 /Piece/
 ├── .gitignore
-├── CMakeLists.txt            # ⬅️ Root CMake file: The main build orchestrator.
+├── CMakeLists.txt            # ⬅️ Primary C++ build orchestrator with CMake.
 ├── CMakePresets.json         # ⬅️ Standardized build configurations.
 ├── vcpkg.json                # ⬅️ C++ dependency manifest for vcpkg.
 │
-├── docs/                     # Project documentation.
+├── docs/
 │   └── Development/
-│       └── BUILD_SYSTEM.md   # This file.
+│       └── BuildSystem.md    # This file.
 │
 ├── src/                      # ⬅️ All engine source code.
 │   │
 │   ├── cpp/                  # C++ source code.
-│   │   ├── Piece.Core/         # Shared C++ logic, types, etc.
-│   │   ├── Piece.Intermediate/ # The intermediate orchestration layer.
-│   │   │
-│   │   └── Backends/           # Rendering backend plugins.
-│   │       ├── opengl/         # OpenGL backend implementation (compiles to gfx_opengl.dll).
-│   │       └── vulkan/         # Vulkan backend implementation (compiles to gfx_vulkan.dll).
+│   │   ├── pal/                # Physics Abstraction Layer.
+│   │   ├── ral/                # Rendering Abstraction Layer.
+│   │   ├── wal/                # Windowing Abstraction Layer.
+│   │   └── piece_intermediate/ # C++ intermediate orchestration layer.
 │   │
 │   └── csharp/               # C# source code.
-│       ├── Piece.sln           # C# solution for IDE convenience.
-│       ├── Piece.Engine/       # High-level C# framework (the public API).
+│       ├── Piece.Core.Interop/ # Interoperability project, P/Invoke for the C++ layer.
+│       ├── Piece.Engine/       # High-level C# framework (public API).
 │       └── Piece.Editor/       # The Visual Editor application.
 │
-└── build/                    # ⬅️ Build output directory (untracked by Git).
+└── build/                    # ⬅️ Build output directory (ignored by Git).
 ```
 
 ---
 
-## 2. Build Philosophy and Tooling
+## 2. Tools and Build Philosophy
 
-### Core Tool: CMake
-**CMake** will be the primary build system orchestrator. It excels at managing complex C++ projects, is cross-platform, and provides powerful scripting capabilities necessary for our hybrid architecture.
+### Primary Tool: CMake
+**CMake** is the primary orchestrator for the C++ build. It manages complex C++ projects, is cross-platform, and provides the scripting capabilities necessary for our hybrid architecture.
 
 ### C++ Dependency Management: vcpkg
-All external C++ libraries (e.g., GLFW, GLM, etc.) will be managed via **vcpkg** in its manifest-based mode. A `vcpkg.json` file in the project root will declare all dependencies. The CMake configuration will be integrated with the vcpkg toolchain, which will automatically download, build, and link the required libraries. This ensures a consistent and reproducible dependency environment for all developers.
+All external C++ libraries (e.g., GLFW, GLM) are managed via **vcpkg** in manifest mode. A `vcpkg.json` file in the project root declares all dependencies.
 
-### IDE & Platform Agnosticism
-CMake itself ensures that the project is not tied to any single IDE. It uses **Generators** to create project files native to a specific environment. For example:
-- A developer on Windows using Visual Studio can run `cmake -G "Visual Studio 17 2022" ..` to generate a `.sln` file.
-- A developer on Linux or using VSCode can run `cmake -G "Ninja" ..` to generate build files for the fast Ninja build tool.
-- The **VSCode CMake Tools extension** integrates seamlessly with this workflow by reading `CMakeLists.txt` and `CMakePresets.json` directly, offering a first-class development experience.
-
-### Build Configuration: CMakePresets.json
-To provide a consistent and easy-to-use build configuration experience across all platforms and IDEs, we will use a `CMakePresets.json` file at the root of the project. This file replaces custom build scripts and is the modern, standard way to define configure, build, and test options.
-
-**Conceptual `CMakePresets.json`:**
-```json
-{
-  "version": 3,
-  "configurePresets": [
-    {
-      "name": "windows-debug",
-      "displayName": "Windows Debug",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build",
-      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" },
-      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
-    }
-  ],
-  "buildPresets": [ /* ... */ ],
-  "installPresets": [
-    {
-      "name": "package-opengl-release",
-      "configurePreset": "windows-release",
-      "components": ["Core", "OpenGL"]
-    }
-  ]
-}
-```
+### IDE and Platform Agnosticism
+CMake, along with `CMakePresets.json`, ensures that the project is not tied to any specific IDE, allowing developers to use Visual Studio, VSCode, or other editors on Windows and Linux.
 
 ---
 
-## 3. Realizing the Modular Component Architecture Philosophy: Build, Packaging, and C# DI Orchestration
+## 3. Build Architecture: From Source to Final Artifacts
 
-The philosophy of **Modular Component Architecture** of the Piece Engine, enabling deep modularity and extensibility, is powerfully realized through a refined build and packaging system that integrates tightly with the C# .NET Dependency Injection (DI) mechanism. This approach ensures that developers can easily "plug and play" C++ backends and other native components directly from their C# projects.
+The build architecture is designed to support both local development and the delivery of robust packages for end-users and developers.
 
-The build system's role is to produce all available native C++ DLLs. The packaging and selection of these components are then primarily managed through C# NuGet packages and the .NET DI system, empowering the C# host application to orchestrate which specific native backends are used and how they are configured.
+### 3.1. Build Phases
 
-### 3.1. Development Workflow: The "Fat Build"
+The compilation process is divided into two main phases:
 
-The default build process for native C++ components is optimized for developers.
-1.  **Build All C++ Plugins:** CMake is configured to automatically find and compile every native backend (e.g., in `src/cpp/Backends/`) into a separate DLL **unconditionally**. This ensures all interchangeable components are available.
-2.  **Orchestrate Hybrid Compilation:** A single build command (`cmake --build .`) compiles all C++ targets and also invokes `dotnet build` on the C# solution.
-3.  **Intermediate Output:** All compiled C++ artifacts, including **all backend DLLs**, are placed in an intermediate build directory (e.g., `build/bin/Debug`). These DLLs then serve as inputs for their respective C# NuGet packages.
+1.  **Native Compilation (C++):** Using CMake, all core engine components and backends (e.g., `wal/glfw_backend`) are compiled into native libraries (`.dll` on Windows, `.so` on Linux). This process is self-contained and produces the low-level binaries.
+2.  **Managed Compilation (C#):** Using the .NET SDK, C# projects are compiled. The `Piece.Core.Interop` layer defines P/Invoke signatures to load and interact with the C++ libraries compiled in the previous phase.
 
-This "fat build" ensures that all native backends are compiled and ready to be consumed by the various C# wrapper NuGet packages. The actual selection and deployment into a C# project's output will be handled by the NuGet system.
+In the CI environment, these phases are executed sequentially to ensure all tests pass before proceeding to packaging.
 
-### 3.2. Production Workflow: The "Lean Package" via NuGet
+### 3.2. Production Artifacts
 
-For a final production release, a "lean package" containing only the necessary native DLLs is desired. With the C# DI-driven architecture, this is implicitly handled by the .NET packaging and dependency management system (NuGet).
+When a release is created, the Continuous Deployment (CD) pipeline is responsible for generating two distinct types of artifacts:
 
-1.  **NuGet Package Creation:** Each native C++ backend (e.g., `gfx_vulkan.dll`) is wrapped in its own C# NuGet package (e.g., `Piece.Vulkan`). This NuGet package's `.csproj` configuration specifies that the native DLL should be included in the package and deployed to the `runtimes/{rid}/native/` folder of the consuming project.
-2.  **C# Host Application Packaging:** When a user's C# game or application builds and publishes, the .NET SDK automatically includes only the native DLLs that are direct or transitive dependencies of its NuGet references.
-    *   If the C# application uses `Piece.Vulkan` and `Piece.GLFW`, only `gfx_vulkan.dll` and `gfx_glfw.dll` (along with `Piece.Intermediate.dll` and other core DLLs) will be included in the final output. Unused backend DLLs (e.g., `gfx_opengl.dll` if `Piece.OpenGL` was not referenced) will not be present.
-3.  **Resulting Lean Package:** The final deployed application contains only the native interchangeable components (DLLs) that were explicitly chosen by the C# application's NuGet dependencies and DI configuration. This eliminates the need for manual `cmake --install --component` selections for the primary deployment scenario.
+**1. The Standalone Editor**
 
-While `cmake --install --component` remains available for specific C++-only deployments or development-time testing of native artifacts, the primary mechanism for delivering and managing native backend dependencies within the Piece Engine ecosystem is through NuGet.
+This is the "download, unzip, and run" package.
+*   **Process:** The pipeline uses the `dotnet publish` command on the `Piece.Editor` project.
+*   **Content:** This command creates a self-contained folder that includes:
+    *   The `Piece.Editor` executable.
+    *   All managed C# libraries (.DLLs) it depends on.
+    *   **The necessary native C++ binaries** for the target platform (e.g., `win-x64`), which are copied into the publish folder.
+*   **Final Result:** The entire publish folder is compressed into a single `.zip` file (e.g., `PieceEngine-Editor-win-x64.zip`), ready for distribution.
 
-### 3.3. Runtime Selection and Configuration (C# DI-driven)
+**2. NuGet Packages (For Developers)**
 
-The runtime selection and configuration of C++ backends are now handled entirely by the C# host application's .NET Dependency Injection (DI) setup. The `engine.json` file is no longer used for backend selection.
+These are for developers who wish to use the `PieceEngine` as a framework in their own .NET games or applications.
+*   **Process:** The pipeline uses the `dotnet pack` command on the C# library projects (e.g., `Piece.Engine`, `Piece.Vulkan`).
+*   **Content:** Each `.nupkg` package contains:
+    *   The C# library DLLs.
+    *   A configuration that instructs NuGet to include the correct native C++ binaries (`.dll`/`.so`) when packing a consuming project.
+*   **Final Result:** A set of versioned `.nupkg` packages, ready to be published to a registry like `NuGet.org`.
 
-1.  **Backend Registration:** The C# application explicitly registers the desired backends by calling extension methods (e.g., `services.AddPieceVulkan()`, `services.AddPieceGlfw()`) on the `IServiceCollection`. These methods typically accept configuration options.
-    ```csharp
-    Host.CreateDefaultBuilder(args)
-        .ConfigureServices((hostContext, services) => {
-            services.AddPieceVulkan(options => {
-                options.EnableValidationLayers = hostContext.HostingEnvironment.IsDevelopment();
-            });
-            services.AddPieceGlfw(options => {
-                options.InitialWindowWidth = 1280;
-                options.InitialWindowHeight = 720;
-            });
-            // ... add other Piece Engine services
-        })
-        .Build()
-        .Run();
-    ```
-2.  **C# to C++ Bridge:** During the C# `GameEngine`'s initialization, it resolves the configured C# factory wrappers for the C++ backends. It then uses P/Invoke to pass the raw C++ factory pointers (obtained from the native DLLs) and marshaled configuration options to the C++ `ServiceLocator` in the intermediate layer.
-3.  **C++ Resolution:** The C++ intermediate layer then retrieves these pre-configured factories from its `ServiceLocator` to create the actual `IGraphicsDevice`, `IWindow`, and other core C++ components.
+**3. Vcpkg Packages (For C++ Developers)**
 
-This approach provides a highly flexible and type-safe way to configure the engine, aligning perfectly with modern .NET development practices and the philosophy of **Modular Component Architecture** and interchangeable components.
+In addition to serving the C# ecosystem, the CD pipeline will also generate packages for C++ developers using `vcpkg`.
+*   **Process:** The pipeline will create and publish a `vcpkg` port for the `PieceEngine`. This involves generating the necessary `portfile.cmake` and manifest files that instruct `vcpkg` on how to build and install the engine.
+*   **Content:** The port enables developers to easily consume the C++ core libraries of the Piece Engine. By adding `pieceengine` to their `vcpkg.json` manifest and running `vcpkg install`, they gain access to the engine's headers and linkable libraries.
+*   **Final Result:** A versioned `vcpkg` port published to a registry, allowing any C++ developer to integrate Piece Engine into their project with a single command.
+
+### 3.3. Runtime Orchestration (C# DI-driven)
+
+As planned, the selection and configuration of C++ backends are controlled by the C# host through .NET Dependency Injection (DI).
+
+1.  **Service Registration:** The C# application (whether the Editor or a game) registers the desired backends by calling extension methods on the `IServiceCollection` (e.g., `services.AddPieceVulkan()`, `services.AddPieceGlfw()`).
+2.  **C# to C++ Bridge:** During initialization, the C# interoperability layer loads the native C++ libraries and passes configuration to the C++ intermediate layer.
+3.  **C++ Resolution:** The C++ intermediate layer then uses the received configurations to create and provide the correct implementations of interfaces (e.g., `IGraphicsDevice`, `IWindow`).
+
+This approach offers a flexible and type-safe way to configure the engine, aligning perfectly with modern .NET development practices and the philosophy of modular component architecture for the Piece Engine.
 
 ---
 
 ## Related Documentation
 
-*   [Versioning Strategy](../Development/VersioningStrategy.md): Details how releases are versioned, and how commit messages are structured to support automated releases.
-*   [CI/CD Strategy](../Development/CiCdStrategy.md): Outlines the continuous integration and continuous delivery pipelines.
+*   [Versioning Strategy (VersioningStrategy.md)](../Development/VersioningStrategy.md)
+*   [CI/CD Strategy (CiCdStrategy.md)](../Development/CiCdStrategy.md)

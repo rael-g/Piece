@@ -1,96 +1,53 @@
 # Piece Engine CI/CD Strategy
 
-This document outlines the Continuous Integration (CI) and Continuous Delivery (CD) strategy for the Piece Engine, leveraging GitHub Actions to automate building, testing, and releasing the engine.
+This document describes the Continuous Integration (CI) and Continuous Delivery (CD) strategy for the Piece Engine, leveraging GitHub Actions to automate building, testing, and publishing the engine.
 
 ## 1. Core Principles
 
-*   **Continuous Integration (CI):** Every code change will trigger an automated build and test process to ensure early detection of issues.
-*   **Continuous Delivery (CD):** Verified changes on the `main` branch will automatically lead to the creation of new releases, including version bumping, changelog generation, and artifact publishing.
+*   **Continuous Integration (CI):** Every code change triggers an automated build and test process to ensure early detection of issues.
+*   **Continuous Delivery (CD):** Verified changes on the `main` branch trigger a process that prepares a new release, including versioning, release note generation, and artifact packaging.
 *   **Fast Feedback:** Pipelines are designed for efficiency to provide rapid feedback to developers.
-*   **Reproducibility:** Builds and releases must be consistent and reproducible across different runs and environments.
-*   **Platform Agnosticism:** Pipelines will aim to support builds and tests on relevant operating systems (Windows, Linux, macOS).
+*   **Reproducibility:** Builds and releases must be consistent and reproducible.
+*   **Platform Agnosticism:** Pipelines support building and testing on multiple operating systems (Windows, Linux).
 
-## 2. Tooling
+## 2. Tools
 
-*   **GitHub Actions:** The primary orchestration tool for defining and executing CI/CD pipelines.
-*   **`vcpkg`:** For managing C++ dependencies, integrated with CMake.
-*   **`CMake`:** For configuring and building C++ projects.
-*   **`.NET SDK`:** For building and testing C# projects.
-*   **`semantic-release`:** For automating semantic versioning, changelog generation, and GitHub Releases based on Conventional Commits.
-*   **`commitlint` (recommended):** A tool to enforce Conventional Commits locally during the commit process, ensuring consistency before code is pushed.
+*   **GitHub Actions:** The primary tool for orchestrating CI/CD pipelines.
+*   **GitVersion:** A tool that uses Git history and commit messages (following the [Conventional Commits](https://www.conventionalcommits.org/) standard) to automatically determine the project's next semantic version and generate release notes.
+*   **CMake & vcpkg:** For configuring and building C++ projects and their dependencies.
+*   **.NET SDK:** For building, testing, and packaging C# projects.
 
-## 3. Pipeline Stages
+## 3. Pipeline Architecture: CI and CD Workflows
 
-The CI/CD process is divided into two main pipelines: one for Pull Requests (CI) and another for the `main` branch (CD).
+The strategy is divided into two independent workflows, following best practices for separation of responsibilities: `ci.yml` and `cd.yml`.
 
-### 3.1. Pull Request / Feature Branch Pipeline (CI)
+### 3.1. Continuous Integration Workflow (`ci.yml`)
 
-This pipeline ensures the quality and stability of code before it's merged into the `main` branch.
+This is the verification and validation pipeline.
 
-*   **Triggers:**
-    *   `push` to any branch *except* `main`.
-    *   `pull_request` targeting the `main` branch.
+*   **Workflow Name:** `Continuous Integration`
+*   **Triggers:** Executes on every `push` to any branch and on every `pull_request` opened against the `main` branch.
+*   **Responsibilities:**
+    1.  **Multi-platform Build:** Executes a build matrix to compile all C++ and C# code on `windows-latest` and `ubuntu-latest` (currently for `x64` architecture).
+    2.  **Test Execution:** Runs all C++ (with CTest) and C# (with `dotnet test`) unit and integration tests for each platform.
+    3.  **Artifact Upload:** If the build and tests are successful, it uploads the compiled C++ binaries as artifacts (e.g., `build-windows-latest-x64`). These artifacts are temporarily stored to be consumed by the CD workflow.
 
-*   **Jobs:**
+### 3.2. Continuous Deployment Workflow (`cd.yml`)
 
-    1.  **Setup Environment:**
-        *   Checkout the repository.
-        *   Set up required development environments (e.g., `vcpkg`, `.NET SDK`, `Node.js`).
+This is the pipeline that creates and publishes official releases.
 
-    2.  **Build C++ Components:**
-        *   Configure CMake with appropriate settings (e.g., `Ninja` generator).
-        *   Build all C++ targets (the "development fat build" as described in `BUILD_SYSTEM.md`) for selected platforms (e.g., Windows, Linux).
-
-    3.  **Build C# Components:**
-        *   Restore NuGet packages for C# projects.
-        *   Build all C# projects using `dotnet build`.
-
-    4.  **Run C++ Tests:**
-        *   Execute C++ unit and integration tests (e.g., using `CTest`).
-
-    5.  **Run C# Tests:**
-        *   Execute C# unit and integration tests (e.g., using `dotnet test`).
-
-    6.  **Linting & Static Analysis (Optional but Recommended):**
-        *   Run code formatters (e.g., `clang-format`, `dotnet format --check`).
-        *   Run static analysis tools (e.g., `clang-tidy` for C++).
-        *   (If `commitlint` is not enforced via pre-push hooks, an additional job can validate commit messages here for PR merges).
-
-    *   **Failure Action:** If any job fails, the PR check fails, blocking the merge until issues are resolved.
-
-### 3.2. Main Branch Release Pipeline (CD)
-
-This pipeline automates the release process for verified changes merged into the `main` branch.
-
-*   **Triggers:**
-    *   `push` events to the `main` branch (only after a successful PR merge).
-
-*   **Jobs:**
-
-    1.  **Perform CI Steps:**
-        *   The initial CI steps (build and test) are implicitly or explicitly run again to ensure the `main` branch is always in a deployable state.
-
-    2.  **Automated Versioning and Release (`semantic-release`):**
-        *   Checkout the `main` branch.
-        *   Run `semantic-release` which will:
-            *   Analyze Conventional Commits made since the last release.
-            *   Determine the next semantic version (`MAJOR`, `MINOR`, or `PATCH`).
-            *   Generate and update the `CHANGELOG.md` file.
-            *   Create a new Git tag for the determined version (e.g., `v1.2.3`).
-            *   Create a new GitHub Release with the changelog.
-
-    3.  **Production Packaging & Artifact Publishing:**
-        *   Checkout the repository again, specifically using the newly created Git tag.
-        *   Configure and build the C++ components for release (if not already done in a release configuration CI job).
-        *   Execute the CMake `install` command to create "lean packages" (as per `BUILD_SYSTEM.md`), specifying desired components (e.g., specific rendering backends like OpenGL, Vulkan). This step might run multiple times to create different variations of the release package.
-        *   Package the resulting `dist/` directories into deployable archives (e.g., `.zip`, `.tar.gz`).
-        *   Attach these packaged artifacts to the GitHub Release created by `semantic-release`.
-        *   **Optional:** Trigger deployment to a distribution platform or internal artifact repository.
-
-## 4. Integration with Documentation
-
-This CI/CD strategy works in conjunction with:
-*   [Build System Design](../Development/BuildSystem.md): Provides the foundation for building and packaging.
-*   [Versioning Strategy](../Development/VersioningStrategy.md): Leveraged by `semantic-release` for automated versioning.
-
-By implementing this CI/CD strategy, the Piece Engine aims to maintain high code quality, accelerate delivery, and ensure transparent and automated release management.
+*   **Workflow Name:** `Continuous Deployment`
+*   **Trigger:** Executes only on `push` events to the `main` branch.
+*   **Responsibilities:**
+    1.  **Versioning:** Runs `GitVersion` to analyze commit history, determine the new semantic version, and generate release notes.
+    2.  **Artifact Assembly:** Downloads the build artifacts (for all platforms) that were generated by the CI workflow for the same commit.
+    3.  **Packaging:** This phase is responsible for creating the final packages:
+        *   **Standalone Editor:** Uses `dotnet publish` to create "zip-and-run" packages for each platform, bundling the C# host with the necessary C++ binaries.
+        *   **NuGet Packages:** Uses `dotnet pack` to create `.nupkg` packages for the engine's libraries, intended for developers.
+        *   **Vcpkg Packages:** Creates the necessary `portfile.cmake` and manifest files for publishing the C++ core as a `vcpkg` port, enabling consumption in C++ projects.
+    4.  **Release Publication:** Uses the `softprops/action-gh-release` action to:
+        *   Create a new Git Tag and a new GitHub Release with the version determined by `GitVersion`.
+        *   Populate the release body with automatically generated release notes.
+        *   Upload the Editor packages and NuGet packages as release assets.
+        *   Publish NuGet packages to `NuGet.org`.
+        *   Publish the Vcpkg port by submitting a pull request to the official vcpkg repository or a custom registry.

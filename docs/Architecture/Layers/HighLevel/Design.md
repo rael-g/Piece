@@ -4,7 +4,11 @@
 
 This document details the architectural design of the high-level layer of the Piece graphics engine. For an overview of the engine's multi-layered architecture and [Piece Engine General Design Document](../OVERVIEW.md).
 
-Implemented as a C# framework, it aims to provide a very high-level API for game developers, abstracting the complexity of the intermediate C++ layer and the low-level C++ backend (WAL/RAL). Its objective is to be similar to frameworks like MonoGame or Raylib in accessibility, but with features and capabilities of higher-level engines, supporting both 2D and 3D development.
+This C# framework serves as the primary, feature-rich **reference implementation** of the engine's core C# interfaces (e.g., `IEngine`, `IScene`, `INode`). Its main purpose is to provide a very high-level API for game developers, abstracting the complexity of the intermediate C++ layer and enabling rapid development for PC platforms (Windows, Linux).
+
+By implementing a shared interface contract, it allows tools like the Visual Editor to remain decoupled from the concrete implementation. This ensures that a different high-level layer (e.g., a C++/Lua backend for consoles) could be created in the future and still be managed by the same toolset, fulfilling the engine's core philosophy of modularity.
+
+Its objective is to provide an accessible and powerful high-level API for game developers, with features and capabilities supporting both 2D and 3D development.
 
 ## 2. Design Philosophy
 

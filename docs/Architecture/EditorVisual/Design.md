@@ -12,9 +12,17 @@ This document details the architectural design of the Visual Editor for the Piec
 *   **Non-Destructive Workflow:** Favor edits that can be undone/redone and that do not permanently alter original data (e.g., modifiers).
 *   **Modern and Cross-Platform UI:** Utilize a UI framework that supports cross-platform (e.g., AvaloniaUI) to ensure accessibility on different operating systems.
 
-## 3. Interaction with the High-Level C# Framework
+## 3. Interaction with the Engine Core via Interfaces
 
-The Visual Editor will directly consume the public APIs of the high-level C# framework of the Piece engine. This means the editor will work with `Node`s, `Component`s, `Scene`s, `AssetManager`s, `RenderManager`s, `Camera`s, etc., exactly as a game would. The layer of `NativeCalls` and interop with C++ will be transparent to the editor. Because the editor interacts only with the public properties of C# components, it remains completely agnostic to their internal logic, allowing it to seamlessly edit components written in pure C# as well as those that host embedded scripting languages (like Lua or Python).
+A core architectural principle of the editor is its **decoupling from any concrete engine implementation**. The editor communicates with the engine core exclusively through a well-defined set of C# interfaces that represent the high-level API (e.g., `IEngine`, `IScene`, `INode`, `IComponent`).
+
+This interface-driven design ensures that the editor remains completely agnostic to the underlying implementation of the engine logic. It can seamlessly operate on:
+
+*   The default, feature-rich **C# high-level framework**.
+*   A potential future **C++/Lua high-level framework** (exposed to C# via a wrapper that implements the same interfaces), which might be used for console-targeted builds.
+*   Any other engine backend that adheres to the required interface contract.
+
+This approach fully realizes the engine's philosophy of modularity, allowing the high-level "game logic" layer to be a truly swappable component without requiring any changes to the editor itself. The specific implementation of the engine interfaces is resolved at runtime using the .NET Dependency Injection container.
 
 ## 4. Main Components of the Visual Editor (C#)
 
