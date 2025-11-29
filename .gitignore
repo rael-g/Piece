@@ -36,21 +36,6 @@
 *.wrn
 *.opensdf
 *.sdf
-*.cache
-*.ncb
-*.vc.db
-*.vc.opendb
-*.vcxproj.filters
-*.vshost.*
-.DS_Store
-Thumbs.db
-
-# Visual Studio and other IDE files
-.vs/
-.vscode/
-*.VC.db
-*.VC.opendb
-*.sdf
 *.suo
 *.user
 *.vsp
@@ -107,3 +92,9 @@ cscope.*
 
 # Windows
 Thumbs.db
+
+# VS Code
+.vscode/
+
+# Doxygen
+/docs/doxygen/
