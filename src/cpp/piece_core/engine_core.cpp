@@ -1,3 +1,7 @@
+/**
+ * @file engine_core.cpp
+ * @brief Implements the EngineCore class and the native C-style exported functions.
+ */
 #include "engine_core.h"
 
 #include <pal/iphysics_world.h>
@@ -16,8 +20,14 @@ namespace Piece
 {
 namespace Core
 {
+/**
+ * @brief Global logger instance.
+ */
 static std::shared_ptr<spdlog::logger> g_logger;
 
+/**
+ * @brief Initializes the spdlog logger with multiple sinks.
+ */
 void InitializeLogger()
 {
     std::vector<spdlog::sink_ptr> sinks;
@@ -32,6 +42,9 @@ void InitializeLogger()
     g_logger->info("spdlog initialized.");
 }
 
+/**
+ * @brief Constructs the EngineCore, initializing all major systems.
+ */
 EngineCore::EngineCore()
 {
     IWindowFactory *windowFactory = ServiceLocator::Get().GetWindowFactory();
@@ -85,11 +98,18 @@ EngineCore::EngineCore()
     spdlog::info("EngineCore: Initialized successfully.");
 }
 
+/**
+ * @brief Destroys the EngineCore.
+ */
 EngineCore::~EngineCore()
 {
     spdlog::info("EngineCore: Destroyed.");
 }
 
+/**
+ * @brief Updates the physics world.
+ * @param deltaTime The time since the last update.
+ */
 void EngineCore::Update(float deltaTime)
 {
     if (physics_world_)
@@ -98,6 +118,9 @@ void EngineCore::Update(float deltaTime)
     }
 }
 
+/**
+ * @brief Renders a frame.
+ */
 void EngineCore::Render()
 {
     if (window_ && graphics_device_)
@@ -108,6 +131,12 @@ void EngineCore::Render()
 } // namespace Core
 } // namespace Piece
 
+/**
+ * @brief Checks if a factory pointer is valid.
+ * @tparam T The type of the factory pointer.
+ * @param ptr The pointer to check.
+ * @return True if the pointer is not null, false otherwise.
+ */
 template <typename T> bool is_valid_factory_ptr(T *ptr)
 {
     return ptr != nullptr;
@@ -116,6 +145,11 @@ template <typename T> bool is_valid_factory_ptr(T *ptr)
 extern "C"
 {
 
+    /**
+     * @brief C-style export to set the graphics device factory.
+     * @param factoryPtr A pointer to the factory implementation.
+     * @param options A pointer to the graphics options.
+     */
     void PieceCore_SetGraphicsDeviceFactory(Piece::Core::IGraphicsDeviceFactory *factoryPtr,
                                             const Piece::Core::NativeVulkanOptions *options)
     {
@@ -129,6 +163,11 @@ extern "C"
         spdlog::info("PieceCore_SetGraphicsDeviceFactory called.");
     }
 
+    /**
+     * @brief C-style export to set the window factory.
+     * @param factoryPtr A pointer to the factory implementation.
+     * @param options A pointer to the window options.
+     */
     void PieceCore_SetWindowFactory(Piece::Core::IWindowFactory *factoryPtr, const Piece::Core::NativeWindowOptions *options)
     {
         if (!is_valid_factory_ptr(factoryPtr))
@@ -140,6 +179,11 @@ extern "C"
         spdlog::info("PieceCore_SetWindowFactory called.");
     }
 
+    /**
+     * @brief C-style export to set the physics world factory.
+     * @param factoryPtr A pointer to the factory implementation.
+     * @param options A pointer to the physics options.
+     */
     void PieceCore_SetPhysicsWorldFactory(Piece::Core::IPhysicsWorldFactory *factoryPtr,
                                           const Piece::Core::NativePhysicsOptions *options)
     {
@@ -153,6 +197,10 @@ extern "C"
         spdlog::info("PieceCore_SetPhysicsWorldFactory called.");
     }
 
+    /**
+     * @brief C-style export to initialize the engine.
+     * @return A pointer to the newly created EngineCore instance.
+     */
     Piece::Core::EngineCore *Engine_Initialize()
     {
         static bool loggerInitialized = false;
@@ -171,6 +219,10 @@ extern "C"
         return reinterpret_cast<Piece::Core::EngineCore *>(core);
     }
 
+    /**
+     * @brief C-style export to destroy the engine.
+     * @param corePtr A pointer to the EngineCore instance to destroy.
+     */
     void Engine_Destroy(Piece::Core::EngineCore *corePtr)
     {
         spdlog::info("Engine_Destroy called.");
@@ -184,6 +236,11 @@ extern "C"
         }
     }
 
+    /**
+     * @brief C-style export to update the engine.
+     * @param corePtr A pointer to the EngineCore instance.
+     * @param deltaTime The time since the last update.
+     */
     void Engine_Update(Piece::Core::EngineCore *corePtr, float deltaTime)
     {
         if (corePtr)
@@ -192,6 +249,10 @@ extern "C"
         }
     }
 
+    /**
+     * @brief C-style export to render a frame.
+     * @param corePtr A pointer to the EngineCore instance.
+     */
     void Engine_Render(Piece::Core::EngineCore *corePtr)
     {
         if (corePtr)
@@ -200,8 +261,15 @@ extern "C"
         }
     }
 
+    /**
+     * @brief Static storage for the C# log callback.
+     */
     static LogCallback s_log_callback = nullptr;
 
+    /**
+     * @brief C-style export to register a log callback function from the host application.
+     * @param callback The callback function.
+     */
     PIECE_CORE_API void PieceCore_RegisterLogCallback(LogCallback callback)
     {
         s_log_callback = callback;
@@ -215,6 +283,11 @@ extern "C"
         }
     }
 
+    /**
+     * @brief C-style export to allow the host application to receive log messages.
+     * @param level The log level.
+     * @param message The log message.
+     */
     PIECE_CORE_API void PieceCore_Log(int level, const char *message)
     {
         if (s_log_callback)

@@ -104,32 +104,19 @@ To get started with the Piece Engine, follow these high-level steps:
     git clone https://github.com/rael-g/Piece.git
     cd Piece
     ```
-2.  **Initialize vcpkg:** (For Windows, Linux, macOS)
-    ```bash
-    # Assuming vcpkg is installed, otherwise install it first.
-    # e.g., git clone https://github.com/microsoft/vcpkg.git
-    #       ./vcpkg/bootstrap-vcpkg.bat (Windows) or ./vcpkg/bootstrap-vcpkg.sh (Linux/macOS)
-    
-    vcpkg integrate install # Integrates vcpkg with Visual Studio or sets up user-wide integration
-    # For CMake toolchain file setup, you might need to specify it explicitly during CMake configure
-    # or ensure VCPKG_ROOT environment variable is set.
+2.  **requiremnts** (For Windows, Linux, macOS)
+3.  https://learn.microsoft.com/vcpkg/get_started/get-started
+4.  https://github.com/Kitware/CMake
     ```
-3.  **Configure and Build (Development "Fat Build"):**
-    *   **Using CMake Presets (Recommended for all IDEs):**
+5.  **Configure and Build**
         ```bash
-        cmake --preset windows-debug # Or linux-debug, etc. (refer to CMakePresets.json)
-        cmake --build build
+        cmake --preset <preset> # (refer to CMakePresets.json)
+        cmake --build --preset <preset>
         ```
-    *   **Manual CMake (Example for Visual Studio):**
-        ```bash
-        mkdir build && cd build
-        cmake .. -G "Visual Studio 17 2022" -DCMAKE_TOOLCHAIN_FILE=<path_to_vcpkg>/scripts/buildsystems/vcpkg.cmake
-        cmake --build .
-        ```
-4.  **Run the Editor or Examples:**
-    *   After building, executables will be in `build/bin/`.
+6.  **Run the Editor or Examples:**
+    *   After building, executables will be in `build/<preset>/`.
 
-*Refer to `docs/Development/BuildSystem.md` for detailed build information.*
+*Refer to [BuildSystem](docs/Development/BuildSystem.md) for detailed build information.*
 
 ## 👋 Contributing
 
@@ -152,7 +139,7 @@ We welcome contributions to the Piece Engine! Please adhere to the following gui
     *   **Comments:** Follows the "Clean Code" philosophy. Comments should explain *why* something is done, not *what* is being done. Avoid obvious or redundant comments; the code should be self-documenting.
 *   **Testing:** Write comprehensive unit and integration tests for your changes.
 
-*Refer to `docs/Development/ExampleDrivenDevelopment.md` and `docs/Development/VersioningStrategy.md` for more details on development practices.*
+*Refer to [ExampleDrivenDevelopment](docs/Development/ExampleDrivenDevelopment.md) and [VersioningStrategy](docs/Development/VersioningStrategy.md) for more details on development practices.*
 
 ## 📄 License
 

@@ -1005,7 +1005,7 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = src/cpp src/csharp docs/Architecture
+INPUT                  = src/cpp src/csharp docs/Architecture README.md
 INCLUDE_PATH           = C:/vcpkg/installed/x64-windows/include
 
 # This tag can be used to specify the character encoding of the source files

@@ -1,3 +1,7 @@
+/**
+ * @file iphysics_world_factory.h
+ * @brief Defines the IPhysicsWorldFactory interface for creating physics world instances.
+ */
 #ifndef PIECE_CORE_IPHYSICS_WORLD_FACTORY_H_
 #define PIECE_CORE_IPHYSICS_WORLD_FACTORY_H_
 
@@ -11,11 +15,22 @@ namespace Piece
 namespace Core
 {
 
+/**
+ * @brief Abstract factory interface for creating IPhysicsWorld instances.
+ */
 class IPhysicsWorldFactory
 {
   public:
+    /**
+     * @brief Virtual destructor.
+     */
     virtual ~IPhysicsWorldFactory() = default;
 
+    /**
+     * @brief Creates a new IPhysicsWorld instance.
+     * @param options Configuration options for the physics world.
+     * @return A unique_ptr to the newly created IPhysicsWorld instance.
+     */
     virtual std::unique_ptr<PAL::IPhysicsWorld> CreatePhysicsWorld(const NativePhysicsOptions *options) = 0;
 };
 

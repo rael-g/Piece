@@ -1,3 +1,7 @@
+/**
+ * @file iwindow.h
+ * @brief Defines the IWindow interface and KeyCode enum for windowing and input handling.
+ */
 #ifndef PIECE_WAL_IWINDOW_H_
 #define PIECE_WAL_IWINDOW_H_
 
@@ -9,10 +13,14 @@ namespace Piece
 namespace WAL
 {
 
+/**
+ * @brief Represents key and mouse button codes.
+ */
 enum class KeyCode : int
 {
     Unknown = -1,
 
+    // Printable keys
     kSpace = 32,
     kApostrophe = 39, /* ' */
     kComma = 44,      /* , */
@@ -64,7 +72,7 @@ enum class KeyCode : int
     kWorld1 = 161,      /* non-US #1 */
     kWorld2 = 162,      /* non-US #2 */
 
-    /* Function keys */
+    // Function keys
     kEscape = 256,
     kEnter = 257,
     kTab = 258,
@@ -136,6 +144,7 @@ enum class KeyCode : int
     kRightSuper = 347,
     kMenu = 348,
 
+    // Mouse buttons
     kMouse1 = 0,
     kMouse2 = 1,
     kMouse3 = 2,
@@ -147,22 +156,72 @@ enum class KeyCode : int
     kLastMouseButton = kMouse8
 };
 
+/**
+ * @brief Interface for a window.
+ * @details This class provides a pure virtual interface for managing a window and its associated input events.
+ */
 class IWindow
 {
   public:
+    /**
+     * @brief Virtual destructor.
+     */
     virtual ~IWindow() = default;
 
+    /**
+     * @brief Initializes the window.
+     * @param width The width of the window.
+     * @param height The height of the window.
+     * @param title The title of the window.
+     * @return True if initialization was successful, false otherwise.
+     */
     virtual bool Init(int width, int height, const std::string &title) = 0;
 
+    /**
+     * @brief Polls for window events, such as input or close requests.
+     */
     virtual void PollEvents() = 0;
+    /**
+     * @brief Swaps the front and back buffers of the window.
+     */
     virtual void SwapBuffers() = 0;
+    /**
+     * @brief Checks if the window should close.
+     * @return True if the window should close, false otherwise.
+     */
     virtual bool ShouldClose() const = 0;
+    /**
+     * @brief Gets a pointer to the native, underlying window handle.
+     * @return A void pointer to the native window handle.
+     */
     virtual void *GetNativeWindow() const = 0;
 
+    /**
+     * @brief Checks if a specific key is currently pressed.
+     * @param keycode The key to check.
+     * @return True if the key is pressed, false otherwise.
+     */
     virtual bool IsKeyPressed(KeyCode keycode) const = 0;
+    /**
+     * @brief Checks if a specific mouse button is currently pressed.
+     * @param button The mouse button to check.
+     * @return True if the button is pressed, false otherwise.
+     */
     virtual bool IsMouseButtonPressed(KeyCode button) const = 0;
+    /**
+     * @brief Gets the current position of the mouse cursor.
+     * @return A pair of floats representing the x and y coordinates of the mouse.
+     */
     virtual std::pair<float, float> GetMousePosition() const = 0;
+    /**
+     * @brief Gets the x-coordinate of the mouse cursor.
+     * @return The x-coordinate of the mouse.
+     */
     virtual float GetMouseX() const = 0;
+    /**
+     * @brief Gets the y-coordinate of the mouse cursor.
+     * @return The y-coordinate of the mouse.
+     */
     virtual float GetMouseY() const = 0;
 };
 

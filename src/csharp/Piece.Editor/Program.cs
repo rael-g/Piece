@@ -8,10 +8,17 @@ using Serilog.Events;
 
 namespace Piece.Editor;
 
+/// <summary>
+/// The main entry point for the Piece Editor application.
+/// </summary>
 public class Program
 {
     private static NativeCalls.CppLogCallback? _cppLogCallbackDelegate;
 
+    /// <summary>
+    /// The main entry point of the application.
+    /// </summary>
+    /// <param name="args">The command-line arguments.</param>
     public static void Main(string[] args)
     {
         var configuration = new ConfigurationBuilder()
@@ -45,6 +52,11 @@ public class Program
         }
     }
 
+    /// <summary>
+    /// Creates and configures the application's host builder.
+    /// </summary>
+    /// <param name="args">The command-line arguments.</param>
+    /// <returns>The configured <see cref="IHostBuilder"/>.</returns>
     public static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
             .UseSerilog();
