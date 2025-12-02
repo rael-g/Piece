@@ -104,16 +104,15 @@ To get started with the Piece Engine, follow these high-level steps:
     git clone https://github.com/rael-g/Piece.git
     cd Piece
     ```
-2.  **requiremnts** (For Windows, Linux, macOS)
-3.  https://learn.microsoft.com/vcpkg/get_started/get-started
-4.  https://github.com/Kitware/CMake
-    ```
-5.  **Configure and Build**
+2.  **Requirements** (For Windows, Linux, macOS)
+    1.  [vcpkg](https://learn.microsoft.com/vcpkg/get_started/get-started)
+    2.  [CMake](https://github.com/Kitware/CMake)
+3.  **Configure and Build**
         ```bash
         cmake --preset <preset> # (refer to CMakePresets.json)
         cmake --build --preset <preset>
         ```
-6.  **Run the Editor or Examples:**
+4.  **Run the Editor or Examples:**
     *   After building, executables will be in `build/<preset>/`.
 
 *Refer to [BuildSystem](docs/Development/BuildSystem.md) for detailed build information.*

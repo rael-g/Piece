@@ -26,7 +26,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Copy SourceFiles="$(SolutionDir)build/windows-debug/src/cpp/piece_intermediate/Debug/piece_intermediate.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(SolutionDir)build/windows-debug/src/cpp/piece_core/Debug/piece_core.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="$(SolutionDir)build/windows-debug/vcpkg_installed/x64-windows/debug/bin/spdlogd.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="$(SolutionDir)build/windows-debug/vcpkg_installed/x64-windows/debug/bin/fmtd.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="$(SolutionDir)build/windows-debug/vcpkg_installed/x64-windows/debug/bin/glfw3.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
