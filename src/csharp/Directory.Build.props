@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup>
+    <NativeBinDir>$(MSBuildThisFileDirectory)..\..\build\native\bin</NativeBinDir>
+  </PropertyGroup>
+
+  <Target Name="BuildNative" BeforeTargets="Build">
+    <Message Text="Compilando dependências nativas..." Importance="high" />
+    <Exec Command="cmake --preset windows-debug" WorkingDirectory="$(MSBuildThisFileDirectory)..\..\" />
+    <Exec Condition="'$(NativeTarget)' != ''" Command="cmake --build build/windows-debug --target $(NativeTarget)" WorkingDirectory="$(MSBuildThisFileDirectory)..\..\" />
+    <Exec Command="cmake --install build/windows-debug --prefix &quot;$(MSBuildThisFileDirectory)..\..\build\native&quot; --config Debug" WorkingDirectory="$(MSBuildThisFileDirectory)..\..\" />
+  </Target>
+</Project>
