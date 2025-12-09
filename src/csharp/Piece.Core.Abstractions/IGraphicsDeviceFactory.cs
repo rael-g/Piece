@@ -14,7 +14,7 @@ public interface IGraphicsDeviceFactory : IDisposable
     IntPtr NativeFactoryPointer { get; }
 
     /// <summary>
-    /// Sets the native C++ factory pointer within the C++ Service Locator.
+    /// Sets the native C++ factory pointer with, poin the C++ Service Locator.
     /// This method is called via P/Invoke to inject the concrete C++ factory
     
     /// into the Piece.Core's Dependency Injection system.

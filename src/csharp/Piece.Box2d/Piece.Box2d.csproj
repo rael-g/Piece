@@ -5,20 +5,20 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <NativeTarget>piece_core</NativeTarget>
+    <NativeTarget>pal_box2d_backend</NativeTarget>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Serilog" Version="4.3.0" />
+    <ProjectReference Include="..\Piece.Core.Interop\Piece.Core.Interop.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Piece.Core.Abstractions\Piece.Core.Abstractions.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="$(NativeBinDir)\piece_core.dll">
-      <Link>piece_core.dll</Link>
+    <Content Include="$(NativeBinDir)\pal_box2d_backend.dll">
+      <Link>pal_box2d_backend.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
