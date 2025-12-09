@@ -2,6 +2,8 @@ add_library(pal INTERFACE)
 
 target_include_directories(pal INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}")
 
+add_subdirectory(box2d_backend)
+
 # Install rules
 include(GNUInstallDirs)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/

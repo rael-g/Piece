@@ -5,6 +5,8 @@ target_include_directories(ral INTERFACE
     "${CMAKE_CURRENT_SOURCE_DIR}/interfaces"
 )
 
+add_subdirectory(opengl_backend)
+
 # Install rules
 include(GNUInstallDirs)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/

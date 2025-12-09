@@ -9,14 +9,13 @@ target_compile_definitions(wal_glfw_backend PRIVATE WAL_GLFW_BACKEND_BUILD_DLL)
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 target_include_directories(wal_glfw_backend PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR} # For internal headers like "glfw_window.h"
-    # Explicitly add roots for angle bracket includes
-    ${CMAKE_SOURCE_DIR}/src/cpp # Allows <wal/iwindow.h>, <piece_intermediate/interfaces/iwindow_factory.h> etc.
+    ${CMAKE_CURRENT_SOURCE_DIR} # for its own headers
+    ${CMAKE_SOURCE_DIR}/src/cpp # for <wal/iwindow.h>, <piece_core/interfaces/iwindow_factory.h>, etc.
 )
 
 # Find GLFW provided by vcpkg
 find_package(glfw3 CONFIG REQUIRED)
-target_link_libraries(wal_glfw_backend PUBLIC wal piece_core glfw)
+target_link_libraries(wal_glfw_backend PUBLIC glfw)
 
 # Install rules
 include(GNUInstallDirs)

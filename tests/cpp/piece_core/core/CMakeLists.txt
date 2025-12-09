@@ -20,12 +20,3 @@ target_link_libraries(piece_core_core_tests PRIVATE
 # Discover and add tests to CTest
 include(GoogleTest)
 gtest_add_tests(TARGET piece_core_core_tests)
-
-# Copy dependent DLLs to the test executable directory so it can run
-add_custom_command(
-    TARGET piece_core_core_tests POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy
-            $<TARGET_FILE:piece_core>
-            $<TARGET_FILE_DIR:piece_core_core_tests>
-    COMMENT "Copying piece_core.dll to test directory"
-)

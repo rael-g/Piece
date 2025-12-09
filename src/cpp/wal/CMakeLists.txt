@@ -7,3 +7,5 @@ include(GNUInstallDirs)
 install(FILES iwindow.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/wal
 )
+
+add_subdirectory(glfw_backend)
