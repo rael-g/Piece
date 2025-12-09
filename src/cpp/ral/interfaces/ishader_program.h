@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <string>
+#include <glm/glm.hpp> // Required for glm::mat4 and glm::vec3
 
 namespace Piece
 {
@@ -60,18 +61,18 @@ class IShaderProgram
      * @param value The float value to set.
      */
     virtual void SetUniform1f(const std::string &name, float value) = 0;
-    // /**
-    //  * @brief Sets a 4x4 float matrix uniform variable.
-    //  * @param name The name of the uniform.
-    //  * @param matrix The matrix to set.
-    //  */
-    // virtual void SetUniformMat4f(const std::string& name, const glm::mat4& matrix) = 0;
-    // /**
-    //  * @brief Sets a 3-component float vector uniform variable.
-    //  * @param name The name of the uniform.
-    //  * @param vector The vector to set.
-    //  */
-    // virtual void SetUniformVec3f(const std::string& name, const glm::vec3& vector) = 0;
+    /**
+     * @brief Sets a 4x4 float matrix uniform variable.
+     * @param name The name of the uniform.
+     * @param matrix The matrix to set.
+     */
+    virtual void SetUniformMat4f(const std::string& name, const glm::mat4& matrix) = 0;
+    /**
+     * @brief Sets a 3-component float vector uniform variable.
+     * @param name The name of the uniform.
+     * @param vector The vector to set.
+     */
+    virtual void SetUniformVec3f(const std::string& name, const glm::vec3& vector) = 0;
 };
 
 } // namespace RAL

@@ -5,8 +5,8 @@
 #ifndef PIECE_WAL_GLFW_BACKEND_GLFW_WINDOW_H_
 #define PIECE_WAL_GLFW_BACKEND_GLFW_WINDOW_H_
 
-#include <GLFW/glfw3.h>  // GLFW header
-#include <wal/iwindow.h> // Base IWindow interface
+#include <GLFW/glfw3.h> 
+#include <wal/iwindow.h>
 
 namespace Piece
 {

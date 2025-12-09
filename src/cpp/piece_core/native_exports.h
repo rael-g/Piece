@@ -22,28 +22,9 @@ class IPhysicsWorldFactory;
 
 extern "C"
 {
-    /**
-     * @brief Sets the graphics device factory.
-     * @param factory_ptr A pointer to an IGraphicsDeviceFactory implementation.
-     * @param options A pointer to the native Vulkan options.
-     */
-    PIECE_CORE_API void PieceCore_SetGraphicsDeviceFactory(Piece::Core::IGraphicsDeviceFactory *factory_ptr,
-                                                           const Piece::Core::NativeVulkanOptions *options);
-
-    /**
-     * @brief Sets the window factory.
-     * @param factory_ptr A pointer to an IWindowFactory implementation.
-     * @param options A pointer to the native window options.
-     */
-    PIECE_CORE_API void PieceCore_SetWindowFactory(Piece::Core::IWindowFactory *factory_ptr,
-                                                   const Piece::Core::NativeWindowOptions *options);
-    /**
-     * @brief Sets the physics world factory.
-     * @param factory_ptr A pointer to an IPhysicsWorldFactory implementation.
-     * @param options A pointer to the native physics options.
-     */
-    PIECE_CORE_API void PieceCore_SetPhysicsWorldFactory(Piece::Core::IPhysicsWorldFactory *factory_ptr,
-                                                         const Piece::Core::NativePhysicsOptions *options);
+    PIECE_CORE_API void SetGraphicsDeviceFactory(Piece::Core::IGraphicsDeviceFactory *factory_ptr);
+    PIECE_CORE_API void SetWindowFactory(Piece::Core::IWindowFactory *factory_ptr);
+    PIECE_CORE_API void SetPhysicsWorldFactory(Piece::Core::IPhysicsWorldFactory *factory_ptr);
 
     /**
      * @brief Initializes the engine.

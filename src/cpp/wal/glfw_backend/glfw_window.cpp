@@ -4,7 +4,7 @@
  */
 #include "glfw_window.h"
 
-#include <iostream> // For error logging
+#include <iostream>
 
 namespace Piece
 {
@@ -53,7 +53,6 @@ bool GlfwWindow::Init(int width, int height, const std::string &title)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    // glfwWindowHint(GLFW_RESIZABLE, GL_TRUE); // Example for resizable
 
     window_ = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
     if (!window_)

@@ -7,7 +7,7 @@
 #define PIECE_CORE_ENGINE_CORE_H_
 
 #include <pal/iphysics_world.h>   // Assuming PAL interfaces are in WAL/RAL namespace or global
-#include <ral/igraphics_device.h.h> // Assuming RAL interfaces are in WAL/RAL namespace or global
+#include <ral/igraphics_device.h> // Assuming RAL interfaces are in WAL/RAL namespace or global
 #include <wal/iwindow.h>          // Assuming WAL interfaces are in WAL/RAL namespace or global
 
 #include <memory>

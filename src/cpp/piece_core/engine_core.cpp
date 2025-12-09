@@ -137,64 +137,42 @@ void EngineCore::Render()
  * @param ptr The pointer to check.
  * @return True if the pointer is not null, false otherwise.
  */
-template <typename T> bool is_valid_factory_ptr(T *ptr)
-{
-    return ptr != nullptr;
-}
-
 extern "C"
 {
-
-    /**
-     * @brief C-style export to set the graphics device factory.
-     * @param factoryPtr A pointer to the factory implementation.
-     * @param options A pointer to the graphics options.
-     */
-    void PieceCore_SetGraphicsDeviceFactory(Piece::Core::IGraphicsDeviceFactory *factoryPtr,
-                                            const Piece::Core::NativeVulkanOptions *options)
+    PIECE_CORE_API void SetGraphicsDeviceFactory(Piece::Core::IGraphicsDeviceFactory *factory_ptr)
     {
-        if (!is_valid_factory_ptr(factoryPtr))
+        if (!factory_ptr)
         {
-            spdlog::error("Invalid IGraphicsDeviceFactory pointer received.");
+            spdlog::error("Received null IGraphicsDeviceFactory pointer.");
             return;
         }
         Piece::Core::ServiceLocator::Get().SetGraphicsDeviceFactory(
-            std::unique_ptr<Piece::Core::IGraphicsDeviceFactory>(factoryPtr));
-        spdlog::info("PieceCore_SetGraphicsDeviceFactory called.");
+            std::unique_ptr<Piece::Core::IGraphicsDeviceFactory>(factory_ptr));
+        spdlog::info("SetGraphicsDeviceFactory called.");
     }
 
-    /**
-     * @brief C-style export to set the window factory.
-     * @param factoryPtr A pointer to the factory implementation.
-     * @param options A pointer to the window options.
-     */
-    void PieceCore_SetWindowFactory(Piece::Core::IWindowFactory *factoryPtr, const Piece::Core::NativeWindowOptions *options)
+    PIECE_CORE_API void SetWindowFactory(Piece::Core::IWindowFactory *factory_ptr)
     {
-        if (!is_valid_factory_ptr(factoryPtr))
+        if (!factory_ptr)
         {
-            spdlog::error("Invalid IWindowFactory pointer received.");
+            spdlog::error("Received null IWindowFactory pointer.");
             return;
         }
-        Piece::Core::ServiceLocator::Get().SetWindowFactory(std::unique_ptr<Piece::Core::IWindowFactory>(factoryPtr));
-        spdlog::info("PieceCore_SetWindowFactory called.");
+        Piece::Core::ServiceLocator::Get().SetWindowFactory(
+            std::unique_ptr<Piece::Core::IWindowFactory>(factory_ptr));
+        spdlog::info("SetWindowFactory called.");
     }
 
-    /**
-     * @brief C-style export to set the physics world factory.
-     * @param factoryPtr A pointer to the factory implementation.
-     * @param options A pointer to the physics options.
-     */
-    void PieceCore_SetPhysicsWorldFactory(Piece::Core::IPhysicsWorldFactory *factoryPtr,
-                                          const Piece::Core::NativePhysicsOptions *options)
+    PIECE_CORE_API void SetPhysicsWorldFactory(Piece::Core::IPhysicsWorldFactory *factory_ptr)
     {
-        if (!is_valid_factory_ptr(factoryPtr))
+        if (!factory_ptr)
         {
-            spdlog::error("Invalid IPhysicsWorldFactory pointer received.");
+            spdlog::error("Received null IPhysicsWorldFactory pointer.");
             return;
         }
         Piece::Core::ServiceLocator::Get().SetPhysicsWorldFactory(
-            std::unique_ptr<Piece::Core::IPhysicsWorldFactory>(factoryPtr));
-        spdlog::info("PieceCore_SetPhysicsWorldFactory called.");
+            std::unique_ptr<Piece::Core::IPhysicsWorldFactory>(factory_ptr));
+        spdlog::info("SetPhysicsWorldFactory called.");
     }
 
     /**
