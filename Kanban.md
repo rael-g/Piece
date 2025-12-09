@@ -170,18 +170,6 @@
 
 ## In Progress
 
-### Phase 1: Foundation & Build System
-
-  - tags: [v1.0.0, setup, foundation, build]
-  - priority: high
-  - steps:
-      - [x] Finalize root `CMakeLists.txt` for C++ project structure.
-      - [x] Finalize `CMakePresets.json` for standardized build configurations (Windows, Linux, Debug, Release).
-      - [x] Finalize `vcpkg.json` for C++ dependencies (e.g., GLFW, GLM).
-      - [x] Set up initial `src/csharp/Piece.sln` with `Piece.Engine` and `Piece.Editor` projects.
-      - [x] Establish `Piece.Intermediate.Abstractions` C# project for P/Invoke interfaces and factory definitions.
-      - [ ] Implement robust cross-language logging setup for C++ (`spdlog`) and C# (`Serilog`).
-
 ### Phase 2: Core C++ Layer Implementations
 
   - tags: [v1.0.0, c++, low-level, intermediate, wal, ral, pal]
@@ -192,7 +180,7 @@
       - [x] Define C-compatible API in `NativeExports.h` for core engine functions to be consumed by C#.
       - [x] Implement `EngineCore` C++ class, relying on `ServiceLocator` for backend instantiation.
       - [x] Write integration tests for `EngineCore` and `ServiceLocator`.
-      - [ ] **WAL (GLFW Backend):**
+      - [x] **WAL (GLFW Backend):**
       - [x] Fully implement `IWindow` interface.
       - [x] Implement `GlfwWindow` class.
       - [x] Write integration tests for `GlfwWindow`.
@@ -225,4 +213,16 @@
     ```
 
 ## Done
+
+### Phase 1: Foundation & Build System
+
+  - tags: [v1.0.0, setup, foundation, build]
+  - priority: high
+  - steps:
+      - [x] Finalize root `CMakeLists.txt` for C++ project structure.
+      - [x] Finalize `CMakePresets.json` for standardized build configurations (Windows, Linux, Debug, Release).
+      - [x] Finalize `vcpkg.json` for C++ dependencies (e.g., GLFW, GLM).
+      - [x] Set up initial `src/csharp/Piece.sln` with `Piece.Engine` and `Piece.Editor` projects.
+      - [x] Establish `Piece.Intermediate.Abstractions` C# project for P/Invoke interfaces and factory definitions.
+      - [x] Implement robust cross-language logging setup for C++ (`spdlog`) and C# (`Serilog`).
 

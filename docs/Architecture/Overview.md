@@ -4,6 +4,8 @@
 
 The Piece Engine is a multi-layered game development framework designed to offer flexibility and performance. Its architecture is built upon a core philosophy: **Maximum Modularity and Extensibility**. Every component of the engine is designed to be a self-contained, replaceable unit, allowing alternative implementations without modifying the engine's main source code. Our goal is to provide a solid and high-performance foundation while empowering developers to customize every aspect, from the low-level renderer to the high-level game logic.
 
+Crucially, the engine employs a hybrid C++ and C# architecture where C++ backends are compiled on-demand via `MSBuild.targets` in NuGet packages, and then seamlessly integrated through Dependency Injection (DI) in C#. This allows the C++ core to remain entirely platform-agnostic and decoupled from specific backend implementations.
+
 This document provides a unified and organic view of the Piece Engine's architecture, encompassing everything from the low-level C++ backend to the Piece.Framework (C#).
 
 ## The Piece Engine's Modular Component Architecture Philosophy: Dynamic and Modular Extensibility
@@ -26,7 +28,11 @@ This means that:
 
 3.  **Ease of Injection and Dynamic Configuration:** The architecture is built to be inherently compatible with Dependency Injection (DI) and Inversion of Control (IoC) patterns.
     *   **For C#:** Components and services can be easily injected and replaced, similar to configuring services with `AddMyServices()` in a .NET host, allowing for the customization of framework and editor functionalities. This includes passing configuration options specific to each component.
-    *   **For C++:** Modularity is facilitated by a Service Locator pattern within the Piece.Core. This Service Locator is configured by the Piece.Framework (C#), which resolves C++ factory implementations (e.g., `IGraphicsDeviceFactory`) through its .NET DI system and passes them, along with specific configuration options, to the C++ layer via P/Invoke. This enables dynamic library loading and swapping of low-level C++ backends (like graphics or physics engines) to be orchestrated and configured directly from the C# application's DI setup, eliminating the need for external configuration files for backend selection.
+    *   **For C++ (orchestrated by C#):** Modularity for C++ backends is facilitated by a Service Locator pattern within the `piece_core`. This Service Locator is configured directly by the C# application. C# wrapper NuGet packages for C++ backends (e.g., `Piece.Glfw`, `Piece.OpenGL`) provide `Add...()` extension methods for `IServiceCollection`. These methods are responsible for:
+        1.  Ensuring their native C++ backend DLLs are compiled (via `MSBuild.targets`) and available in the application's output directory.
+        2.  Invoking a C-style `CreateFactory()` function exported by the native DLL to obtain a pointer to an already created C++ factory implementation (e.g., `IWindowFactory*`). The .NET runtime automatically handles loading the native DLL for this P/Invoke call.
+        3.  Passing this factory pointer to the `piece_core` C++ layer via a simple P/Invoke call (e.g., `SetWindowFactory()`), where it's stored in the `ServiceLocator`.
+        This approach enables dynamic loading and swapping of low-level C++ backends (like graphics or physics engines) to be orchestrated and configured directly from the C# application's DI setup, eliminating the need for external configuration files for backend selection.
 
 4.  **Dynamic and Agnostic Communication Between Layers:** Communication between layers is designed to be flexible. Dependency injection and interfaces allow interaction to be dynamically configured, ensuring that layers can "talk" without being rigidly coupled to a specific implementation, maintaining technological agnosticism.
 
@@ -35,13 +41,13 @@ This means that:
 The engine is divided into three main layers, each with its own extension points and distinct responsibilities, with well-defined communication boundaries:
 
 ### 1. Low-Level Layer (C++ Backend: WAL/RAL/PAL)
-This layer is in direct contact with the GPU and the operating system. It is implemented in C++ for maximum performance and control.
-*   **Responsibility:** Provide the lowest-level abstractions for graphics hardware, the operating system, and physical simulation.
+This layer is implemented in C++ for maximum performance and control. Each backend (e.g., GLFW for windowing, OpenGL for rendering) is packaged as a standalone dynamic library (`.dll`, `.so`) that strictly implements abstract interfaces (like `IWindowFactory` or `IGraphicsDeviceFactory`) and exports a C-style `CreateFactory()` function. These backends are **completely agnostic** to the `piece_core` C++ and are compiled on-demand via `MSBuild.targets` provided by their respective C# NuGet wrapper packages.
+*   **Responsibility:** Provide concrete, platform-specific implementations for low-level abstractions (graphics hardware, operating system interactions, physical simulation) without any direct dependency on the `piece_core` C++.
 *   **Details:** See [Design Document - Low-Level Layer](../Architecture/Layers/LowLevel/DESIGN.md)
 
 ### 2. Piece.Core (C++: Orchestration and Management)
-This layer, implemented in C++, acts as an orchestrator between the C++ backend and the Piece.Framework (C#). It also incorporates a core `Job System` to manage CPU-bound tasks with maximum efficiency, distributing workloads (like physics, AI, culling, and asset decompression) across all available CPU cores using a task-based model, preventing bottlenecks and aligning the engine with Data-Oriented Design (DOD) principles. This layer is also responsible for advanced rendering and asset optimization techniques crucial for modern, high-performance game development.
-*   **Responsibility:** Orchestrate the backend, manage GPU resources (caching, lifecycle), implement the high-level rendering pipeline (culling, sorting), and expose a stable C-compatible API.
+This layer, implemented in C++, acts as a **passive orchestrator and service container**. It does not initiate backend loading or configuration. Instead, it exposes a stable C-compatible API to the C# layer for core engine functions and provides a `Service Locator` to receive and store already-created C++ factory implementations (e.g., `IWindowFactory*`, `IGraphicsDeviceFactory*`) passed from the C# layer. It also incorporates a core `Job System` to manage CPU-bound tasks with maximum efficiency, distributing workloads (like physics, AI, culling, and asset decompression) across all available CPU cores using a task-based model, preventing bottlenecks and aligning the engine with Data-Oriented Design (DOD) principles. This layer is also responsible for advanced rendering and asset optimization techniques crucial for modern, high-performance game development.
+*   **Responsibility:** Provide a central `Service Locator` for C++ backend factories, manage GPU resources (caching, lifecycle), implement the high-level rendering pipeline (culling, sorting), and expose a stable C-compatible API for core engine functions.
 *   **Details:** See [Design Document - Piece.Core](../Architecture/Layers/Intermediate/DESIGN.md)
 
 ### 3. Piece.Framework (C#: Game Logic and Tools)
@@ -59,7 +65,7 @@ The Visual Editor is a C# application built on top of the High-Level Framework. 
 
 The engine's lifecycle and data flow follow a top-down and bottom-up pattern across the layers:
 
-1.  **Initialization:** The `GameEngine` (C#) initializes its systems, which in turn initialize the Piece.Core (C++) (via P/Invoke for `RenderSystemCpp`, `ResourceManagerCpp`), which then directly interacts with the C++ backend (WAL/RAL) to create devices and contexts.
+1.  **Initialization (Orchestrated by C#):** The C# application (typically through its DI setup) is responsible for ensuring the appropriate native C++ backend DLLs (e.g., `wal_glfw_backend.dll`, `ral_opengl_backend.dll`) are compiled and available in the application's output directory (via `MSBuild.targets`). It then calls the C-style `CreateFactory()` function exported by each backend DLL (using P/Invoke) to obtain pointers to `IWindowFactory`, `IGraphicsDeviceFactory`, etc. These factory pointers are then passed to the `piece_core` C++ via P/Invoke (`SetWindowFactory()`, `SetGraphicsDeviceFactory()`) where they are stored in the `ServiceLocator`. Only after all necessary C++ factories are registered does the `GameEngine` (C#) call `Engine_Initialize()` on the `piece_core` C++, which then retrieves the registered factories from the `ServiceLocator` to create devices and contexts.
 2.  **Game Loop (`Update`):** The `GameEngine` (C#) calls `Update()` on systems (Input, Scene, etc.). The `InputManager` (C#) can query the `IWindow` (WAL C++ via P/Invoke). `Node`s and `Component`s (C#) update game logic.
 3.  **Game Loop (`Draw`):** The `GameEngine` (C#) invokes the `RenderManager` (C#), which translates high-level rendering intentions to the `RenderSystemCpp`. The `RenderSystemCpp` orchestrates the rendering pipeline, interacting with `IGraphicsDevice` and `IRenderContext` (RAL C++) to issue drawing commands. (Through the Piece.Core (C++)) The `IGraphicsDevice` manages `BeginFrame()` and `EndFrame()`.
 4.  **Resource Management:** Assets are loaded via `AssetManager` (C#), which delegates to `ResourceManagerCpp`. This, in turn, uses `IGraphicsDevice` (RAL C++) to create GPU resources. C# wrappers hold `IntPtr`s for C++ resources and use `IDisposable` to signal release to the intermediate layer.
@@ -77,8 +83,12 @@ Resource management is crucial for the engine's stability and performance:
 The extensibility of the Piece Engine is granular, allowing you to customize the engine at various levels. This is most powerfully demonstrated by how the graphics backend is selected and loaded at runtime, fully realizing the philosophy of a modular component architecture. Beyond modularity, the engine's design also prioritizes developer workflow and productivity, integrating features like fast compilation times and Hot-Reloading of C++ code to minimize downtime and keep developers in a creative flow.
 
 *   **Low-Level Layer (C++: WAL/RAL/PAL):**
-    *   **Backend as a Plugin (C# DI Orchestration):** The core renderers and physics engines are implemented as C++ dynamic libraries (`.dll`, `.so`). Each of these libraries **must** export C-style factory functions (e.g., `CreateVulkanGraphicsDeviceFactory()`) that return instances of C++ factory interfaces (e.g., `IGraphicsDeviceFactory`).
-    *   **Runtime Selection & Injection:** At startup, the high-level C# application uses its .NET DI system to select and register C# wrapper factories (e.g., `VulkanGraphicsDeviceFactory`). These C# wrappers then obtain the raw C++ factory pointers from the native backend DLLs and pass them to the intermediate C++ layer's `ServiceLocator` via P/Invoke. This allows the C# application to directly control which C++ backend implementation is injected and used.
+    *   **Backend as a Plugin (C# DI Orchestration):** The core renderers, windowing systems, and physics engines are implemented as standalone C++ dynamic libraries (`.dll`, `.so`). Each of these libraries **must** implement abstract interfaces (like `IWindowFactory` or `IGraphicsDeviceFactory`) and export a single C-style `CreateFactory()` function that creates and returns a raw pointer to its factory implementation (e.g., `IWindowFactory* CreateFactory() { return new GlfwWindowFactory(); }`). These C++ backends have **no direct dependency** on the `piece_core` C++.
+    *   **Orchestration via C# NuGet Wrappers:** The integration of these C++ backends is entirely orchestrated by their corresponding C# NuGet wrapper packages (e.g., `Piece.Glfw`, `Piece.OpenGL`).
+        1.  These NuGet packages contain the C++ source code and an `MSBuild.targets` file that compiles the native C++ library for the target platform during the C# project's build process.
+        2.  The C# code within these NuGet wrappers uses standard .NET P/Invoke to call the `CreateFactory()` function directly from the compiled native DLL, obtaining a raw `IntPtr` to the C++ factory.
+        3.  This `IntPtr` is then passed to the `piece_core` C++ layer via a simple P/Invoke call (e.g., `NativeCalls.SetWindowFactory(IntPtr factoryPtr)`), where the `piece_core` assumes ownership and stores it in its `ServiceLocator`.
+        This robust approach ensures maximum decoupling, platform-native compilation, and full control over backend selection and injection directly from the C# application's Dependency Injection setup.
 
 *   **Piece.Core (C++: Orchestration and Management):**
     *   **Full Replacement:** Develop your own `PieceCore.dll`, implementing the C-compatible API defined in `piece_core_api.h`.
@@ -96,23 +106,18 @@ The extensibility of the Piece Engine is granular, allowing you to customize the
 
 The multi-layered architecture of the Piece Engine, founded on the principles of modular component architecture, balances performance, control, and flexibility. The clear separation of responsibilities and robust extension mechanisms in each layer empower developers to optimize and adapt the engine to the most diverse project needs.
 
-The future vision includes the expansion of backend implementations (Vulkan, DirectX), the enhancement of editing tools, and the continuous optimization of communication between layers, always maintaining modularity and extensibility as core principles.
-
 ## Multi-Platform Strategy
 
-The Piece Engine's core philosophy of "Maximum Modularity and Extensibility" and its "Modular Component Architecture" provide an ideal foundation for supporting a wide array of platforms, including desktop (Windows, macOS, Linux), consoles (PS5, Xbox Series, Nintendo Switch), mobile (Android, iOS), and web browsers. Our strategy for achieving broad multi-platform support leverages the engine's layered design, dynamic backend loading, and the clear separation of concerns inherent in its architecture.
+The Piece Engine's core philosophy of "Maximum Modularity and Extensibility" and its "Modular Component Architecture" provide an ideal foundation for supporting a wide array of platforms, including desktop (Windows, macOS, Linux), consoles (PS5, Xbox Series, Nintendo Switch), mobile (Android, iOS), and web browsers. Our strategy for achieving broad multi-platform support leverages the engine's layered design, the flexible C# orchestration, and the clear separation of concerns inherent in its architecture.
 
 **Strategic Pillars for Multi-Platform Support:**
 
-1.  **Platform-Specific Low-Level Backends (WAL/RAL/PAL):**
-    *   **Approach:** Implement dedicated C++ dynamic libraries (`.dll` or `.so`) for each target platform to fulfill the `WAL`, `RAL`, and `PAL` interfaces. This ensures optimal performance and direct interaction with native platform APIs, such as windowing systems, graphics APIs (e.g., DirectX, Vulkan, Metal, OpenGL ES), and physics engines.
-    *   **Leveraging Modularity:** The engine's existing `Service Locator` pattern (C++) and Dependency Injection system (C#) will be utilized to dynamically load and inject the appropriate platform-specific backends at runtime, as orchestrated by the Piece.Framework (C#).
+1.  **Platform-Native Low-Level Backends (WAL/RAL/PAL) via NuGet/MSBuild.targets:**
+    *   **Approach:** Dedicated C++ dynamic libraries (`.dll` or `.so`) are implemented for each target platform to fulfill the `WAL`, `RAL`, and `PAL` interfaces. These C++ backends are distributed as part of C# NuGet packages (e.g., `Piece.Glfw`, `Piece.OpenGL`).
+    *   **Cross-Compilation Orchestration:** Each NuGet package includes an `MSBuild.targets` file that, during the C# project's build process, automatically invokes CMake and Vcpkg to compile the native C++ backend source code. This ensures that the native libraries are built *on the developer's machine*, for their *specific target platform*, using the correct toolchain (e.g., `clang` for macOS/Linux, MSVC for Windows). This eliminates pre-compiled binary distribution issues and allows for truly flexible multi-platform support.
+    *   **Seamless Integration:** The compiled native DLLs are then seamlessly loaded and integrated into the `piece_core` C++ via simple P/Invoke calls orchestrated by the C# application's Dependency Injection system.
 
-2.  **Robust Cross-Compilation and Toolchain Integration:**
-    *   **Approach:** Extend the existing CMake-based build system to support cross-compilation for diverse target environments. This includes integrating with platform-specific Software Development Kits (SDKs) and toolchains (e.g., Android NDK, Xcode for iOS/macOS, Emscripten for WebAssembly, and proprietary console SDKs).
-    *   **Automation:** Establish CI/CD pipelines to automate builds and tests for each target platform, ensuring consistent quality and rapid iteration.
-
-3.  **Adaptation of the High-Level C# Framework:**
+2.  **Adaptation of the High-Level C# Framework:**
     *   **Approach:** Ensure the High-Level C# Framework (game logic, UI, asset management) is compatible with target platform runtimes. This may involve integrating with specific .NET implementations (e.g., Mono/Xamarin for mobile, Blazor WebAssembly for web, or console-specific .NET versions).
     *   **Input & System Services:** Adapt and extend the C# input management system to handle platform-specific input mechanisms (e.g., touch gestures, specialized console controller features) and integrate with other platform-specific system services as needed.
 
@@ -120,10 +125,9 @@ The Piece Engine's core philosophy of "Maximum Modularity and Extensibility" and
 
 The expansion to new platforms will follow a phased approach, prioritizing platforms based on strategic importance and development effort:
 
-*   **Phase 1 (Desktop Expansion):** Enhance existing desktop support to include robust macOS and Linux backends, leveraging GLFW's cross-platform capabilities where appropriate, or native APIs for deeper integration.
-*   **Phase 2 (Mobile Platforms):** Develop dedicated WAL/RAL backends for Android (Vulkan/OpenGL ES) and iOS (Metal) and integrate with their respective build systems and C# runtimes.
-*   **Phase 3 (Web Browsers):** Target WebAssembly/WebGL via Emscripten for web deployment, ensuring C# framework compatibility (e.g., Blazor WASM) and efficient interop.
-*   **Phase 4 (Console Platforms):** Initiate development for consoles (PS5, Xbox Series, Nintendo Switch), recognizing the significant effort required for proprietary SDK integration, specialized backends, and strict certification processes. This phase will be contingent on securing necessary development kits and licenses.
+*   **Phase 1 (Desktop Expansion):** Enhance existing desktop support to include robust macOS and Linux backends, leveraging GLFW's cross-platform capabilities where appropriate, or native APIs for deeper integration. The compilation of these backends will be managed by the NuGet/MSBuild.targets strategy.
+*   **Phase 2 (Mobile Platforms):** Develop dedicated WAL/RAL backends for Android (Vulkan/OpenGL ES) and iOS (Metal) and integrate with their respective build systems and C# runtimes, adhering to the NuGet/MSBuild.targets compilation model.
+*   **Phase 3 (Web Browsers):** Target WebAssembly/WebGL via Emscripten for web deployment, ensuring C# framework compatibility (e.g., Blazor WASM) and efficient interop, with C++ compilation for WASM handled by MSBuild.targets.
+*   **Phase 4 (Console Platforms):** Initiate development for consoles (PS5, Xbox Series, Nintendo Switch), recognizing the significant effort required for proprietary SDK integration, specialized backends, and strict certification processes. This phase will be contingent on securing necessary development kits and licenses, with native compilation orchestrated via MSBuild.targets where feasible.
 
 This strategic roadmap ensures a systematic and modular approach to multi-platform support, building upon the engine's architectural strengths to provide developers with extensive deployment options.
-
