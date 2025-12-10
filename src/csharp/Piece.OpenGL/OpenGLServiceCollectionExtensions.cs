@@ -1,6 +1,6 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
-using Piece.Core.Interop;
+using Piece.Core;
 
 namespace Piece.OpenGL;
 

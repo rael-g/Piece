@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
-using Piece.Core.Interop;
+using Piece.Core;
 
 using Serilog;
 using Serilog.Events;

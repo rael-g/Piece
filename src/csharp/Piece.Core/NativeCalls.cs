@@ -1,9 +1,8 @@
 using System.Runtime.InteropServices;
-
 using Serilog;
 using Serilog.Events;
 
-namespace Piece.Core.Interop;
+namespace Piece.Core;
 
 /// <summary>
 /// Contains the P/Invoke definitions for calling the native C++ core library.

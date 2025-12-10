@@ -1,4 +1,4 @@
-namespace Piece.Core.Interop;
+namespace Piece.Core;
 
 /// <summary>
 /// Defines the severity levels for log messages, mirroring the native C++ LogLevel enum.

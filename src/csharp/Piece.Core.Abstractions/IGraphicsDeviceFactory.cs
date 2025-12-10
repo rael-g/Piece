@@ -1,4 +1,4 @@
-namespace Piece.Core.Abstractions;
+namespace Piece.Core;
 
 /// <summary>
 /// Defines a contract for factories that create and manage native C++ IGraphicsDevice instances.
