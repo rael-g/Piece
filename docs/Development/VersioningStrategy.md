@@ -48,11 +48,11 @@ All commit messages will follow the [Conventional Commits specification](https:/
 A `BREAKING CHANGE` must be indicated in the footer or by appending `!` after the type/scope of the header. This signifies an incompatible API change and will result in a `MAJOR` version bump.
 
 ```
-feat!: allow `engine.json` to configure multiple backends
+feat!: allow `engine.json` to configure multiple implementations
 ```
 OR
 ```
-feat: allow `engine.json` to configure multiple backends
+feat: allow `engine.json` to configure multiple implementations
 
 BREAKING CHANGE: The `engine.json` schema has changed, requiring updates.
 ```
@@ -62,7 +62,7 @@ BREAKING CHANGE: The `engine.json` schema has changed, requiring updates.
 A simplified [GitHub Flow](https://docs.github.com/en/get-started/quickstart/github-flow) will be used:
 
 *   **`main` branch:** This branch represents the latest stable, production-ready version of the engine. All releases will be tagged directly from this branch.
-*   **Feature Branches:** For every new feature, bug fix, or example (as per EDD), a new branch will be created from `main`. Branch names should be descriptive (e.g., `feat/vulkan-backend`, `fix/window-resizing`, `docs/update-build-system`).
+*   **Feature Branches:** For every new feature, bug fix, or example (as per EDD), a new branch will be created from `main`. Branch names should be descriptive (e.g., `feat/vulkan-implementation`, `fix/window-resizing`, `docs/update-build-system`).
 *   **Pull Requests (PRs):** All changes will be merged into the `main` branch via Pull Requests. PRs will undergo code review and must pass all Continuous Integration (CI) checks before merging.
 *   **Direct Commits:** Direct commits to `main` are strictly prohibited.
 

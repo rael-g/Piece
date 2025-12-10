@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
+
 project(PieceEngine LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -9,8 +10,6 @@ add_subdirectory(src/cpp)
 enable_testing()
 
 add_subdirectory(tests)
-
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # --- C++ Formatting Target ---
 find_program(CLANG_FORMAT_EXECUTABLE clang-format)

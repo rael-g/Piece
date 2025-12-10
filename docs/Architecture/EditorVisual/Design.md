@@ -20,7 +20,7 @@ This interface-driven design ensures that the editor remains completely agnostic
 
 *   The default, feature-rich **C# high-level framework**.
 *   A potential future **C++/Lua high-level framework** (exposed to C# via a wrapper that implements the same interfaces), which might be used for console-targeted builds.
-*   Any other engine backend that adheres to the required interface contract.
+*   Any other engine low-level implementation that adheres to the required interface contract.
 
 This approach fully realizes the engine's philosophy of modularity, allowing the high-level "game logic" layer to be a truly swappable component without requiring any changes to the editor itself. The specific implementation of the engine interfaces is resolved at runtime using the .NET Dependency Injection container.
 

@@ -2,8 +2,8 @@
  * @file glfw_window_factory.h
  * @brief Defines the GlfwWindowFactory class, a factory for creating GlfwWindow instances.
  */
-#ifndef PIECE_WAL_GLFW_BACKEND_GLFW_WINDOW_FACTORY_H_
-#define PIECE_WAL_GLFW_BACKEND_GLFW_WINDOW_FACTORY_H_
+#ifndef PIECE_WAL_GLFW_WINDOW_FACTORY_H_
+#define PIECE_WAL_GLFW_WINDOW_FACTORY_H_
 
 #include <piece_core/interfaces/iwindow_factory.h>
 #include <piece_core/native_exports.h> // For NativeWindowOptions
@@ -15,14 +15,14 @@ namespace Piece
 namespace Core
 {
 
-#include "wal_glfw_backend_exports.h"
+#include "wal_glfw_exports.h"
 
 /**
  * @brief A factory for creating GlfwWindow instances.
  * @details This class implements the IWindowFactory interface to provide a concrete
  *          factory for creating GLFW-based windows.
  */
-class WAL_GLFW_BACKEND_API GlfwWindowFactory : public IWindowFactory
+class WAL_GLFW_API GlfwWindowFactory : public IWindowFactory
 {
   public:
     /**
@@ -50,4 +50,4 @@ class WAL_GLFW_BACKEND_API GlfwWindowFactory : public IWindowFactory
 } // namespace Core
 } // namespace Piece
 
-#endif // PIECE_WAL_GLFW_BACKEND_GLFW_WINDOW_FACTORY_H_
+#endif // PIECE_WAL_GLFW_WINDOW_FACTORY_H_

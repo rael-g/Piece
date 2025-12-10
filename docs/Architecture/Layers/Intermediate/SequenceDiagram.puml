@@ -8,10 +8,10 @@ participant "JobSystem (C++ Interm.)" as JS_Cpp
 participant "PhysicsSystem (C++ Interm.)" as PS_Cpp
 participant "ResourceManager (C++ Interm.)" as RM_Cpp
 participant "RenderSystem (C++ Interm.)" as RS_Cpp
-participant "IGraphicsDevice (C++ Backend)" as GD_Cpp
-participant "IPhysicsWorld (C++ Backend)" as PW_Cpp
+participant "IGraphicsDevice (C++ Low-Level Impl)" as GD_Cpp
+participant "IPhysicsWorld (C++ Low-Level Impl)" as PW_Cpp
 participant "IWindow" as Window
-participant "IRenderContext (C++ Backend)" as RC_Cpp
+participant "IRenderContext (C++ Low-Level Impl)" as RC_Cpp
 participant "PostProcMgr (C++ Interm.)" as PPM_Cpp
 participant "Camera (C# Wrapper)" as Cam_Cs
 participant "Model (C# Wrapper)" as Mod_Cs
@@ -124,7 +124,7 @@ loop Game Loop
 
   RS_Cpp -> RS_Cpp: SortRenderables(cullingResults)
 
-  loop for each visible ModelCpp in sorted order
+  loop for each visible Model (C++ internal)
     RS_Cpp -> Mod_Cs: GetNativePtr()
     activate Mod_Cs
     Mod_Cs --> RS_Cpp: mod_cpp_ptr

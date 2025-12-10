@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <NativeTarget>ral_opengl_backend</NativeTarget>
+    <NativeTarget>ral_opengl</NativeTarget>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,8 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="$(NativeBinDir)\ral_opengl_backend.dll">
-      <Link>ral_opengl_backend.dll</Link>
+    <Content Include="$(NativeBinDir)\ral_opengl.dll">
+      <Link>ral_opengl.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

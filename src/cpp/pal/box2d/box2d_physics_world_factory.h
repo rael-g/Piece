@@ -3,7 +3,7 @@
 #include <piece_core/interfaces/iphysics_world_factory.h>
 #include <pal/iphysics_world.h>
 #include <pal/iphysics_body.h>
-#include "pal_box2d_backend_exports.h"
+#include "pal_box2d_exports.h"
 
 namespace Piece {
     namespace PAL {
@@ -42,5 +42,5 @@ namespace Piece {
 }
 
 extern "C" {
-    PAL_BOX2D_BACKEND_API Piece::Core::IPhysicsWorldFactory* CreateBox2DPhysicsWorldFactory();
+    PAL_BOX2D_API Piece::Core::IPhysicsWorldFactory* CreateBox2DPhysicsWorldFactory();
 }

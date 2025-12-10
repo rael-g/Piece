@@ -2,8 +2,8 @@
  * @file glfw_window.h
  * @brief Defines the GlfwWindow class, a GLFW-based implementation of the IWindow interface.
  */
-#ifndef PIECE_WAL_GLFW_BACKEND_GLFW_WINDOW_H_
-#define PIECE_WAL_GLFW_BACKEND_GLFW_WINDOW_H_
+#ifndef PIECE_WAL_GLFW_WINDOW_H_
+#define PIECE_WAL_GLFW_WINDOW_H_
 
 #include <GLFW/glfw3.h> 
 #include <wal/iwindow.h>
@@ -13,12 +13,12 @@ namespace Piece
 namespace WAL
 {
 
-#include "wal_glfw_backend_exports.h"
+#include "wal_glfw_exports.h"
 
 /**
  * @brief A GLFW implementation of the IWindow interface.
  */
-class WAL_GLFW_BACKEND_API GlfwWindow : public IWindow
+class WAL_GLFW_API GlfwWindow : public IWindow
 {
   public:
     /**
@@ -94,4 +94,4 @@ class WAL_GLFW_BACKEND_API GlfwWindow : public IWindow
 } // namespace WAL
 } // namespace Piece
 
-#endif // PIECE_WAL_GLFW_BACKEND_GLFW_WINDOW_H_
+#endif // PIECE_WAL_GLFW_WINDOW_H_

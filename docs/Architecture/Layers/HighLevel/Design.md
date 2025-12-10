@@ -6,7 +6,7 @@ This document details the architectural design of the Piece.Framework of the Pie
 
 This C# framework serves as the primary, feature-rich **reference implementation** of the engine's core C# interfaces (e.g., `IEngine`, `IScene`, `INode`). Its main purpose is to provide a very high-level API for game developers, abstracting the complexity of the Piece.Core (C++) and enabling rapid development for PC platforms (Windows, Linux).
 
-By implementing a shared interface contract, it allows tools like the Visual Editor to remain decoupled from the concrete implementation. This ensures that a different Piece.Framework (e.g., a C++/Lua backend for consoles) could be created in the future and still be managed by the same toolset, fulfilling the engine's core philosophy of modularity.
+By implementing a shared interface contract, it allows tools like the Visual Editor to remain decoupled from the concrete implementation. This ensures that a different Piece.Framework (e.g., a C++/Lua low-level implementation for consoles) could be created in the future and still be managed by the same toolset, fulfilling the engine's core philosophy of modularity.
 
 Its objective is to provide an accessible and powerful high-level API for game developers, with features and capabilities supporting both 2D and 3D development.
 
@@ -21,7 +21,7 @@ In this layer, the key principles are manifested through:
 *   **Clean and Idiomatic C# Interface:** Abstraction of C++ complexity to focus on game logic.
 ## 3. Interaction with the Piece.Core (C++)
 
-The Piece.Framework plays a crucial role in configuring the Piece.Core (C++). Instead of merely consuming a fixed C-compatible API, the C# layer leverages its .NET Dependency Injection (DI) system to resolve C# wrapper factories (e.g., `VulkanGraphicsDeviceFactory`, `GlfwWindowFactory`) for various C++ backends. These C# wrappers encapsulate `IntPtr`s to actual C++ factory instances (e.g., `IGraphicsDeviceFactory*`, `IWindowFactory*`) residing in the native backend DLLs. During the engine's initialization, the C# layer uses P/Invoke to pass these C++ factory pointers, along with any relevant configuration options, to a C++ Service Locator in the Piece.Core. This fundamentally shifts the responsibility of backend selection and configuration from hardcoded C++ logic to the flexible .NET DI system. Once configured, the Piece.Core can then use these provided C++ factories to create concrete `IGraphicsDevice`, `IWindow`, and other low-level C++ objects.
+The Piece.Framework plays a crucial role in configuring the Piece.Core (C++). Instead of merely consuming a fixed C-compatible API, the C# layer leverages its .NET Dependency Injection (DI) system to resolve C# wrapper factories (e.g., `VulkanGraphicsDeviceFactory`, `GlfwWindowFactory`) for various C++ low-level implementations. These C# wrappers encapsulate `IntPtr`s to actual C++ factory instances (e.g., `IGraphicsDeviceFactory*`, `IWindowFactory*`) residing in the native low-level implementation DLLs. During the engine's initialization, the C# layer uses P/Invoke to pass these C++ factory pointers, along with any relevant configuration options, to a C++ Service Locator in the Piece.Core. This fundamentally shifts the responsibility of low-level implementation selection and configuration from hardcoded C++ logic to the flexible .NET DI system. Once configured, the Piece.Core can then use these provided C++ factories to create concrete `IGraphicsDevice`, `IWindow`, and other low-level C++ objects.
 
 ### 3.1. Safe Interop Strategy: Encapsulating Unsafe Code
 
@@ -43,7 +43,7 @@ This strategy ensures that the power and performance of C++ can be leveraged whi
     *   Maintains references to central systems like `InputManager`, `SceneManager`, and `AssetManager`.
     *   **Orchestrates the initialization of the Piece.Core (C++) layer:** This involves resolving C# factory wrappers (e.g., `IGraphicsDeviceFactory`, `IWindowFactory`) from the .NET DI container. It then uses P/Invoke to pass the native C++ factory pointers (obtained from these C# wrappers), along with any associated configuration options, to the C++ Service Locator within the Piece.Core.
     *   Manages the game loop (`Update`, `Draw`).
-*   **Dependencies:** `InputManager`, `SceneManager`, `AssetManager`, resolved C# factory wrappers for C++ backends (e.g., `IGraphicsDeviceFactory`, `IWindowFactory`), C# wrappers for `RenderSystem`, `ResourceManager` (for initialization).
+*   **Dependencies:** `InputManager`, `SceneManager`, `AssetManager`, resolved C# factory wrappers for C++ low-level implementations (e.g., `IGraphicsDeviceFactory`, `IWindowFactory`), C# wrappers for `RenderSystem`, `ResourceManager` (for initialization).
 
 ### 4.2. `Scene`
 
@@ -174,18 +174,18 @@ To create rich and believable worlds, the framework will be expanded with a foun
 
 ## 7. Configuration via .NET Dependency Injection and Options
 
-To provide a clean and idiomatic C# configuration experience for the Piece Engine, especially for its C++ backends, we leverage the robust .NET Dependency Injection (DI) system in conjunction with the standard .NET Options pattern.
+To provide a clean and idiomatic C# configuration experience for the Piece Engine, especially for its C++ low-level implementations, we leverage the robust .NET Dependency Injection (DI) system in conjunction with the standard .NET Options pattern.
 
-### 7.1. Extension Methods for Backend Registration
+### 7.1. Extension Methods for Low-Level Implementation Registration
 
-Each major module or backend (e.g., Vulkan renderer, GLFW windowing, Jolt physics) will be distributed as a dedicated C# NuGet package (e.g., `Piece.Vulkan`, `Piece.GLFW`, `Piece.Jolt`). These packages will expose an extension method on `Microsoft.Extensions.DependencyInjection.IServiceCollection` to register their services and C++ factory wrappers.
+Each major module or low-level implementation (e.g., Vulkan renderer, GLFW windowing, Jolt physics) will be distributed as a dedicated C# NuGet package (e.g., `Piece.Vulkan`, `Piece.GLFW`, `Piece.Jolt`). These packages will expose an extension method on `Microsoft.Extensions.DependencyInjection.IServiceCollection` to register their services and C++ factory wrappers.
 
 **Example:**
 ```csharp
 public static class VulkanServiceCollectionExtensions {
     public static IServiceCollection AddPieceVulkan(this IServiceCollection services, Action<VulkanOptions>? configureOptions = null) {
         services.AddSingleton<IGraphicsDeviceFactory, VulkanGraphicsDeviceFactory>();
-        // Configure options for Vulkan backend
+        // Configure options for Vulkan low-level implementation
         if (configureOptions != null) {
             services.Configure(configureOptions);
         } else {
@@ -198,7 +198,7 @@ public static class VulkanServiceCollectionExtensions {
 
 ### 7.2. Options Pattern for Configuration
 
-The .NET Options pattern will be used to provide structured, type-safe configuration for each module and backend.
+The .NET Options pattern will be used to provide structured, type-safe configuration for each module and low-level implementation.
 
 *   **Options Classes:** For each configurable component, a simple C# POCO (Plain Old C# Object) class will be defined (e.g., `VulkanOptions`, `GlfwOptions`, `EngineOptions`). These classes will contain properties representing the configurable parameters.
 
@@ -245,7 +245,7 @@ When a C# factory wrapper (e.g., `VulkanGraphicsDeviceFactory`) is instantiated 
     1.  Serialize the `XxxOptions` object into a C-compatible format (e.g., JSON string, custom binary blob) and pass this data to the C++ factory via P/Invoke. The C++ factory would then deserialize/parse it.
     2.  Marshal individual primitive properties of the `XxxOptions` class into a C-style struct (if the options are simple enough) and pass this struct via P/Invoke.
 
-*   The C++ factory (e.g., `VulkanGraphicsDeviceFactory` in C++) will then use these received options to configure the underlying C++ backend.
+*   The C++ factory (e.g., `VulkanGraphicsDeviceFactory` in C++) will then use these received options to configure the underlying C++ low-level implementation.
 
 This configuration strategy provides a flexible, type-safe, and idiomatic .NET way to manage the engine's extensive modularity, including the C++ layers.
 
@@ -257,7 +257,7 @@ The main specific extension points of this layer include:
 
 ### 9.1. Dependency Injection (DI) with .NET
 
-The Piece.Framework is designed to be fully compatible with the .NET Dependency Injection (DI) system. This is the primary mechanism for configuring and extending the engine, allowing the complete or partial replacement of any core framework subsystem. Crucially, this extends to injecting specific implementations of **C++ backends** (like graphics APIs or physics engines) into the intermediate C++ layer. By configuring the DI container in the C# host application, developers can seamlessly swap native C++ components without modifying engine source code. This includes passing configuration options to these C++ components as detailed in Section 7.
+The Piece.Framework is designed to be fully compatible with the .NET Dependency Injection (DI) system. This is the primary mechanism for configuring and extending the engine, allowing the complete or partial replacement of any core framework subsystem. Crucially, this extends to injecting specific implementations of **C++ low-level implementations** (like graphics APIs or physics engines) into the intermediate C++ layer. By configuring the DI container in the C# host application, developers can seamlessly swap native C++ components without modifying engine source code. This includes passing configuration options to these C++ components as detailed in Section 7.
 
 ### 8.2. Extension via Component System
 

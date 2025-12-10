@@ -6,17 +6,17 @@
 
 ## 🚀 Overview
 
-The Piece Engine is a next-generation game development platform designed for flexibility, performance, and extensibility. Inspired by the Modular Component Architecture philosophy, every component of the engine, from rendering backends to Piece.Framework (C#) gameplay systems, is designed to be a swappable and extendable unit. This allows developers to fine-tune the engine to their specific needs, integrating preferred technologies and custom solutions with ease.
+The Piece Engine is a next-generation game development platform designed for flexibility, performance, and extensibility. Inspired by the Modular Component Architecture philosophy, every component of the engine, from rendering implementations to Piece.Framework (C#) gameplay systems, is designed to be a swappable and extendable unit. This allows developers to fine-tune the engine to their specific needs, integrating preferred technologies and custom solutions with ease.
 
-Built with a hybrid C++ and C# architecture, the Piece Engine leverages the performance of native code for its core systems, which are orchestrated and configured by a powerful and approachable C# framework. Crucially, C++ backends (like rendering or windowing) are compiled on-demand from source via `MSBuild.targets` within C# NuGet packages, ensuring platform-native compatibility and seamless integration through .NET Dependency Injection.
+Built with a hybrid C++ and C# architecture, the Piece Engine leverages the performance of native code for its core systems, which are orchestrated and configured by a powerful and approachable C# framework. Crucially, C++ low-level implementations (like rendering or windowing) are compiled on-demand from source via `MSBuild.targets` within C# NuGet packages, ensuring platform-native compatibility and seamless integration through .NET Dependency Injection.
 
 ## ✨ Key Features
 
 *   **Hybrid Language Architecture:** Combines performance-critical C++ (for low-level and Piece.Core layers) with a rich C# framework (for Piece.Framework (C#) game logic and editor tooling).
 *   **Multi-Layered Design:** A clear separation of concerns across Low-Level (C++), Piece.Core (C++), Piece.Framework (C#), and Editor (C#) layers.
 *   **Ultimate Modularity & Extensibility:**
-    *   **Source-Compiled C++ Backends:** C++ low-level backends (rendering, windowing, physics) are provided as source code within C# NuGet packages. They are compiled on-demand via MSBuild.targets for the target platform, ensuring native performance and maximum compatibility.
-    *   **.NET Dependency Injection:** Extensible C# framework for custom components and services, orchestrating the integration of C++ backends.
+    *   **Source-Compiled C++ Low-Level Implementations:** C++ low-level implementations (rendering, windowing, physics) are provided as source code within C# NuGet packages. They are compiled on-demand via MSBuild.targets for the target platform, ensuring native performance and maximum compatibility.
+    *   **.NET Dependency Injection:** Extensible C# framework for custom components and services, orchestrating the integration of C++ low-level implementations.
     *   **Multi-language Scripting:** Support for various scripting languages via "Bridge Components."
 *   **IDE & Platform Agnostic:** Develop on Windows, Linux, or macOS using your preferred IDE (Visual Studio, VSCode, Vim, etc.).
 *   **Example-Driven Development (EDD):** A guided development workflow that ensures functionality is tied to concrete, executable examples.
@@ -25,8 +25,8 @@ Built with a hybrid C++ and C# architecture, the Piece Engine leverages the perf
 
 The engine is structured in a multi-layered approach to maximize performance, maintainability, and extensibility:
 
-1.  **Low-Level Layer (C++ Backends):**
-    *   Standalone C++ dynamic libraries (e.g., `wal_glfw_backend.dll`, `ral_opengl_backend.dll`) that strictly implement abstract interfaces (WAL, RAL, PAL). They are completely agnostic to `piece_core` C++.
+1.  **Low-Level Layer (C++ Implementations):**
+    *   Standalone C++ dynamic libraries (e.g., `wal_glfw.dll`, `ral_opengl.dll`) that strictly implement abstract interfaces (WAL, RAL, PAL). They are completely agnostic to `piece_core` C++.
     *   Export a C-style `CreateFactory()` function to create an instance of their factory implementation.
 
 2.  **Piece.Core (C++):**
@@ -34,7 +34,7 @@ The engine is structured in a multi-layered approach to maximize performance, ma
     *   Manages GPU resources, rendering pipeline, and includes a `JobSystem` for multithreading.
 
 3.  **Piece.Framework (C#):**
-    *   Acts as the intelligent orchestrator, using .NET Dependency Injection to manage and integrate C++ backends into the `piece_core`.
+    *   Acts as the intelligent orchestrator, using .NET Dependency Injection to manage and integrate C++ low-level implementations into the `piece_core`.
     *   Offers a user-friendly API for game developers, abstracting C++ complexities.
     *   Features a Node/Component system, core managers (`GameEngine`, `Scene`, `InputManager`, `AssetManager`, `RenderManager`), and advanced AI systems.
     *   Primary interface for game logic development and backend configuration.
@@ -49,11 +49,11 @@ The Piece Engine employs a robust build system designed for hybrid language supp
 
 *   **Monorepo Structure:** All related code and scripts are kept in a single repository.
 *   **Core Tooling:**
-    *   **CMake:** Used by C# NuGet packages' `MSBuild.targets` to configure and build C++ backend projects.
-    *   **vcpkg:** Manages all external C++ dependencies (e.g., GLFW, OpenGL) for native backends. It's invoked by `MSBuild.targets` during the C++ compilation step.
+    *   **CMake:** Used by C# NuGet packages' `MSBuild.targets` to configure and build C++ low-level projects.
+    *   **vcpkg:** Manages all external C++ dependencies (e.g., GLFW, OpenGL) for native implementations. It's invoked by `MSBuild.targets` during the C++ compilation step.
     *   **.NET SDK:** For building and managing C# projects and orchestrating the native C++ builds via NuGet packages.
 *   **Hybrid Build Process:**
-    *   **C++ Backends:** C++ low-level backends (WAL, RAL, PAL implementations) are distributed as source code within their respective C# NuGet wrapper packages. When a C# project referencing these NuGet packages is built, the NuGet package's `MSBuild.targets` file automatically invokes CMake and vcpkg to compile the native C++ code into dynamic libraries (`.dll`, `.so`) tailored for the target platform. These compiled native libraries are then placed in the C# project's output directory.
+    *   **C++ Low-Level Implementations:** C++ low-level implementations (WAL, RAL, PAL implementations) are distributed as source code within their respective C# NuGet wrapper packages. When a C# project referencing these NuGet packages is built, the NuGet package's `MSBuild.targets` file automatically invokes CMake and vcpkg to compile the native C++ code into dynamic libraries (`.dll`, `.so`) tailored for the target platform. These compiled native libraries are then placed in the C# project's output directory.
     *   **C# Projects:** Standard .NET SDK build process.
 
 ## 🚀 Development Workflow
@@ -105,9 +105,9 @@ To get started with the Piece Engine, follow these high-level steps:
     2.  [CMake](https://github.com/Kitware/CMake)
     3.  [.NET SDK 8.0+](https://dotnet.microsoft.com/download)
 
-3.  **Build C# Projects (which includes C++ backends):**
+3.  **Build C# Projects (which includes C++ low-level implementations):**
     *   Navigate to the solution directory (or your specific C# project).
-    *   Run `dotnet build` from your terminal. This will automatically trigger the CMake/vcpkg build process for C++ backends via NuGet's `MSBuild.targets`.
+    *   Run `dotnet build` from your terminal. This will automatically trigger the CMake/vcpkg build process for C++ low-level implementations via NuGet's `MSBuild.targets`.
     *   Example: `dotnet build tests/csharp/Piece.ExampleGame/Piece.ExampleGame.csproj`
 
 4.  **Run Your Game/Example:**

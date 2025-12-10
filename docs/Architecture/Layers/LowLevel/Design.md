@@ -1,17 +1,17 @@
 # Design Document - Low-Level Layer of the Piece Engine (C++)
 
-This document describes the architecture of the low-level backend of the Piece graphics engine, implemented in C++. It aligns with the engine's philosophy of **Modular Component Architecture** by being modular, extensible, and agnostic concerning graphics and windowing APIs. This backend provides the essential abstractions for interacting with the GPU and the operating system in a performant manner.
+This document describes the architecture of the low-level implementations of the Piece graphics engine, implemented in C++. It aligns with the engine's philosophy of **Modular Component Architecture** by being modular, extensible, and agnostic concerning graphics and windowing APIs. This low-level implementation provides the essential abstractions for interacting with the GPU and the operating system in a performant manner.
 
-## 1. General Backend Architecture
+## 1. General Low-Level Implementation Architecture
 
-The backend architecture is composed of two main abstraction layers:
+The low-level implementation architecture is composed of two main abstraction layers:
 
 1.  **Window Abstraction Layer (WAL):** Provides a generic interface for managing windows, graphics contexts, and user inputs.
 2.  **Render Abstraction Layer (RAL):** Defines a common set of interfaces for low-level rendering resources and commands, regardless of the underlying graphics API (OpenGL, Vulkan, DirectX).
 
-This backend is the foundation upon which the Piece.Core (C++) and, subsequently, the Piece.Framework (C#) will be built. Communication with the Piece.Core will be direct, without interop overhead, as both are in C++.
+This low-level implementation is the foundation upon which the Piece.Core (C++) and, subsequently, the Piece.Framework (C#) will be built. Communication with the Piece.Core will be direct, without interop overhead, as both are in C++.
 
-### Proposed Directory Structure for the Backend (inside `src/`)
+### Proposed Directory Structure for the Low-Level Implementations (inside `src/`)
 
 ```
 src/
@@ -344,7 +344,7 @@ public:
 
 ## 4. Physics Abstraction Layer (PAL)
 
-The PAL defines a common set of C++ interfaces for physics simulation, allowing the engine to integrate various physics engines as pluggable backends.
+The PAL defines a common set of C++ interfaces for physics simulation, allowing the engine to integrate various physics engines as pluggable implementations.
 
 ### 4.1. `IPhysicsWorld` (Physics World Manager)
 
@@ -453,7 +453,7 @@ public:
 *   **`PhysicsQuality`:** Enum for simulation quality settings (e.g., low, medium, high).
 *   **`CollisionFlags`:** Bitmask for collision filtering.
 
-## 5. Backend Directory Structure (inside `src/`)
+## 5. Low-Level Implementation Directory Structure (inside `src/`)
 
 ```
 src/
@@ -489,9 +489,9 @@ src/
 └── app_example/                # Example application using the backend
 ```
 
-## 6. Usage Example (Removed from Core Backend Design)
+## 6. Usage Example (Removed from Core Low-Level Implementation Design)
 
-The C++ backend usage example has been moved to the Piece.Core design document, where the interaction between the Piece.Core and the backend will be detailed.
+The C++ low-level implementation usage example has been moved to the Piece.Core design document, where the interaction between the Piece.Core and the low-level implementation will be detailed.
 
 ## 7. Observations and Conclusions (Analysis of Modern Graphics Engines)
 
@@ -533,13 +533,13 @@ This section summarizes insights obtained from the analysis of modern graphics e
 
 The WAL/RAL/PAL architecture is designed for extreme modularity, enabling the complete replacement or granular customization of its components. This fully adheres to the Piece Engine's philosophy of **Modular Component Architecture**, with the configuration orchestrated by the high-level C# application via .NET DI.
 
-### 8.1 Complete Backend Replacement (C# DI-driven)
+### 8.1 Complete Low-Level Implementation Replacement (C# DI-driven)
 
 *   **Mechanism:** Users can provide their own `gfx_vulkan.dll`, `gfx_directx.dll`, `physics_jolt.dll`, or `physics_custom.dll` libraries. These native DLLs **must** implement the core WAL/RAL/PAL interfaces and, crucially, **export C-style factory creation functions**.
-*   **Factory Exports:** Each backend DLL needs to export a function that creates and returns a raw pointer to an instance of its concrete C++ factory implementation (e.g., `VulkanGraphicsDeviceFactory*` implementing `IGraphicsDeviceFactory`). These factory functions can accept C-compatible configuration structs as parameters, marshaled from the C# application.
-    **Conceptual C++ Backend Export Example:**
+*   **Factory Exports:** Each low-level implementation DLL needs to export a function that creates and returns a raw pointer to an instance of its concrete C++ factory implementation (e.g., `VulkanGraphicsDeviceFactory*` implementing `IGraphicsDeviceFactory`). These factory functions can accept C-compatible configuration structs as parameters, marshaled from the C# application.
+    **Conceptual C++ Low-Level Implementation Export Example:**
     ```cpp
-    // In gfx_vulkan.dll or similar native backend project
+    // In gfx_vulkan.dll or similar native low-level implementation project
     #include "../../Piece.Intermediate/interfaces/igraphics_device_factory.h"
     #include "vulkan_graphics_device_factory.h" // Concrete implementation
     #include "../../Piece.Intermediate/NativeExports.h" // For NativeVulkanOptions
@@ -561,7 +561,7 @@ The WAL/RAL/PAL architecture is designed for extreme modularity, enabling the co
 
 ### 8.2 Partial Replacement of RAL/WAL/PAL Implementations (C# DI-driven Abstract Factories)
 
-*   **Mechanism:** To allow the user to replace only a specific type of RAL/WAL/PAL resource (e.g., a custom `IVertexBuffer` implementation, or an `IPhysicsMaterial` behavior) within an existing backend, the respective C++ factory interfaces (e.g., `IGraphicsDeviceFactory`, `IPhysicsWorldFactory`) can be designed to accept *internal factory interfaces* for these sub-components.
+*   **Mechanism:** To allow the user to replace only a specific type of RAL/WAL/PAL resource (e.g., a custom `IVertexBuffer` implementation, or an `IPhysicsMaterial` behavior) within an existing low-level implementation, the respective C++ factory interfaces (e.g., `IGraphicsDeviceFactory`, `IPhysicsWorldFactory`) can be designed to accept *internal factory interfaces* for these sub-components.
 *   **Example:** An `IGraphicsDeviceFactory` might accept an `IVertexBufferFactory` during its construction. This `IVertexBufferFactory` itself could be another C++ object, managed and provided by the C# DI system.
     ```cpp
     // Vertex Buffer Factory Interface (defined in Piece.Core or common abstractions)
@@ -583,10 +583,10 @@ The WAL/RAL/PAL architecture is designed for extreme modularity, enabling the co
 
 ### 8.3 Dynamic Extension of Functionalities (Plugins)
 
-*   **Potential:** Backends can be designed to dynamically load DLLs that provide specific implementations for certain functionalities (e.g., a plugin for a custom broad-phase collision detection algorithm or a specific ray tracing technique). These plugins can register themselves with internal mechanisms or, again, be managed via the C# DI system providing factories for these specific functionalities to the C++ side.
+*   **Potential:** Low-level implementations can be designed to dynamically load DLLs that provide specific implementations for certain functionalities (e.g., a plugin for a custom broad-phase collision detection algorithm or a specific ray tracing technique). These plugins can register themselves with internal mechanisms or, again, be managed via the C# DI system providing factories for these specific functionalities to the C++ side.
 
-These granular extension points transform the backend into a true set of **interchangeable building blocks**, where even the fundamental pieces can be customized with precision through a consistent C# DI-driven configuration.
+These granular extension points transform the low-level implementation into a true set of **interchangeable building blocks**, where even the fundamental pieces can be customized with precision through a consistent C# DI-driven configuration.
 
 ---
 
-**Note:** This document describes only the low-level C++ backend (WAL/RAL/PAL). For an overview of the engine's multi-layered architecture and the guiding philosophy of **Modular Component Architecture**, please refer to the [Piece Engine General Design Document](../OVERVIEW.md). The Piece.Core (C++) and the Piece.Framework (C#) are detailed in their respective design documents.
+**Note:** This document describes only the low-level C++ implementations (WAL/RAL/PAL). For an overview of the engine's multi-layered architecture and the guiding philosophy of **Modular Component Architecture**, please refer to the [Piece Engine General Design Document](../OVERVIEW.md). The Piece.Core (C++) and the Piece.Framework (C#) are detailed in their respective design documents.

@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <NativeTarget>pal_box2d_backend</NativeTarget>
+    <NativeTarget>pal_box2d</NativeTarget>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,8 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="$(NativeBinDir)\pal_box2d_backend.dll">
-      <Link>pal_box2d_backend.dll</Link>
+    <Content Include="$(NativeBinDir)\pal_box2d.dll">
+      <Link>pal_box2d.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

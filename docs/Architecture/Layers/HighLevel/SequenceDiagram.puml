@@ -28,10 +28,10 @@ participant "RenderSystem (C++ Interm.)" as RS_Cpp
 participant "Camera (C++ Interm.)" as Cam_Cpp
 participant "PhysicsSystem (C++ Interm.)" as PS_Cpp
 
-' C++ Backend (Conceptual)
-participant "IGraphicsDevice (C++ Backend)" as GD_Cpp
-participant "IRenderContext (C++ Backend)" as RC_Cpp
-participant "IPhysicsWorld (C++ Backend)" as PW_Cpp
+' C++ Low-Level Implementation (Conceptual)
+participant "IGraphicsDevice (C++ Low-Level Impl)" as GD_Cpp
+participant "IRenderContext (C++ Low-Level Impl)" as RC_Cpp
+participant "IPhysicsWorld (C++ Low-Level Impl)" as PW_Cpp
 
 
 ' --- Initialization Sequence ---
@@ -56,122 +56,114 @@ App -> App: ... (Create/Load initial Scene, Nodes, Components)
 deactivate App
 
 ' --- Game Loop ---
-App -> App: Run()
-loop Game Loop
+App -> App: Update(gameTime)
+activate App
+App -> IM: Update()
+activate IM
+IM --> App:
+deactivate IM
 
-  ' 1. Update Phase (C#)
-  App -> App: Update(gameTime)
-  activate App
-  App -> IM: Update()
-  activate IM
-  IM --> App:
-  deactivate IM
-
-  App -> Sc: Update(gameTime)
-  activate Sc
-  loop each Node in Scene (hierarchical update)
-    Sc -> Nd: Update(gameTime)
-    activate Nd
-    loop each Component in Node
-      Nd -> Comp: Update(gameTime)
-      activate Comp
-      Comp --> Nd:
-      deactivate Comp
-    end
-    Nd --> Sc:
-    deactivate Nd
+App -> Sc: Update(gameTime)
+activate Sc
+loop each Node in Scene (hierarchical update)
+  Sc -> Nd: Update(gameTime)
+  activate Nd
+  loop each Component in Node
+    Nd -> Comp: Update(gameTime)
+    activate Comp
+    Comp --> Nd:
+    deactivate Comp
   end
-  Sc --> App:
-  deactivate Sc
+  Nd --> Sc:
+  deactivate Nd
+end
+Sc --> App:
+deactivate Sc
 
-  App -> AIS: Update(gameTime)
-  activate AIS
-  loop each BehaviorTreeComponent
-    AIS -> BTC: Execute()
-    activate BTC
-    BTC --> AIS:
-    deactivate BTC
-  end
-  AIS --> App:
-  deactivate AIS
+App -> AIS: Update(gameTime)
+activate AIS
+loop each BehaviorTreeComponent
+  AIS -> BTC: Execute()
+  activate BTC
+  BTC --> AIS:
+  deactivate BTC
+end
+AIS --> App:
+deactivate AIS
 
-  ' 2. Physics Update (C# triggering C++ intermediate)
-  App -> NC: Engine_UpdatePhysics(engine_core_ptr, gameTime.DeltaTime)
-  activate NC
-  NC -> EC_Cpp: UpdatePhysics(deltaTime)
-  activate EC_Cpp
-  EC_Cpp -> PS_Cpp: Update(deltaTime)
-  activate PS_Cpp
-  PS_Cpp -> PW_Cpp: Step(deltaTime)
-  activate PW_Cpp
-  PW_Cpp --> PS_Cpp:
-  deactivate PW_Cpp
-  PS_Cpp --> EC_Cpp:
-  deactivate PS_Cpp
-  EC_Cpp --> NC:
-  deactivate EC_Cpp
-  NC --> App:
-  deactivate NC
+' 2. Physics Update (C# triggering C++ intermediate)
+App -> NC: Engine_UpdatePhysics(engine_core_ptr, gameTime.DeltaTime)
+activate NC
+NC -> EC_Cpp: UpdatePhysics(deltaTime)
+activate EC_Cpp
+EC_Cpp -> PS_Cpp: Update(deltaTime)
+activate PS_Cpp
+PS_Cpp -> PW_Cpp: Step(deltaTime)
+activate PW_Cpp
+PW_Cpp --> PS_Cpp:
+deactivate PW_Cpp
+PS_Cpp --> EC_Cpp:
+deactivate EC_Cpp
+NC --> App:
+deactivate NC
 
-  ' 3. Draw Phase (C# triggering C++ intermediate)
-  App -> App: Draw(gameTime)
-  activate App
-  RM -> Sc: GetRenderables(activeCamera) ' Collect visible nodes/components
-  activate Sc
-  Sc --> RM: collected_renderables (C# objects)
-  deactivate Sc
+' 3. Draw Phase (C# triggering C++ intermediate)
+App -> App: Draw(gameTime)
+activate App
+RM -> Sc: GetRenderables(activeCamera) ' Collect visible nodes/components
+activate Sc
+Sc --> RM: collected_renderables (C# objects)
+deactivate Sc
 
-  RM -> RS_Cs: RenderFrame(Cam_Cs, collected_renderables)
-  activate RS_Cs
-  RS_Cs -> NC: Engine_RenderFrame(engine_core_ptr, Cam_Cs.NativePtr, collected_renderables_native_ptrs_array, numModels)
-  activate NC
-  NC -> EC_Cpp: RenderFrame(cam_cpp_ptr, models_cpp_vector)
-  activate EC_Cpp
-  EC_Cpp -> RS_Cpp: RenderFrame(cam_cpp_ptr, models_cpp_vector)
-  activate RS_Cpp
+RM -> RS_Cs: RenderFrame(Cam_Cs, collected_renderables)
+activate RS_Cs
+RS_Cs -> NC: Engine_RenderFrame(engine_core_ptr, Cam_Cs.NativePtr, collected_renderables_native_ptrs_array, numModels)
+activate NC
+NC -> EC_Cpp: RenderFrame(cam_cpp_ptr, models_cpp_vector)
+activate EC_Cpp
+EC_Cpp -> RS_Cpp: RenderFrame(cam_cpp_ptr, models_cpp_vector)
+activate RS_Cpp
 
-  RS_Cpp -> GD_Cpp: BeginFrame()
-  RS_Cpp -> RC_Cpp: SetViewport(...)
-  RS_Cpp -> RC_Cpp: Configure Camera (UBOs, View/Projection)
+RS_Cpp -> GD_Cpp: BeginFrame()
+RS_Cpp -> RC_Cpp: SetViewport(...)
+RS_Cpp -> RC_Cpp: Configure Camera (UBOs, View/Projection)
 
-  RS_Cpp -> RS_Cpp: Perform Culling (can use JobSystem, not shown here)
-  RS_Cpp -> RS_Cpp: Sort Renderables
+RS_Cpp -> RS_Cpp: Perform Culling (can use JobSystem, not shown here)
+RS_Cpp -> RS_Cpp: Sort Renderables
 
-  loop for each visible Model (C++ internal)
-    RS_Cpp -> Mod_Cs: GetNativePtr() ' If needed to pass C# Model around
-    RS_Cpp -> ResM_Cpp: GetMesh(model_id)
-    activate ResM_Cpp
-    ResM_Cpp --> RS_Cpp: msh_cpp_ptr
-    deactivate ResM_Cpp
+loop for each visible Model (C++ internal)
+  RS_Cpp -> Mod_Cs: GetNativePtr() ' If needed to pass C# Model around
+  RS_Cpp -> ResM_Cpp: GetMesh(model_id)
+  activate ResM_Cpp
+  ResM_Cpp --> RS_Cpp: msh_cpp_ptr
+  deactivate ResM_Cpp
 
-    RS_Cpp -> ResM_Cpp: GetMaterial(model_id)
-    activate ResM_Cpp
-    ResM_Cpp --> RS_Cpp: mat_cpp_ptr
-    deactivate ResM_Cpp
+  RS_Cpp -> ResM_Cpp: GetMaterial(model_id)
+  activate ResM_Cpp
+  ResM_Cpp --> RS_Cpp: mat_cpp_ptr
+  deactivate ResM_Cpp
 
-    RS_Cpp -> RC_Cpp: SetVertexBuffer(msh_cpp_ptr.GetVertexBuffer())
-    RS_Cpp -> RC_Cpp: SetIndexBuffer(msh_cpp_ptr.GetIndexBuffer())
-    RS_Cpp -> RC_Cpp: SetShaderProgram(mat_cpp_ptr.GetShaderProgram())
-    RS_Cpp -> RC_Cpp: SetTexture(mat_cpp_ptr.GetTexture(...), slot)
-    RS_Cpp -> RC_Cpp: SetSampler(mat_cpp_ptr.GetSampler(...), slot)
-    RS_Cpp -> RC_Cpp: SetUniformBuffer(mat_cpp_ptr.GetUniformBuffer(...), bindingPoint)
-    RS_Cpp -> RC_Cpp: DrawIndexed(...)
-  end
+  RS_Cpp -> RC_Cpp: SetVertexBuffer(msh_cpp_ptr.GetVertexBuffer())
+  RS_Cpp -> RC_Cpp: SetIndexBuffer(msh_cpp_ptr.GetIndexBuffer())
+  RS_Cpp -> RC_Cpp: SetShaderProgram(mat_cpp_ptr.GetShaderProgram())
+  RS_Cpp -> RC_Cpp: SetTexture(mat_cpp_ptr.GetTexture(...), slot)
+  RS_Cpp -> RC_Cpp: SetSampler(mat_cpp_ptr.GetSampler(...), slot)
+  RS_Cpp -> RC_Cpp: SetUniformBuffer(mat_cpp_ptr.GetUniformBuffer(...), bindingPoint)
+  RS_Cpp -> RC_Cpp: DrawIndexed(...)
+end
 
-  RS_Cpp -> EC_Cpp: PostProcessManager.ApplyEffects(RC_Cpp, ...)
-  RS_Cpp -> GD_Cpp: EndFrame()
+RS_Cpp -> EC_Cpp: PostProcessManager.ApplyEffects(RC_Cpp, ...)
+RS_Cpp -> GD_Cpp: EndFrame()
 
-  RS_Cpp --> EC_Cpp:
-  deactivate RS_Cpp
-  EC_Cpp --> NC:
-  deactivate EC_Cpp
-  NC --> RS_Cs:
-  deactivate NC
-  RS_Cs --> RM:
-  deactivate RS_Cs
-  RM --> App:
-  deactivate App
-  App --> App:
-  deactivate App
+RS_Cpp --> EC_Cpp:
+deactivate RS_Cpp
+EC_Cpp --> NC:
+deactivate EC_Cpp
+NC --> RS_Cs:
+deactivate NC
+RM --> App:
+deactivate App
+App --> App:
+deactivate App
 end
 @enduml

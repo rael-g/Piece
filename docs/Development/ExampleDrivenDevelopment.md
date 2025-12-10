@@ -32,7 +32,7 @@ For the chosen example, implement *only the minimum amount of software functiona
 
 *   **"Just Enough" Principle:** Avoid over-engineering or implementing features that are not directly required by the current example.
 *   **Focus on the Current Layer:** If the example targets a low-level feature (e.g., window creation), the implementation should primarily focus on the WAL/RAL layers. If it targets a high-level feature, it will utilize the lower layers.
-*   **Initial Backend:** The initial implementation will use `GLFW` for the WAL and `OpenGL` for the RAL.
+*   **Initial Low-Level Implementation:** The initial implementation will use `GLFW` for the WAL and `OpenGL` for the RAL.
 
 ### Step 2.3: Develop Tests Concurrently
 
