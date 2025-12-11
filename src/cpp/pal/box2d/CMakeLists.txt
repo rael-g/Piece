@@ -6,7 +6,7 @@ add_library(pal_box2d SHARED
 
 target_compile_definitions(pal_box2d PRIVATE PAL_BOX2D_BUILD_DLL)
 
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
 
 target_include_directories(pal_box2d PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}

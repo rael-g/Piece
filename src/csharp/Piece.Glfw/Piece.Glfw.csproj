@@ -17,8 +17,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="$(NativeBinDir)\wal_glfw.dll">
+    <Content Include="$(NativeBinDir)\wal_glfw.dll" Condition="$([MSBuild]::IsOSPlatform('Windows'))">
       <Link>wal_glfw.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(NativeBinDir)\libwal_glfw.so" Condition="$([MSBuild]::IsOSPlatform('Linux'))">
+      <Link>libwal_glfw.so</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(NativeBinDir)\libwal_glfw.dylib" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+      <Link>libwal_glfw.dylib</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

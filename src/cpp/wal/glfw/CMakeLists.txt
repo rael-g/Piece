@@ -6,7 +6,7 @@ add_library(wal_glfw SHARED
 
 target_compile_definitions(wal_glfw PRIVATE WAL_GLFW_BUILD_DLL)
 
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
 
 target_include_directories(wal_glfw PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR} # for its own headers
