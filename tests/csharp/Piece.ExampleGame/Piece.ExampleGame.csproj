@@ -10,7 +10,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\csharp\Piece.Core\Piece.Core.csproj" />
-    <ProjectReference Include="..\..\..\src\csharp\Piece.Core.Interop\Piece.Core.Interop.csproj" />
     <ProjectReference Include="..\..\..\src\csharp\Piece.Glfw\Piece.Glfw.csproj" />
     <ProjectReference Include="..\..\..\src\csharp\Piece.OpenGL\Piece.OpenGL.csproj" />
     <ProjectReference Include="..\..\..\src\csharp\Piece.Box2d\Piece.Box2d.csproj" />

@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <piece_core/native_interop_types.h>
-#include <wal/glfw_backend/glfw_window.h>
-#include <wal/glfw_backend/glfw_window_factory.h>
+#include <wal/glfw/glfw_window.h>
+#include <wal/glfw/glfw_window_factory.h>
 
 using namespace Piece::Core; // Added this line
 

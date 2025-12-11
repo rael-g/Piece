@@ -1,12 +1,28 @@
 <Project>
   <PropertyGroup>
     <NativeBinDir>$(MSBuildThisFileDirectory)..\..\build\native\bin</NativeBinDir>
+    <NativeBuildSentinel>$(MSBuildThisFileDirectory)..\..\build\windows-debug\.native_build_completed</NativeBuildSentinel>
   </PropertyGroup>
 
   <Target Name="BuildNative" BeforeTargets="Build">
-    <Message Text="Compilando dependências nativas..." Importance="high" />
-    <Exec Command="cmake --preset windows-debug" WorkingDirectory="$(MSBuildThisFileDirectory)..\..\" />
-    <Exec Condition="'$(NativeTarget)' != ''" Command="cmake --build build/windows-debug --target $(NativeTarget) --verbose" WorkingDirectory="$(MSBuildThisFileDirectory)..\..\" />
-    <Exec Command="cmake --install build/windows-debug --prefix &quot;$(MSBuildThisFileDirectory)..\..\build\native&quot; --config Debug --verbose" WorkingDirectory="$(MSBuildThisFileDirectory)..\..\" />
+    <Message Text="Checking if native build is required..." Importance="high" />
+
+    <Exec Condition="!Exists('$(NativeBuildSentinel)')"
+          Command="cmake --preset windows-debug"
+          WorkingDirectory="$(MSBuildThisFileDirectory)..\..\" />
+
+    <Exec Condition="!Exists('$(NativeBuildSentinel)')"
+          Command="cmake --build build/windows-debug --verbose"
+          WorkingDirectory="$(MSBuildThisFileDirectory)..\..\" />
+
+    <Exec Condition="!Exists('$(NativeBuildSentinel)')"
+          Command="cmake --install build/windows-debug --prefix &quot;$(MSBuildThisFileDirectory)..\..\build\native&quot; --config Debug"
+          WorkingDirectory="$(MSBuildThisFileDirectory)..\..\" />
+
+    <WriteLinesToFile
+        Condition="!Exists('$(NativeBuildSentinel)')"
+        File="$(NativeBuildSentinel)"
+        Lines="Completed at $([System.DateTime]::Now)"
+        Overwrite="true" />
   </Target>
 </Project>
