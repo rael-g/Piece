@@ -1,0 +1,85 @@
+<Project>
+
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
+    <NativeOS>linux</NativeOS>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+    <NativeOS>osx</NativeOS>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+      <NativeOS>windows</NativeOS>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(Configuration) == 'Debug'">
+    <NativeConfig>debug</NativeConfig>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(Configuration) == 'Release'">
+    <NativeConfig>release</NativeConfig>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <NativePreset>$(NativeOS)-$(NativeConfig)</NativePreset>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
+    <NativeExt>so</NativeExt>
+    <NativePre>lib</NativePre>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+    <NativeExt>dylib</NativeExt>
+    <NativePre>lib</NativePre>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+    <NativeExt>dll</NativeExt>
+    <NativePre></NativePre>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PiecePackageDir>$(MSBuildThisFileDirectory)..\..\..\</PiecePackageDir>
+    <NativeBinDir>$(PiecePackageDir)\build\native\bin</NativeBinDir>
+    <VcpkgInstalledDir>$(PiecePackageDir)\build\$(NativePreset)\vcpkg_installed\</VcpkgInstalledDir>
+  </PropertyGroup>
+
+  <Target Name="BuildNative" BeforeTargets="Build">
+    <Exec
+          Command="cmake --preset $(NativePreset)"
+          WorkingDirectory="$(PiecePackageDir)" />
+
+    <Exec
+          Command="cmake --build --preset $(NativePreset) --verbose"
+          WorkingDirectory="$(PiecePackageDir)" />
+    <Exec
+          Command="cmake --install build/$(NativePreset) --prefix build/native --config $(NativeConfig)"
+          WorkingDirectory="$(PiecePackageDir)" />
+  </Target>
+
+  <PropertyGroup>
+    <NativeArch Condition="'$(NativeArch)' == ''">x64</NativeArch> <!-- Default for most platforms -->
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <VcpkgTriplet>$(NativeArch)-$(NativeOS)</VcpkgTriplet>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <NativeDepDir Condition="'$(Configuration)'=='Debug'">$(VcpkgInstalledDir)$(VcpkgTriplet)\debug\bin</NativeDepDir>
+    <NativeDepDir Condition="'$(Configuration)'!='Debug'">$(VcpkgInstalledDir)$(VcpkgTriplet)\bin</NativeDepDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(NativeBinDir)\$(NativePre)$(NativeTarget).$(NativeExt)" Condition="Exists('$(NativeBinDir)\$(NativePre)$(NativeTarget).$(NativeExt)')">
+      <Link>%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="@(NativeLibraryDependency->'$(NativeDepDir)\$(NativePre)%(Identity).$(NativeExt)')">
+        <Link>%(Filename)%(Extension)</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

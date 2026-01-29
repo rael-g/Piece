@@ -12,23 +12,20 @@
     <ProjectReference Include="..\Piece.Core\Piece.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup Condition="$(Configuration) == 'Debug'">
+    <NativeLibraryDependency Include="glfw3" />
+    <NativeLibraryDependency Include="fmtd" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(Configuration) == 'Release'">
+    <NativeLibraryDependency Include="glfw3" />
+    <NativeLibraryDependency Include="fmt" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="$(NativeBinDir)\ral_opengl.dll" Condition="$([MSBuild]::IsOSPlatform('Windows'))">
-      <Link>ral_opengl.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="$(NativeBinDir)\libral_opengl.so" Condition="$([MSBuild]::IsOSPlatform('Linux'))">
-      <Link>libral_opengl.so</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="$(NativeBinDir)\libral_opengl.dylib" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
-      <Link>libral_opengl.dylib</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+  <Import Project="../build/NativeDependencies.targets"/>
 
 </Project>
