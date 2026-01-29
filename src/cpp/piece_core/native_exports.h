@@ -1,30 +1,24 @@
-/**
- * @file native_exports.h
- * @brief Defines the C-style API exported by the Piece Core library.
- *        This API is used for interoperability with other languages, such as C#.
- */
 #ifndef NATIVE_EXPORTS_H
 #define NATIVE_EXPORTS_H
 
-#include <piece_core/native_interop_types.h>
 #include <piece_core/piece_core_exports.h>
+#include <ral/igraphics_device_factory.h>
+#include <pal/iphysics_world_factory.h>
+#include <wal/iwindow_factory.h>
 
 namespace Piece
 {
 namespace Core
 {
-struct EngineCore;
-class IGraphicsDeviceFactory;
-class IWindowFactory;
-class IPhysicsWorldFactory;
+struct EngineCore; // Opaque struct moved here
 } // namespace Core
 } // namespace Piece
 
 extern "C"
 {
-    PIECE_CORE_API void SetGraphicsDeviceFactory(Piece::Core::IGraphicsDeviceFactory *factory_ptr);
-    PIECE_CORE_API void SetWindowFactory(Piece::Core::IWindowFactory *factory_ptr);
-    PIECE_CORE_API void SetPhysicsWorldFactory(Piece::Core::IPhysicsWorldFactory *factory_ptr);
+    PIECE_CORE_API void SetGraphicsDeviceFactory(Piece::RAL::IGraphicsDeviceFactory *factory_ptr);
+    PIECE_CORE_API void SetWindowFactory(Piece::WAL::IWindowFactory *factory_ptr);
+    PIECE_CORE_API void SetPhysicsWorldFactory(Piece::PAL::IPhysicsWorldFactory *factory_ptr);
 
     /**
      * @brief Initializes the engine.

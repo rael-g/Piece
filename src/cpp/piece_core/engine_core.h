@@ -12,12 +12,10 @@
 
 #include <memory>
 
-// Forward declarations of factories and service locator.
-// These headers define the types within Piece::Core namespace already.
 #include "core/service_locator.h"
-#include "interfaces/igraphics_device_factory.h"
-#include "interfaces/iphysics_world_factory.h"
-#include "interfaces/iwindow_factory.h"
+#include <ral/igraphics_device_factory.h>
+#include <pal/iphysics_world_factory.h>
+#include <wal/iwindow_factory.h>
 
 #include "piece_core_exports.h" // Defines PIECE_CORE_API
 

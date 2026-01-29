@@ -5,6 +5,8 @@ target_include_directories(ral INTERFACE
     "${CMAKE_CURRENT_SOURCE_DIR}/interfaces"
 )
 
+target_link_libraries(ral INTERFACE wal glm::glm)
+
 add_subdirectory(opengl)
 
 # Install rules

@@ -4,7 +4,7 @@ target_include_directories(wal INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}")
 
 # Install rules
 include(GNUInstallDirs)
-install(FILES iwindow.h
+install(FILES iwindow.h iwindow_factory.h native_window_options.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/wal
 )
 

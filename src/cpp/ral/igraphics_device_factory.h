@@ -2,18 +2,18 @@
  * @file igraphics_device_factory.h
  * @brief Defines the IGraphicsDeviceFactory interface for creating graphics device instances.
  */
-#ifndef PIECE_CORE_GRAPHICS_DEVICE_FACTORY_H_
-#define PIECE_CORE_GRAPHICS_DEVICE_FACTORY_H_
+#ifndef RAL_IGRAPHICS_DEVICE_FACTORY_H_
+#define RAL_IGRAPHICS_DEVICE_FACTORY_H_
 
-#include <piece_core/native_exports.h>
 #include <ral/igraphics_device.h>
 #include <wal/iwindow.h>
+#include "native_graphics_options.h" // Changed include
 
 #include <memory>
 
 namespace Piece
 {
-namespace Core
+namespace RAL
 {
 
 /**
@@ -37,17 +37,17 @@ class IGraphicsDeviceFactory
      *
      * @details This method is responsible for instantiating a concrete graphics device.
      * The provided window is used to establish a rendering context, and options
-     * allow for specific configuration (e.g., enabling validation layers for Vulkan).
+     * allow for specific configuration (e.g., enabling debug layers).
      *
      * @param window A pointer to the window interface that the graphics device will use.
      * @param options Configuration options for the graphics device.
      * @return A unique_ptr to the newly created IGraphicsDevice instance.
      */
     virtual std::unique_ptr<RAL::IGraphicsDevice> CreateGraphicsDevice(WAL::IWindow *window,
-                                                                       const NativeVulkanOptions *options) = 0;
+                                                                       const NativeGraphicsOptions *options) = 0;
 };
 
-} // namespace Core
+} // namespace RAL
 } // namespace Piece
 
-#endif // PIECE_CORE_GRAPHICS_DEVICE_FACTORY_H_
+#endif // RAL_IGRAPHICS_DEVICE_FACTORY_H_

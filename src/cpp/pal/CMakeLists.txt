@@ -2,6 +2,8 @@ add_library(pal INTERFACE)
 
 target_include_directories(pal INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}")
 
+target_link_libraries(pal INTERFACE glm::glm)
+
 add_subdirectory(box2d)
 
 # Install rules

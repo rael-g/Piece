@@ -1,4 +1,3 @@
-using System;
 using Microsoft.Extensions.DependencyInjection;
 using Piece.Core;
 
@@ -8,7 +7,7 @@ public static class OpenGLServiceCollectionExtensions
 {
     public static IServiceCollection AddOpenGLRenderer(this IServiceCollection services)
     {
-        IntPtr factoryPtr = OpenGLPInvoke.CreateFactory();
+        IntPtr factoryPtr = OpenGLPInvoke.CreateFactory(default, default);
         NativeCalls.SetGraphicsDeviceFactory(factoryPtr);
         return services;
     }

@@ -1,8 +1,9 @@
 #pragma once
 
-#include <piece_core/interfaces/iphysics_world_factory.h>
 #include <pal/iphysics_world.h>
 #include <pal/iphysics_body.h>
+#include <pal/iphysics_world_factory.h> // New include
+#include <pal/native_physics_options.h>   // New include
 #include "pal_box2d_exports.h"
 
 namespace Piece {
@@ -31,7 +32,7 @@ namespace Piece {
         };
     }
 
-    namespace Core {
+    namespace PAL { // Changed from Core to PAL
         class Box2DPhysicsWorldFactory : public IPhysicsWorldFactory {
         public:
             std::unique_ptr<PAL::IPhysicsWorld> CreatePhysicsWorld(const NativePhysicsOptions *options) override {
@@ -42,5 +43,5 @@ namespace Piece {
 }
 
 extern "C" {
-    PAL_BOX2D_API Piece::Core::IPhysicsWorldFactory* CreateBox2DPhysicsWorldFactory();
+    PAL_BOX2D_API Piece::PAL::IPhysicsWorldFactory* CreateBox2DPhysicsWorldFactory(); // Changed Piece::Core to Piece::PAL
 }

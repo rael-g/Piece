@@ -6,8 +6,6 @@ add_library(pal_box2d SHARED
 
 target_compile_definitions(pal_box2d PRIVATE PAL_BOX2D_BUILD_DLL)
 
-
-
 target_include_directories(pal_box2d PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/src/cpp
@@ -15,7 +13,6 @@ target_include_directories(pal_box2d PUBLIC
 
 target_link_libraries(pal_box2d PRIVATE
     pal
-    piece_core
 )
 
 # Install rules

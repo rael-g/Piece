@@ -21,7 +21,6 @@ target_include_directories(ral_opengl PUBLIC
 
 target_link_libraries(ral_opengl PRIVATE
     ral
-    piece_core
     wal
     OpenGL::GL
 )

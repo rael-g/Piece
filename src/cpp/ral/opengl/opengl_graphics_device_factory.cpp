@@ -7,7 +7,7 @@ namespace Piece {
         OpenGLGraphicsDeviceFactory::~OpenGLGraphicsDeviceFactory() {}
 
         std::unique_ptr<RAL::IGraphicsDevice> OpenGLGraphicsDeviceFactory::CreateGraphicsDevice(WAL::IWindow *window,
-                                                                                              const Core::NativeVulkanOptions *options) {
+                                                                                              const Piece::RAL::NativeGraphicsOptions *options) {
             // TODO: Implement actual OpenGL device creation using window and options
             return std::unique_ptr<RAL::IGraphicsDevice>(static_cast<RAL::IGraphicsDevice*>(new OpenGLGraphicsDevice()));
         }

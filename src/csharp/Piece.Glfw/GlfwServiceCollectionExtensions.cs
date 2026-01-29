@@ -1,4 +1,3 @@
-using System;
 using Microsoft.Extensions.DependencyInjection;
 using Piece.Core;
 
@@ -8,7 +7,7 @@ public static class GlfwServiceCollectionExtensions
 {
     public static IServiceCollection AddGlfwWindow(this IServiceCollection services)
     {
-        IntPtr factoryPtr = GlfwPInvoke.CreateFactory();
+        IntPtr factoryPtr = GlfwPInvoke.CreateFactory(default);
         NativeCalls.SetWindowFactory(factoryPtr);
         return services;
     }

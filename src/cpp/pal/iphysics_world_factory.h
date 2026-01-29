@@ -2,17 +2,17 @@
  * @file iphysics_world_factory.h
  * @brief Defines the IPhysicsWorldFactory interface for creating physics world instances.
  */
-#ifndef PIECE_CORE_IPHYSICS_WORLD_FACTORY_H_
-#define PIECE_CORE_IPHYSICS_WORLD_FACTORY_H_
+#ifndef PAL_IPHYSICS_WORLD_FACTORY_H_
+#define PAL_IPHYSICS_WORLD_FACTORY_H_
 
 #include <pal/iphysics_world.h>
-#include <piece_core/native_interop_types.h>
+#include "native_physics_options.h" // New include
 
 #include <memory>
 
 namespace Piece
 {
-namespace Core
+namespace PAL
 {
 
 /**
@@ -34,7 +34,7 @@ class IPhysicsWorldFactory
     virtual std::unique_ptr<PAL::IPhysicsWorld> CreatePhysicsWorld(const NativePhysicsOptions *options) = 0;
 };
 
-} // namespace Core
+} // namespace PAL
 } // namespace Piece
 
-#endif // PIECE_CORE_IPHYSICS_WORLD_FACTORY_H_
+#endif // PAL_IPHYSICS_WORLD_FACTORY_H_

@@ -6,16 +6,13 @@ add_library(wal_glfw SHARED
 
 target_compile_definitions(wal_glfw PRIVATE WAL_GLFW_BUILD_DLL)
 
-
-
 target_include_directories(wal_glfw PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR} # for its own headers
-    ${CMAKE_SOURCE_DIR}/src/cpp # for <wal/iwindow.h>, <piece_core/interfaces/iwindow_factory.h>, etc.
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../>
 )
 
-# Find GLFW provided by vcpkg
 find_package(glfw3 CONFIG REQUIRED)
-target_link_libraries(wal_glfw PUBLIC glfw)
+target_link_libraries(wal_glfw PUBLIC glfw wal)
 
 # Install rules
 include(GNUInstallDirs)

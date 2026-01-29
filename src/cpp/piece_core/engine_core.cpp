@@ -47,9 +47,9 @@ void InitializeLogger()
  */
 EngineCore::EngineCore()
 {
-    IWindowFactory *windowFactory = ServiceLocator::Get().GetWindowFactory();
-    IGraphicsDeviceFactory *graphicsFactory = ServiceLocator::Get().GetGraphicsDeviceFactory();
-    IPhysicsWorldFactory *physicsFactory = ServiceLocator::Get().GetPhysicsWorldFactory();
+    WAL::IWindowFactory *windowFactory = ServiceLocator::Get().GetWindowFactory();
+    RAL::IGraphicsDeviceFactory *graphicsFactory = ServiceLocator::Get().GetGraphicsDeviceFactory();
+    PAL::IPhysicsWorldFactory *physicsFactory = ServiceLocator::Get().GetPhysicsWorldFactory();
 
     if (!windowFactory)
     {
@@ -69,7 +69,7 @@ EngineCore::EngineCore()
         return;
     }
 
-    Piece::Core::NativeWindowOptions defaultWindowOptions = {800, 600, 0, "Piece Engine Window"};
+    Piece::WAL::NativeWindowOptions defaultWindowOptions = {800, 600, 0, "Piece Engine Window"};
     window_ = windowFactory->CreateWindow(&defaultWindowOptions);
     if (!window_)
     {
@@ -78,8 +78,8 @@ EngineCore::EngineCore()
     }
     spdlog::info("IWindow created.");
 
-    Piece::Core::NativeVulkanOptions defaultVulkanOptions = {0, 2};
-    graphics_device_ = graphicsFactory->CreateGraphicsDevice(window_.get(), &defaultVulkanOptions);
+    Piece::RAL::NativeGraphicsOptions defaultGraphicsOptions = {0, 2};
+    graphics_device_ = graphicsFactory->CreateGraphicsDevice(window_.get(), &defaultGraphicsOptions);
     if (!graphics_device_)
     {
         spdlog::error("Failed to create IGraphicsDevice instance.");
@@ -87,7 +87,7 @@ EngineCore::EngineCore()
     }
     spdlog::info("IGraphicsDevice created.");
 
-    Piece::Core::NativePhysicsOptions defaultPhysicsOptions = {1.0f / 60.0f, 4};
+    Piece::PAL::NativePhysicsOptions defaultPhysicsOptions = {1.0f / 60.0f, 4};
     physics_world_ = physicsFactory->CreatePhysicsWorld(&defaultPhysicsOptions);
     if (!physics_world_)
     {
@@ -139,7 +139,7 @@ void EngineCore::Render()
  */
 extern "C"
 {
-    PIECE_CORE_API void SetGraphicsDeviceFactory(Piece::Core::IGraphicsDeviceFactory *factory_ptr)
+    PIECE_CORE_API void SetGraphicsDeviceFactory(Piece::RAL::IGraphicsDeviceFactory *factory_ptr)
     {
         if (!factory_ptr)
         {
@@ -147,11 +147,11 @@ extern "C"
             return;
         }
         Piece::Core::ServiceLocator::Get().SetGraphicsDeviceFactory(
-            std::unique_ptr<Piece::Core::IGraphicsDeviceFactory>(factory_ptr));
+            std::unique_ptr<Piece::RAL::IGraphicsDeviceFactory>(factory_ptr));
         spdlog::info("SetGraphicsDeviceFactory called.");
     }
 
-    PIECE_CORE_API void SetWindowFactory(Piece::Core::IWindowFactory *factory_ptr)
+    PIECE_CORE_API void SetWindowFactory(Piece::WAL::IWindowFactory *factory_ptr)
     {
         if (!factory_ptr)
         {
@@ -159,11 +159,11 @@ extern "C"
             return;
         }
         Piece::Core::ServiceLocator::Get().SetWindowFactory(
-            std::unique_ptr<Piece::Core::IWindowFactory>(factory_ptr));
+            std::unique_ptr<Piece::WAL::IWindowFactory>(factory_ptr));
         spdlog::info("SetWindowFactory called.");
     }
 
-    PIECE_CORE_API void SetPhysicsWorldFactory(Piece::Core::IPhysicsWorldFactory *factory_ptr)
+    PIECE_CORE_API void SetPhysicsWorldFactory(Piece::PAL::IPhysicsWorldFactory *factory_ptr)
     {
         if (!factory_ptr)
         {
@@ -171,7 +171,7 @@ extern "C"
             return;
         }
         Piece::Core::ServiceLocator::Get().SetPhysicsWorldFactory(
-            std::unique_ptr<Piece::Core::IPhysicsWorldFactory>(factory_ptr));
+            std::unique_ptr<Piece::PAL::IPhysicsWorldFactory>(factory_ptr));
         spdlog::info("SetPhysicsWorldFactory called.");
     }
 
@@ -179,7 +179,7 @@ extern "C"
      * @brief C-style export to initialize the engine.
      * @return A pointer to the newly created EngineCore instance.
      */
-    Piece::Core::EngineCore *Engine_Initialize()
+    PIECE_CORE_API Piece::Core::EngineCore *Engine_Initialize()
     {
         static bool loggerInitialized = false;
         if (!loggerInitialized)
@@ -217,7 +217,6 @@ extern "C"
     /**
      * @brief C-style export to update the engine.
      * @param corePtr A pointer to the EngineCore instance.
-     * @param deltaTime The time since the last update.
      */
     void Engine_Update(Piece::Core::EngineCore *corePtr, float deltaTime)
     {

@@ -1,9 +1,7 @@
 #include <gtest/gtest.h>
-#include <piece_core/native_interop_types.h>
-#include <wal/glfw_backend/glfw_window.h>
-#include <wal/glfw_backend/glfw_window_factory.h>
-
-using namespace Piece::Core; // Added this line
+#include <wal/native_window_options.h> // New include
+#include <wal/glfw/glfw_window.h>
+#include <wal/glfw/glfw_window_factory.h>
 
 // Test fixture for GlfwWindow
 class GlfwWindowTest : public ::testing::Test
@@ -33,8 +31,8 @@ TEST_F(GlfwWindowTest, CanCreateWindow)
 
 TEST_F(GlfwWindowTest, FactoryCreatesWindow)
 {
-    NativeWindowOptions options = {800, 600, 0, "Factory Test"};
-    Piece::Core::GlfwWindowFactory factory(&options);
+    Piece::WAL::NativeWindowOptions options = {800, 600, 0, "Factory Test"};
+    Piece::WAL::GlfwWindowFactory factory(&options);
     auto window = factory.CreateWindow(&options);
 
     ASSERT_NE(window, nullptr);

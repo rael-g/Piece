@@ -8,14 +8,14 @@
 
 namespace Piece
 {
-namespace Core
+namespace WAL
 {
 
 /**
  * @brief Constructs a GlfwWindowFactory instance, caching the provided options.
  * @param options The native window options.
  */
-GlfwWindowFactory::GlfwWindowFactory(const Piece::Core::NativeWindowOptions *options)
+GlfwWindowFactory::GlfwWindowFactory(const Piece::WAL::NativeWindowOptions *options)
 {
     if (options)
     {
@@ -36,10 +36,10 @@ GlfwWindowFactory::GlfwWindowFactory(const Piece::Core::NativeWindowOptions *opt
  * @param options The configuration options for the window. If null, cached options are used.
  * @return A unique_ptr to the newly created IWindow instance, or nullptr on failure.
  */
-std::unique_ptr<WAL::IWindow> GlfwWindowFactory::CreateWindow(const Piece::Core::NativeWindowOptions *options)
+std::unique_ptr<WAL::IWindow> GlfwWindowFactory::CreateWindow(const Piece::WAL::NativeWindowOptions *options)
 {
     auto window = std::make_unique<WAL::GlfwWindow>();
-    const Piece::Core::NativeWindowOptions *actualOptions = options ? options : &options_;
+    const Piece::WAL::NativeWindowOptions *actualOptions = options ? options : &options_;
 
     if (!window->Init(actualOptions->initial_window_width, actualOptions->initial_window_height,
                       std::string(actualOptions->window_title)))
@@ -50,5 +50,5 @@ std::unique_ptr<WAL::IWindow> GlfwWindowFactory::CreateWindow(const Piece::Core:
     return window;
 }
 
-} // namespace Core
+} // namespace WAL
 } // namespace Piece
