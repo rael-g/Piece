@@ -31,7 +31,6 @@ A monorepo structure is used to keep all related code and scripts in a single lo
 │   │   └── piece_core/ # Piece.Core (C++)
 │   │
 │   └── csharp/               # C# source code.
-│       ├── Piece.Core.Interop/ # Interoperability project, P/Invoke for Piece.Core (C++).
 │       ├── Piece.Framework/      # Piece.Framework (public API).
 │       └── Piece.Editor/       # The Visual Editor application.
 │
@@ -62,7 +61,7 @@ The build architecture is designed to support both local development and the del
 The compilation process is divided into two main phases:
 
 1.  **Native Compilation (C++):** Using CMake, all core engine components and low-level implementations (e.g., `wal/glfw`) are compiled into native libraries (`.dll` on Windows, `.so` on Linux). This process is self-contained and produces the low-level binaries.
-2.  **Managed Compilation (C#):** Using the .NET SDK, C# projects are compiled. The `Piece.Core.Interop` project defines P/Invoke signatures to load and interact with the C++ libraries (from Piece.Core) compiled in the previous phase.
+2.  **Managed Compilation (C#):** Using the .NET SDK, C# projects are compiled. C# wrapper projects (e.g., `Piece.Glfw`, `Piece.OpenGL`, `Piece.Box2d`) define P/Invoke signatures to load and interact with the C++ libraries (from Piece.Core) compiled in the previous phase.
 
 In the CI environment, these phases are executed sequentially to ensure all tests pass before proceeding to packaging.
 
@@ -86,7 +85,7 @@ These are for developers who wish to use the `PieceEngine` as a framework in the
 *   **Process:** The pipeline uses the `dotnet pack` command on the C# library projects (e.g., `Piece.Framework`, `Piece.Vulkan`).
 *   **Content:** Each `.nupkg` package contains:
     *   The C# library DLLs.
-    *   A configuration that instructs NuGet to include the correct native C++ binaries (`.dll`/`.so`) when packing a consuming project.
+    *   A configuration that instructs NuGet to include the correct native C++ binaries (`.dll`/.so) when packing a consuming project. This configuration is managed through custom MSBuild target files.
 *   **Final Result:** A set of versioned `.nupkg` packages, ready to be published to a registry like `NuGet.org`.
 
 **3. Vcpkg Packages (For C++ Developers)**
@@ -101,7 +100,7 @@ In addition to serving the C# ecosystem, the CD pipeline will also generate pack
 As planned, the selection and configuration of C++ low-level implementations are controlled by the C# host through .NET Dependency Injection (DI).
 
 1.  **Service Registration:** The C# application (whether the Editor or a game) registers the desired low-level implementations by calling extension methods on the `IServiceCollection` (e.g., `services.AddPieceVulkan()`, `services.AddPieceGlfw()`).
-2.  **C# to C++ Bridge:** During initialization, the C# interoperability layer loads the native C++ libraries and passes configuration to the Piece.Core (C++).
+2.  **C# to C++ Bridge:** During initialization, individual C# wrapper projects (e.g., `Piece.Glfw`, `Piece.OpenGL`, `Piece.Box2d`) handle the loading of their respective native C++ libraries, passing configuration and factory pointers to the Piece.Core (C++) via P/Invoke.
 3.  **C++ Resolution:** The Piece.Core then uses the received configurations to create and provide the correct implementations of interfaces (e.g., `IGraphicsDevice`, `IWindow`).
 
 This approach offers a flexible and type-safe way to configure the engine, aligning perfectly with modern .NET development practices and the philosophy of modular component architecture for the Piece Engine.

@@ -30,15 +30,15 @@ To enable the flexible injection and configuration of low-level C++ implementati
 
 *   **Purpose:** To decouple the core Piece.Core from concrete low-level implementations. Instead of directly loading low-level implementation DLLs or instantiating specific low-level implementation types, the Piece.Core requests factories from the `ServiceLocator` and uses them to create instances of `IGraphicsDevice`, `IWindow`, `IPhysicsWorld`, etc.
 *   **Mechanism:** The `ServiceLocator` stores `std::unique_ptr`s to these C++ factory interfaces. The C# host resolves C# wrapper factories (which encapsulate raw C++ factory pointers) via its .NET DI container and uses P/Invoke functions to pass these raw pointers to the C++ `ServiceLocator`. The `ServiceLocator` then takes ownership of these C++ factory instances.
-*   **Location:** Defined in `src/cpp/Piece.Intermediate/core/service_locator.h`.
+*   **Location:** Defined in `src/cpp/piece_core/core/service_locator.h`.
 
 **Conceptual `ServiceLocator` Structure:**
 ```cpp
 #pragma once
 #include <memory>
-#include "../interfaces/igraphics_device_factory.h"
-#include "../interfaces/iwindow_factory.h"
-#include "../interfaces/iphysics_world_factory.h"
+#include <ral/igraphics_device_factory.h>
+#include <wal/iwindow_factory.h>
+#include <pal/iphysics_world_factory.h>
 
 namespace Piece { namespace Core {
     class ServiceLocator {
@@ -48,24 +48,24 @@ namespace Piece { namespace Core {
             return instance;
         }
 
-        void SetGraphicsDeviceFactory(std::unique_ptr<IGraphicsDeviceFactory> factory) {
+        void SetGraphicsDeviceFactory(std::unique_ptr<RAL::IGraphicsDeviceFactory> factory) {
             graphics_device_factory_ = std::move(factory);
         }
-        IGraphicsDeviceFactory* GetGraphicsDeviceFactory() {
+        RAL::IGraphicsDeviceFactory* GetGraphicsDeviceFactory() {
             return graphics_device_factory_.get();
         }
 
-        void SetWindowFactory(std::unique_ptr<IWindowFactory> factory) {
+        void SetWindowFactory(std::unique_ptr<WAL::IWindowFactory> factory) {
             window_factory_ = std::move(factory);
         }
-        IWindowFactory* GetWindowFactory() {
+        WAL::IWindowFactory* GetWindowFactory() {
             return window_factory_.get();
         }
 
-        void SetPhysicsWorldFactory(std::unique_ptr<IPhysicsWorldFactory> factory) {
+        void SetPhysicsWorldFactory(std::unique_ptr<PAL::IPhysicsWorldFactory> factory) {
             physics_world_factory_ = std::move(factory);
         }
-        IPhysicsWorldFactory* GetPhysicsWorldFactory() {
+        PAL::IPhysicsWorldFactory* GetPhysicsWorldFactory() {
             return physics_world_factory_.get();
         }
 
@@ -74,9 +74,9 @@ namespace Piece { namespace Core {
         ServiceLocator(const ServiceLocator&) = delete;
         ServiceLocator& operator=(const ServiceLocator&) = delete;
 
-        std::unique_ptr<IGraphicsDeviceFactory> graphics_device_factory_;
-        std::unique_ptr<IWindowFactory> window_factory_;
-        std::unique_ptr<IPhysicsWorldFactory> physics_world_factory_;
+        std::unique_ptr<RAL::IGraphicsDeviceFactory> graphics_device_factory_;
+        std::unique_ptr<WAL::IWindowFactory> window_factory_;
+        std::unique_ptr<PAL::IPhysicsWorldFactory> physics_world_factory_;
     };
 }}
 ```
@@ -93,44 +93,33 @@ This C++ Service Locator acts as the crucial bridge for the .NET DI system to co
     ```cpp
     #ifndef NATIVE_EXPORTS_H
     #define NATIVE_EXPORTS_H
-
-    // Forward declarations for opaque types and factory interfaces
-    struct EngineCore;
+    
+    #include <ral/igraphics_device_factory.h>
+    #include <wal/iwindow_factory.h>
+    #include <pal/iphysics_world_factory.h>
+    #include <ral/native_graphics_options.h>
+    #include <wal/native_window_options.h>
+    #include <pal/native_physics_options.h>
+    
     namespace Piece { namespace Core {
-        class IGraphicsDeviceFactory;
-        class IWindowFactory;
-        class IPhysicsWorldFactory;
+        struct EngineCore; // Opaque struct
     }}
-
-    // C-compatible struct for passing configuration options
-    struct NativeWindowOptions {
-        int initialWindowWidth;
-        int initialWindowHeight;
-        bool windowResizable;
-        // Pointers for strings must be allocated/deallocated correctly across the boundary
-        const char* windowTitle;
-    };
-
-    struct NativeVulkanOptions {
-        bool enableValidationLayers;
-        int maxFramesInFlight;
-        // Pointers for arrays of strings (e.g., required device extensions) need careful marshaling
-    };
-
+    
     extern "C" {
         // Functions for the C# layer to set C++ factory instances in the Service Locator
-        __declspec(dllexport) void PieceCore_SetGraphicsDeviceFactory(void* factoryPtr, const NativeVulkanOptions* options);
-        __declspec(dllexport) void PieceCore_SetWindowFactory(void* factoryPtr, const NativeWindowOptions* options);
-        __declspec(dllexport) void PieceCore_SetPhysicsWorldFactory(void* factoryPtr, void* options); // Generic options pointer
-
+        __declspec(dllexport) void PieceCore_SetGraphicsDeviceFactory(Piece::RAL::IGraphicsDeviceFactory* factoryPtr);
+        __declspec(dllexport) void PieceCore_SetWindowFactory(Piece::WAL::IWindowFactory* factoryPtr);
+        __declspec(dllexport) void PieceCore_SetPhysicsWorldFactory(Piece::PAL::IPhysicsWorldFactory* factoryPtr);
+    
         // Main engine initialization, now relying on Service Locator
-        __declspec(dllexport) EngineCore* Engine_Initialize();
-        __declspec(dllexport) void Engine_Destroy(EngineCore* core);
-
+        __declspec(dllexport) Piece::Core::EngineCore* Engine_Initialize();
+        __declspec(dllexport) void Engine_Destroy(Piece::Core::EngineCore* core);
+    
         // ... other engine functions ...
     }
-
+    
     #endif // NATIVE_EXPORTS_H
+    
     ```
 
 ### 4.2. `NativeCalls` (C# Static Class/P/Invoke Wrapper)
@@ -143,56 +132,63 @@ This C++ Service Locator acts as the crucial bridge for the .NET DI system to co
     ```csharp
     using System;
     using System.Runtime.InteropServices;
-
+    
     public static class NativeCalls
     {
         // P/Invoke for setting C++ factories in the Service Locator
         [DllImport("PieceCore.dll")]
-        public static extern void PieceCore_SetGraphicsDeviceFactory(IntPtr factoryPtr, ref NativeVulkanOptions options);
-
+        public static extern void PieceCore_SetGraphicsDeviceFactory(IntPtr factoryPtr);
+    
         [DllImport("PieceCore.dll")]
-        public static extern void PieceCore_SetWindowFactory(IntPtr factoryPtr, ref NativeWindowOptions options);
-
+        public static extern void PieceCore_SetWindowFactory(IntPtr factoryPtr);
+    
         [DllImport("PieceCore.dll")]
-        public static extern void PieceCore_SetPhysicsWorldFactory(IntPtr factoryPtr, IntPtr optionsPtr); // For more complex options
-
+        public static extern void PieceCore_SetPhysicsWorldFactory(IntPtr factoryPtr);
+    
         // Main engine initialization, now relying on Service Locator
         [DllImport("PieceCore.dll")]
         public static extern IntPtr Engine_Initialize();
-
+    
         [DllImport("PieceCore.dll")]
         public static extern void Engine_Destroy(IntPtr corePtr);
-
+    
         // Example for other exposed objects and methods
         [DllImport("PieceCore.dll")]
         public static extern IntPtr RenderSystem_Create();
-
+    
         [DllImport("PieceCore.dll")]
         public static extern void RenderSystem_RenderFrame(IntPtr renderSystemPtr, IntPtr cameraPtr, IntPtr scenePtr);
-
+    
         // ... and so on for all exposed objects and methods
     }
     ```
-    *   **C# `NativeVulkanOptions` and `NativeWindowOptions` structs** (mirroring C++):
-        ```csharp
-        [StructLayout(LayoutKind.Sequential)]
-        public struct NativeWindowOptions {
-            public int InitialWindowWidth;
-            public int InitialWindowHeight;
-            [MarshalAs(UnmanagedType.I1)] // Marshals bool to a 1-byte Boolean
-            public bool WindowResizable;
-            public IntPtr WindowTitle; // Must be allocated/deallocated from C# side
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct NativeVulkanOptions {
-            [MarshalAs(UnmanagedType.I1)]
-            public bool EnableValidationLayers;
-            public int MaxFramesInFlight;
-            // Complex types like string arrays or lists require custom marshalling logic.
-        }
-        ```
-    *   The C# layer will be responsible for allocating unmanaged memory for strings (`Marshal.StringToHGlobalAnsi`) and structs, and then freeing them.
+        *   **C# `NativeGraphicsOptions`, `NativeWindowOptions` and `NativePhysicsOptions` structs** (mirroring C++):
+            ```csharp
+            [StructLayout(LayoutKind.Sequential)]
+            public struct NativeWindowOptions {
+                public int InitialWindowWidth;
+                public int InitialWindowHeight;
+                [MarshalAs(UnmanagedType.I1)] // Marshals bool to a 1-byte Boolean
+                public bool WindowResizable;
+                public IntPtr WindowTitle; // Must be allocated/deallocated from C# side
+            }
+    
+            [StructLayout(LayoutKind.Sequential)]
+            public struct NativeGraphicsOptions {
+                [MarshalAs(UnmanagedType.I1)]
+                public bool EnableValidationLayers;
+                public int MaxFramesInFlight;
+                // Complex types like string arrays or lists require custom marshalling logic.
+            }
+    
+            [StructLayout(LayoutKind.Sequential)]
+            public struct NativePhysicsOptions {
+                public float FixedDeltaTime;
+                public uint MaxPhysicsSteps;
+            }
+            ```
+        *   The C# layer will be responsible for allocating unmanaged memory for strings (`Marshal.StringToHGlobalAnsi`) and then freeing them.
+    
 ### 4.3. High-Level C# Wrappers
 
 *   C# classes (e.g., `Material`, `Mesh`, `Model`, `Camera`, `RenderSystem`) that mirror the concepts of the Piece.Core.
@@ -272,17 +268,20 @@ The `EngineCore` (or the main initialization routine of the Piece.Core) no longe
 #include "core/service_locator.h"
 #include <memory>
 
-namespace Piece { namespace Core {
-    // Forward declarations (assuming RAL/WAL interfaces are in scope)
-    // class IWindow;
-    // class IGraphicsDevice;
-    // class IPhysicsWorld;
+#include <wal/iwindow.h>
+#include <ral/igraphics_device.h>
+#include <pal/iphysics_world.h>
+#include <wal/native_window_options.h>
+#include <ral/native_graphics_options.h>
+#include <pal/native_physics_options.h>
 
+
+namespace Piece { namespace Core {
     EngineCore::EngineCore() {
         // Retrieve factories from the Service Locator
-        IGraphicsDeviceFactory* graphicsFactory = ServiceLocator::Get().GetGraphicsDeviceFactory();
-        IWindowFactory* windowFactory = ServiceLocator::Get().GetWindowFactory();
-        IPhysicsWorldFactory* physicsFactory = ServiceLocator::Get().GetPhysicsWorldFactory();
+        RAL::IGraphicsDeviceFactory* graphicsFactory = ServiceLocator::Get().GetGraphicsDeviceFactory();
+        WAL::IWindowFactory* windowFactory = ServiceLocator::Get().GetWindowFactory();
+        PAL::IPhysicsWorldFactory* physicsFactory = ServiceLocator::Get().GetPhysicsWorldFactory();
 
         if (!graphicsFactory || !windowFactory || !physicsFactory) {
             // Handle error: factories not set by C# application
@@ -293,23 +292,26 @@ namespace Piece { namespace Core {
 
         // Use factories to create concrete low-level implementation instances
         // Note: IWindow might be created first, then passed to IGraphicsDevice.
-        // Configuration options (NativeWindowOptions, NativeVulkanOptions) would be
+        // Configuration options (NativeWindowOptions, NativeGraphicsOptions, NativePhysicsOptions) would be
         // passed to the factory's Create methods if they support them.
 
         // Example: Create window
-        auto window_unique_ptr = windowFactory->CreateWindow(WindowOptions); // Assuming CreateWindow takes options
+        // Assuming default options for now, these would typically come from C#
+        WAL::NativeWindowOptions defaultWindowOptions = {800, 600, 0, "Piece Engine Window"};
+        auto window_unique_ptr = windowFactory->CreateWindow(&defaultWindowOptions);
         window_ = std::move(window_unique_ptr);
-        window_->Create("Piece Engine", 1280, 720); // Initial window setup
-
+        
         // Example: Create graphics device
-        auto graphics_unique_ptr = graphicsFactory->CreateGraphicsDevice(window_.get(), GraphicsOptions); // Assuming CreateGraphicsDevice takes options
+        // Assuming default options for now, these would typically come from C#
+        RAL::NativeGraphicsOptions defaultGraphicsOptions = {0, 2}; // Example values
+        auto graphics_unique_ptr = graphicsFactory->CreateGraphicsDevice(window_.get(), &defaultGraphicsOptions);
         graphics_device_ = std::move(graphics_unique_ptr);
-        graphics_device_->Init(window_.get()); // Initialize device with window context
-
+        
         // Example: Create physics world
-        auto physics_unique_ptr = physicsFactory->CreatePhysicsWorld(PhysicsOptions); // Assuming CreatePhysicsWorld takes options
+        // Assuming default options for now, these would typically come from C#
+        PAL::NativePhysicsOptions defaultPhysicsOptions = {1.0f / 60.0f, 4}; // Example values
+        auto physics_unique_ptr = physicsFactory->CreatePhysicsWorld(&defaultPhysicsOptions);
         physics_world_ = std::move(physics_unique_ptr);
-        physics_world_->Init(); // Initialize physics world
 
         // ... other engine component initializations
     }

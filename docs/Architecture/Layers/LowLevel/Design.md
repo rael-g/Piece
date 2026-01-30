@@ -15,27 +15,43 @@ This low-level implementation is the foundation upon which the Piece.Core (C++) 
 
 ```
 src/
-├── wal/                        # Window Abstraction Layer (Interfaces)
-│   └── iwindow.h               # IWindow Interface (Window Abstraction)
-├── ral/                        # Render Abstraction Layer (Interfaces)
-│   ├── ral_types.h             # Common Enums and Structs for RAL
-│   ├── iacceleration_structure.h # IAccelerationStructure Interface
-│   ├── icompute_buffer.h       # IComputeBuffer Interface
-│   ├── iframebuffer.h          # IFrameBuffer Interface
-│   ├── iindirect_draw_buffer.h # IIndirectDrawBuffer Interface
-│   ├── iindex_buffer.h         # IIndexBuffer Interface
-│   ├── irender_context.h       # IRenderContext Interface
-│   ├── isampler.h              # ISampler Interface
-│   ├── ishader.h               # IShader Interface (Shader Module)
-│   ├── ishader_program.h       # IShaderProgram Interface (Linked Shader Program)
-│   ├── itexture.h              # ITexture Interface (Texture Data)
-│   ├── iuniform_buffer.h       # IUniformBuffer Interface
-│   └── ivertex_buffer.h        # IVertexBuffer Interface
-├── gfx_glfw/                   # WAL Implementation with GLFW
-├── gfx_opengl/                 # RAL Implementation with OpenGL
-├── gfx_vulkan/                 # RAL Implementation with Vulkan (future)
-├── gfx_directx/                # RAL Implementation with DirectX (future)
-└── app_example/                # Example application using the backend
+├── cpp/
+│   ├── wal/                        # Window Abstraction Layer (Interfaces)
+│   │   ├── iwindow.h               # IWindow Interface
+│   │   ├── iwindow_factory.h       # IWindowFactory Interface
+│   │   └── native_window_options.h # NativeWindowOptions struct
+│   ├── ral/                        # Render Abstraction Layer (Interfaces)
+│   │   ├── ral_types.h             # Common Enums and Structs for RAL
+│   │   ├── igraphics_device_factory.h # IGraphicsDeviceFactory Interface
+│   │   ├── native_graphics_options.h # NativeGraphicsOptions struct
+│   │   ├── iacceleration_structure.h # IAccelerationStructure Interface
+│   │   ├── icompute_buffer.h       # IComputeBuffer Interface
+│   │   ├── iframebuffer.h          # IFrameBuffer Interface
+│   │   ├── iindirect_draw_buffer.h # IIndirectDrawBuffer Interface
+│   │   ├── iindex_buffer.h         # IIndexBuffer Interface
+│   │   ├── irender_context.h       # IRenderContext Interface
+│   │   ├── isampler.h              # ISampler Interface
+│   │   ├── ishader.h               # IShader Interface (Shader Module)
+│   │   ├── ishader_program.h       # IShaderProgram Interface (Linked Shader Program)
+│   │   ├── itexture.h              # ITexture Interface (Texture Data)
+│   │   ├── iuniform_buffer.h       # IUniformBuffer Interface
+│   │   └── ivertex_buffer.h        # IVertexBuffer Interface
+│   ├── pal/                        # Physics Abstraction Layer (Interfaces)
+│   │   ├── pal_types.h             # Common Enums and Structs for PAL
+│   │   ├── iphysics_world_factory.h # IPhysicsWorldFactory Interface
+│   │   ├── native_physics_options.h # NativePhysicsOptions struct
+│   │   ├── icollider_shape.h       # IColliderShape Interface
+│   │   ├── ijoint.h                # IJoint Interface
+│   │   ├── iphysics_body.h         # IPhysicsBody Interface
+│   │   ├── iphysics_material.h     # IPhysicsMaterial Interface
+│   │   └── iphysics_world.h        # IPhysicsWorld Interface
+│   ├── wal/glfw/                   # WAL Implementation with GLFW
+│   ├── ral/opengl/                 # RAL Implementation with OpenGL
+│   ├── ral/vulkan/                 # RAL Implementation with Vulkan (future)
+│   ├── ral/directx/                # RAL Implementation with DirectX (future)
+│   ├── pal/jolt/                   # PAL Implementation with Jolt Physics (example)
+│   ├── pal/physx/                  # PAL Implementation with NVIDIA PhysX (future)
+│   └── app_example/                # Example application using the backend
 ```
 
 ## 2. Window Abstraction Layer (WAL)
@@ -68,7 +84,7 @@ public:
 ```
 **Note:** The `IWindow` interface provides a polling model for input, sufficient for the low-level layer. A more robust event system could be built in higher layers.
 
-The `NativeWindowOptions` struct, defined in the Piece.Core's `NativeExports.h`, would be marshaled from C# and passed to the factory and eventually to the window's constructor/Init method.
+The `NativeWindowOptions` struct, defined in `wal/native_window_options.h`, would be marshaled from C# and passed to the factory and eventually to the window's constructor/Init method.
 
 ## 3. Render Abstraction Layer (RAL)
 
@@ -105,7 +121,7 @@ public:
     virtual std::unique_ptr<IUniformBuffer> CreateUniformBuffer(uint32_t size, const void* data = nullptr) = 0;
 };
 ```
-**Note:** Factory methods return `std::unique_ptr` to ensure ownership and lifecycle of C++ resources in a safe and idiomatic way. The `NativeVulkanOptions` struct would be defined in the Piece.Core's `NativeExports.h` and marshaled from C# for configuration.
+**Note:** Factory methods return `std::unique_ptr` to ensure ownership and lifecycle of C++ resources in a safe and idiomatic way. The `NativeGraphicsOptions` struct would be defined in `ral/native_graphics_options.h` and marshaled from C# for configuration.
 
 ### 3.2. `IRenderContext` (Rendering Context)
 
@@ -373,7 +389,7 @@ public:
     // ... other factory methods for shapes, joints, etc.
 };
 ```
-**Note:** Factory methods return `std::unique_ptr` for safe ownership and lifecycle management, similar to RAL. The `NativePhysicsOptions` struct would be defined in the Piece.Core's `NativeExports.h` and marshaled from C# for configuration.
+**Note:** Factory methods return `std::unique_ptr` for safe ownership and lifecycle management, similar to RAL. The `NativePhysicsOptions` struct would be defined in `pal/native_physics_options.h` and marshaled from C# for configuration.
 
 ### 4.2. `IPhysicsBody` (Physics Body)
 
@@ -457,36 +473,43 @@ public:
 
 ```
 src/
-├── wal/                        # Window Abstraction Layer (Interfaces)
-│   └── iwindow.h               # IWindow Interface (Window Abstraction)
-├── ral/                        # Render Abstraction Layer (Interfaces)
-│   ├── ral_types.h             # Common Enums and Structs for RAL
-│   ├── iacceleration_structure.h # IAccelerationStructure Interface
-│   ├── icompute_buffer.h       # IComputeBuffer Interface
-│   ├── iframebuffer.h          # IFrameBuffer Interface
-│   ├── iindirect_draw_buffer.h # IIndirectDrawBuffer Interface
-│   ├── iindex_buffer.h         # IIndexBuffer Interface
-│   ├── irender_context.h       # IRenderContext Interface
-│   ├── isampler.h              # ISampler Interface
-│   ├── ishader.h               # IShader Interface (Shader Module)
-│   ├── ishader_program.h       # IShaderProgram Interface (Linked Shader Program)
-│   ├── itexture.h              # ITexture Interface (Texture Data)
-│   ├── iuniform_buffer.h       # IUniformBuffer Interface
-│   └── ivertex_buffer.h        # IVertexBuffer Interface
-├── pal/                        # Physics Abstraction Layer (Interfaces)
-│   ├── pal_types.h             # Common Enums and Structs for PAL
-│   ├── icollider_shape.h       # IColliderShape Interface
-│   ├── ijoint.h                # IJoint Interface
-│   ├── iphysics_body.h         # IPhysicsBody Interface
-│   ├── iphysics_material.h     # IPhysicsMaterial Interface
-│   └── iphysics_world.h        # IPhysicsWorld Interface
-├── gfx_glfw/                   # WAL Implementation with GLFW
-├── gfx_opengl/                 # RAL Implementation with OpenGL
-├── gfx_vulkan/                 # RAL Implementation with Vulkan (future)
-├── gfx_directx/                # RAL Implementation with DirectX (future)
-├── physics_jolt/               # PAL Implementation with Jolt Physics (example)
-├── physics_physx/              # PAL Implementation with NVIDIA PhysX (future)
-└── app_example/                # Example application using the backend
+├── cpp/
+│   ├── wal/                        # Window Abstraction Layer (Interfaces)
+│   │   ├── iwindow.h               # IWindow Interface
+│   │   ├── iwindow_factory.h       # IWindowFactory Interface
+│   │   └── native_window_options.h # NativeWindowOptions struct
+│   ├── ral/                        # Render Abstraction Layer (Interfaces)
+│   │   ├── ral_types.h             # Common Enums and Structs for RAL
+│   │   ├── igraphics_device_factory.h # IGraphicsDeviceFactory Interface
+│   │   ├── native_graphics_options.h # NativeGraphicsOptions struct
+│   │   ├── iacceleration_structure.h # IAccelerationStructure Interface
+│   │   ├── icompute_buffer.h       # IComputeBuffer Interface
+│   │   ├── iframebuffer.h          # IFrameBuffer Interface
+│   │   ├── iindirect_draw_buffer.h # IIndirectDrawBuffer Interface
+│   │   ├── iindex_buffer.h         # IIndexBuffer Interface
+│   │   ├── irender_context.h       # IRenderContext Interface
+│   │   ├── isampler.h              # ISampler Interface
+│   │   ├── ishader.h               # IShader Interface (Shader Module)
+│   │   ├── ishader_program.h       # IShaderProgram Interface (Linked Shader Program)
+│   │   ├── itexture.h              # ITexture Interface (Texture Data)
+│   │   ├── iuniform_buffer.h       # IUniformBuffer Interface
+│   │   └── ivertex_buffer.h        # IVertexBuffer Interface
+│   ├── pal/                        # Physics Abstraction Layer (Interfaces)
+│   │   ├── pal_types.h             # Common Enums and Structs for PAL
+│   │   ├── iphysics_world_factory.h # IPhysicsWorldFactory Interface
+│   │   ├── native_physics_options.h # NativePhysicsOptions struct
+│   │   ├── icollider_shape.h       # IColliderShape Interface
+│   │   ├── ijoint.h                # IJoint Interface
+│   │   ├── iphysics_body.h         # IPhysicsBody Interface
+│   │   ├── iphysics_material.h     # IPhysicsMaterial Interface
+│   │   └── iphysics_world.h        # IPhysicsWorld Interface
+│   ├── wal/glfw/                   # WAL Implementation with GLFW
+│   ├── ral/opengl/                 # RAL Implementation with OpenGL
+│   ├── ral/vulkan/                 # RAL Implementation with Vulkan (future)
+│   ├── ral/directx/                # RAL Implementation with DirectX (future)
+│   ├── pal/jolt/                   # PAL Implementation with Jolt Physics (example)
+│   ├── pal/physx/                  # PAL Implementation with NVIDIA PhysX (future)
+│   └── app_example/                # Example application using the backend
 ```
 
 ## 6. Usage Example (Removed from Core Low-Level Implementation Design)
@@ -540,23 +563,23 @@ The WAL/RAL/PAL architecture is designed for extreme modularity, enabling the co
     **Conceptual C++ Low-Level Implementation Export Example:**
     ```cpp
     // In gfx_vulkan.dll or similar native low-level implementation project
-    #include "../../Piece.Intermediate/interfaces/igraphics_device_factory.h"
+    #include <ral/igraphics_device_factory.h>
     #include "vulkan_graphics_device_factory.h" // Concrete implementation
-    #include "../../Piece.Intermediate/NativeExports.h" // For NativeVulkanOptions
-
+    #include <piece_core/native_exports.h> // For the C-style exports functions
+    #include <ral/native_graphics_options.h> // For NativeGraphicsOptions
+    
     extern "C" {
-        __declspec(dllexport) Piece::Intermediate::IGraphicsDeviceFactory* CreateVulkanGraphicsDeviceFactory(
-            const NativeVulkanOptions* options) {
+        __declspec(dllexport) Piece::RAL::IGraphicsDeviceFactory* CreateVulkanGraphicsDeviceFactory(
+            const Piece::RAL::NativeGraphicsOptions* options) {
             // Options are passed from C# DI configuration
-            return new VulkanGraphicsDeviceFactory(options);
+            return new Piece::RAL::VulkanGraphicsDeviceFactory(options);
         }
-
+    
         __declspec(dllexport) void DestroyVulkanGraphicsDeviceFactory(
-            Piece::Intermediate::IGraphicsDeviceFactory* factory) {
+            Piece::RAL::IGraphicsDeviceFactory* factory) {
             delete factory;
         }
-    }
-    ```
+    }    ```
 *   **C# Orchestration:** The Piece.Framework (C#) application, via its .NET DI configuration, resolves a C# wrapper for this factory. This C# wrapper then loads the native DLL, calls the exported factory function (passing marshaled options), and eventually pushes the resulting C++ factory pointer to the Piece.Core's `ServiceLocator`.
 
 ### 8.2 Partial Replacement of RAL/WAL/PAL Implementations (C# DI-driven Abstract Factories)
