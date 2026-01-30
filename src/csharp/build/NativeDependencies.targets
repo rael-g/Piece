@@ -45,11 +45,22 @@
     <VcpkgInstalledDir>$(PiecePackageDir)\build\$(NativePreset)\vcpkg_installed\</VcpkgInstalledDir>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <NativeBuildSentinel>$(PiecePackageDir)\build\$(NativePreset)\.native_configure_completed</NativeBuildSentinel>
+  </PropertyGroup>
+
   <Target Name="BuildNative" BeforeTargets="Build">
-    <Exec
+    <Message Text="Checking if native CMake configuration is required for preset $(NativePreset)..." Importance="high" />
+    <Exec Condition="!Exists('$(NativeBuildSentinel)')"
           Command="cmake --preset $(NativePreset)"
           WorkingDirectory="$(PiecePackageDir)" />
+    <WriteLinesToFile
+        Condition="!Exists('$(NativeBuildSentinel)')"
+        File="$(NativeBuildSentinel)"
+        Lines="Completed at $([System.DateTime]::Now)"
+        Overwrite="true" />
 
+    <Message Text="Building native target $(NativeTarget) for preset $(NativePreset)..." Importance="high" />
     <Exec
           Command="cmake --build --preset $(NativePreset) --target $(NativeTarget) --verbose"
           WorkingDirectory="$(PiecePackageDir)" />

@@ -162,6 +162,7 @@
       - [ ] Write comprehensive unit tests for all implemented core C++ and C# components.
       - [ ] Write integration tests to verify interactions between C++ and C# layers and backend plugins.
       - [ ] Ensure all project code adheres to Conventional Commits and passes CI checks.
+      - [ ] Create a dedicated integration test to verify the full native build process and native library copying to C# output directories.
       - [ ] Implement Logging for Core Examples & Testing.
       - [ ] Implement Tests for Core Examples & Testing.
     ```md
