@@ -51,7 +51,7 @@
           WorkingDirectory="$(PiecePackageDir)" />
 
     <Exec
-          Command="cmake --build --preset $(NativePreset) --verbose"
+          Command="cmake --build --preset $(NativePreset) --target $(NativeTarget) --verbose"
           WorkingDirectory="$(PiecePackageDir)" />
     <Exec
           Command="cmake --install build/$(NativePreset) --prefix build/native --config $(NativeConfig)"
