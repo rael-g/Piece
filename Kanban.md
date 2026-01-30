@@ -133,21 +133,58 @@
     Develop the High-Level C# Framework, providing a user-friendly API for game developers. This includes the core game loop, scene graph components, input and asset management, rendering orchestration, and robust C# wrappers for all underlying C++ engine functionalities, orchestrated via .NET Dependency Injection.
     ```
 
+### Phase 3.5: Piece.ProjectManagement Layer
+
+  - tags: [v1.0.0, c#, project-management, core]
+  - priority: high
+  - steps:
+      - [ ] Define `PieceProject` data model (name, path, default scene, engine config).
+      - [ ] Implement `IProjectManager` interface (Create, Load, Save project).
+      - [ ] Implement `ProjectManager` (handles `.pieceproject` file I/O, default structure).
+      - [ ] Define `IProjectAssetService` (ImportAsset, ListAssets).
+      - [ ] Implement `ProjectAssetService` (wraps `Piece.Framework.AssetManager`).
+      - [ ] Define `IProjectSceneService` (OpenScene, SaveScene, AddEntity, RemoveEntity).
+      - [ ] Implement `ProjectSceneService` (wraps `Piece.Framework.SceneManager`).
+      - [ ] Implement `ProjectServiceCollectionExtensions` for DI setup.
+      - [ ] Implement Tests for Piece.ProjectManagement Layer.
+    ```md
+    Develop the Piece.ProjectManagement layer to provide a high-level, editor-agnostic abstraction for managing engine projects. This layer will handle project creation, loading, saving, and provide services for asset and scene management, consuming the Piece.Framework APIs.
+    ```
+
 ### Phase 4: Minimal Visual Editor
 
   - tags: [v1.0.0, editor, c#]
   - priority: high
   - steps:
-      - [ ] Implement `EditorApplication` to host the `GameEngine`.
-      - [ ] Implement `EditorState` to manage global editor state.
+      - [ ] Implement `EditorApplication` to host the `GameEngine` and use `IProjectManager`.
+      - [ ] Implement `EditorState` to manage global editor state, including the `PieceProject` object.
       - [ ] Implement a basic `ViewportPanel` to display the game scene rendered by `GameEngine`.
       - [ ] Implement a basic `HierarchyPanel` to list `Node`s in the `ActiveScene`.
       - [ ] Implement a basic `InspectorPanel` to display and allow editing of simple properties of selected `Node`s/`Component`s.
-      - [ ] Implement basic scene serialization/deserialization for saving/loading editor state and scenes.
+      - [ ] Implement basic project/scene persistence using `IProjectManager` and `IProjectSceneService`.
+      - [ ] Implement a basic `AssetBrowserPanel` utilizing `IProjectAssetService`.
       - [ ] Implement Logging for the Minimal Visual Editor
       - [ ] Implement Tests for the Minimal Visual Editor
     ```md
-    Develop a minimal but functional Visual Editor in C# that can host the engine's game loop, display the scene in a viewport, and allow basic inspection and manipulation of scene elements.
+    Develop a minimal but functional Visual Editor in C# that uses the Piece.ProjectManagement layer to manage projects, host the engine's game loop, display the scene in a viewport, and allow basic inspection and manipulation of scene elements.
+    ```
+
+### Phase 4.5: Minimal CLI Editor
+
+  - tags: [v1.0.0, cli, c#, tooling]
+  - priority: high
+  - steps:
+      - [ ] Create `Piece.Cli` console application project.
+      - [ ] Set up `System.CommandLine` for command parsing.
+      - [ ] Register `Piece.ProjectManagement` services via DI.
+      - [ ] Implement `piece project new` command using `IProjectManager`.
+      - [ ] Implement `piece build` command using `IProjectManager`.
+      - [ ] Implement `piece asset import` command using `IProjectAssetService`.
+      - [ ] Implement `piece asset list` command using `IProjectAssetService`.
+      - [ ] Implement Logging for Minimal CLI Editor.
+      - [ ] Implement Tests for Minimal CLI Editor.
+    ```md
+    Develop a minimal but functional CLI editor for the Piece Engine, providing stateless commands for project creation, building, and basic asset management, all interacting with the Piece.ProjectManagement layer.
     ```
 
 ### Phase 5: Core Examples & Testing
@@ -168,6 +205,7 @@
     ```md
     Validate the core engine functionality through Example-Driven Development (EDD) examples, ensuring comprehensive unit and integration test coverage across all layers and adherence to development best practices.
     ```
+
 
 ## In Progress
 

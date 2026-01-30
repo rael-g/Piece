@@ -12,17 +12,17 @@ This document details the architectural design of the Visual Editor for the Piec
 *   **Non-Destructive Workflow:** Favor edits that can be undone/redone and that do not permanently alter original data (e.g., modifiers).
 *   **Modern and Cross-Platform UI:** Utilize a UI framework that supports cross-platform (e.g., AvaloniaUI) to ensure accessibility on different operating systems.
 
-## 3. Interaction with the Engine Core via Interfaces
+## 3. Interaction with the Engine Core via Layered Interfaces
 
-A core architectural principle of the editor is its **decoupling from any concrete engine implementation**. The editor communicates with the engine core exclusively through a well-defined set of C# interfaces that represent the high-level API (e.g., `IEngine`, `IScene`, `INode`, `IComponent`).
+A core architectural principle of the editor is its **decoupling from any concrete engine implementation**. The editor communicates with the engine core exclusively through a well-defined set of C# interfaces, primarily interacting with the `Piece.ProjectManagement` layer for project-level concerns, which in turn utilizes the `Piece.Framework` APIs for scene, asset, and engine core interactions.
 
-This interface-driven design ensures that the editor remains completely agnostic to the underlying implementation of the engine logic. It can seamlessly operate on:
+This interface-driven and layered design ensures that the editor remains completely agnostic to the underlying implementation of the engine logic. It can seamlessly operate on:
 
-*   The default, feature-rich **C# high-level framework**.
-*   A potential future **C++/Lua high-level framework** (exposed to C# via a wrapper that implements the same interfaces), which might be used for console-targeted builds.
-*   Any other engine low-level implementation that adheres to the required interface contract.
+*   The default, feature-rich **`Piece.ProjectManagement` layer**, which orchestrates interaction with the **C# high-level framework (`Piece.Framework`)**.
+*   A potential future alternative `Piece.ProjectManagement` implementation (exposed to C# via a wrapper that implements the same interfaces), which might utilize a **C++/Lua high-level framework** (exposed to C# via a wrapper that implements the same interfaces) for console-targeted builds.
+*   Any other engine low-level implementation that adheres to the required interface contract, all orchestrated through the defined layers.
 
-This approach fully realizes the engine's philosophy of modularity, allowing the high-level "game logic" layer to be a truly swappable component without requiring any changes to the editor itself. The specific implementation of the engine interfaces is resolved at runtime using the .NET Dependency Injection container.
+This approach fully realizes the engine's philosophy of modularity, allowing the high-level "game logic" and "project management" layers to be truly swappable components without requiring any changes to the editor itself. The specific implementation of the engine interfaces is resolved at runtime using the .NET Dependency Injection container.
 
 ## 4. Main Components of the Visual Editor (C#)
 
@@ -32,12 +32,12 @@ This approach fully realizes the engine's philosophy of modularity, allowing the
     *   Manages the editor's lifecycle.
     *   Orchestrates the initialization and layout of UI panels.
     *   Hosts the `GameEngine` instance (from the high-level framework) for real-time rendering.
-    *   Manages project loading/saving.
+    *   **Delegates project loading/saving to the `Piece.ProjectManagement` layer.**
 
 ### 4.2. `EditorState`
 
 *   **Responsibilities:** Manages the global state of the editor.
-    *   `CurrentProject`: Path of the open project.
+    *   `CurrentProject`: The currently loaded `PieceProject` object (provided by `Piece.ProjectManagement`).
     *   `ActiveScene`: The currently loaded and edited `Scene`.
     *   `SelectedObjects`: List of selected `Node`s or `Component`s.
     *   `CommandHistory`: Stack for Undo/Redo operations.
@@ -59,24 +59,24 @@ This approach fully realizes the engine's philosophy of modularity, allowing the
 *   **`AssetBrowserPanel`:**
     *   **Purpose:** Browse, view, and import project assets.
     *   **Interaction:** Displays project files. Allows previewing assets (textures, models). Drag-and-drop to instantiate `Node`s in the scene.
-    *   **Dependencies:** `AssetManager` (for loading, importing), `EditorState`.
+    *   **Dependencies:** `IProjectAssetService` (from `Piece.ProjectManagement` for asset operations), `EditorState`.
 *   **`ConsolePanel`:**
     *   **Purpose:** Display logs, error messages, and debug information from the engine and editor.
     *   **Interaction:** Receives messages from the engine's logging system.
 *   **`Toolbar` and `MenuBar`:**
     *   **Purpose:** Provide access to global actions (Save, Load, Play, Stop, Editing Tools).
-    *   **Interaction:** Call methods in `EditorApplication` or `EditorSystems`.
+    *   **Interaction:** Call methods in `EditorApplication` or `EditorSystems`, which will internally use `IProjectManager` for project operations.
 
 ### 4.4. `EditorSystems` (Logic for the Editor)
 
 *   **`UndoRedoSystem`:** Manages the command stack for undo/redo editor operations.
 *   **`SelectionSystem`:** Selection logic (click, drag-box, multi-selection).
 *   **`GizmoSystem`:** Renders and manipulates gizmos (move, rotate, scale).
-*   **`SerializationSystem`:** Saves and loads `Scene`s and project data to/from files.
+*   **`SerializationSystem`:** Primarily uses `IProjectManager` and `IProjectSceneService` (from `Piece.ProjectManagement`) to save and load `Scene`s and project data to/from files.
 
 ## 5. High-Level C# Interface Expansion (if necessary)
 
-To support editor functionalities, the following additions/modifications will be necessary in the Piece engine's high-level C# framework APIs:
+To support editor functionalities, the following additions/modifications will be necessary in the Piece engine's C# framework APIs (these APIs will be consumed by `Piece.ProjectManagement`):
 
 *   **`Node` / `Component`:**
     *   **`GetProperties()`:** A method or interface that returns a list of editable properties (e.g., `EditorPropertyInfo` struct with name, type, value, min/max, etc.).
