@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 add_library(pal_box2d SHARED
     box2d_physics_world_factory.cpp
 )

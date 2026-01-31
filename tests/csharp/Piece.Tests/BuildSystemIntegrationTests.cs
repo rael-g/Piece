@@ -125,8 +125,7 @@ public class BuildSystemIntegrationTests
         // Define expected native libraries (only for Piece.Glfw)
         string[] expectedNativeLibrariesBaseNames = new[]
         {
-            "wal_glfw", // From Piece.Glfw
-            "glfw3"     // External dependency of Piece.Glfw
+            "wal_glfw" // From Piece.Glfw
         };
 
         // 1. Clean all relevant projects explicitly for both configurations

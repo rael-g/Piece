@@ -1,7 +1,10 @@
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 add_library(piece_core SHARED
     engine_core.cpp
     core/service_locator.cpp
 )
+
 target_compile_definitions(piece_core PRIVATE PIECE_CORE_BUILD_DLL)
 
 target_include_directories(piece_core PUBLIC

@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 find_package(OpenGL REQUIRED)
 
 add_library(ral_opengl SHARED

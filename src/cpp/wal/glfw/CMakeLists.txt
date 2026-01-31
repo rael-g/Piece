@@ -1,3 +1,5 @@
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 add_library(wal_glfw SHARED
     glfw_window.cpp
     glfw_window_factory.cpp
