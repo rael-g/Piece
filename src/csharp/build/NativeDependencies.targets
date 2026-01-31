@@ -62,7 +62,7 @@
 
     <Message Text="Building native target $(NativeTarget) for preset $(NativePreset)..." Importance="high" />
     <Exec
-          Command="cmake --build --preset $(NativePreset) --target $(NativeTarget) --verbose"
+          Command="cmake --build --preset $(NativePreset) --target $(NativeTarget) --config $(NativeConfig) --verbose"
           WorkingDirectory="$(PiecePackageDir)" />
     <Exec
           Command="cmake --install build/$(NativePreset) --prefix build/native --config $(NativeConfig)"

@@ -12,7 +12,7 @@ target_include_directories(piece_core PUBLIC
 )
 find_package(fmt CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
-target_link_libraries(piece_core PUBLIC wal ral pal fmt::fmt spdlog::spdlog)
+target_link_libraries(piece_core PUBLIC fmt::fmt spdlog::spdlog)
 
 # Install rules
 include(GNUInstallDirs)
