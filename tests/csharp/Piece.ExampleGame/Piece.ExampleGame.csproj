@@ -9,10 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\csharp\Piece.Core\Piece.Core.csproj" />
-    <ProjectReference Include="..\..\..\src\csharp\Piece.Glfw\Piece.Glfw.csproj" />
-    <ProjectReference Include="..\..\..\src\csharp\Piece.OpenGL\Piece.OpenGL.csproj" />
-    <ProjectReference Include="..\..\..\src\csharp\Piece.Box2d\Piece.Box2d.csproj" />
+    <PackageReference Include="Piece.Core" />
+    <PackageReference Include="Piece.Glfw" />
+    <PackageReference Include="Piece.OpenGL" />
+    <PackageReference Include="Piece.Box2d" />
   </ItemGroup>
 
    <ItemGroup>

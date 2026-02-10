@@ -4,10 +4,14 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>Piece.Framework</PackageId>
+    <Version>0.0.1</Version>
+    <Description>Framework for the Piece engine.</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Piece.Core.Abstractions\Piece.Core.Abstractions.csproj" />
+    <PackageReference Include="Piece.Core.Abstractions" Version="1.0.0" />
   </ItemGroup>
 
 </Project>

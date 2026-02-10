@@ -1,10 +1,5 @@
-using System;
-using System.IO;
 using System.Diagnostics;
-using System.Linq; // For Any()
 using System.Runtime.InteropServices;
-using System.Threading.Tasks; // For Task.Run
-using Xunit; // For Xunit.Assert and Xunit.Theory
 
 namespace Piece.Tests;
 
@@ -111,44 +106,57 @@ public class BuildSystemIntegrationTests
     [Theory]
     [InlineData("Debug")]
     [InlineData("Release")]
-    public void NativeLibrariesAreCopiedToOutputAndNativeBuildTargetRuns(string configuration) // Reverted name
+    public void NativeLibrariesAreCopiedToOutputAndNativeBuildTargetRuns(string configuration)
     {
         string solutionDir = GetSolutionDirectory();
         string pieceGlfwProjectPath = Path.Combine(solutionDir, "src", "csharp", "Piece.Glfw");
-        string pieceCoreProjectPath = Path.Combine(solutionDir, "src", "csharp", "Piece.Core"); // Need to build Piece.Core as it's a dependency
+        string pieceCoreProjectPath = Path.Combine(solutionDir, "src", "csharp", "Piece.Core");
         string nativeBuildTargetProjectPath = Path.Combine(solutionDir, "tests", "csharp", "TestTargets", "NativeBuildTarget");
-        string targetFramework = "net9.0"; // Consistent for all projects
+        string targetFramework = "net9.0";
 
-        // Determine the expected output directory for NativeBuildTarget
         string outputDir = Path.Combine(nativeBuildTargetProjectPath, "bin", configuration, targetFramework);
 
-        // Define expected native libraries (only for Piece.Glfw)
         string[] expectedNativeLibrariesBaseNames = new[]
         {
-            "wal_glfw" // From Piece.Glfw
+            "wal_glfw"
         };
 
-        // 1. Clean all relevant projects explicitly for both configurations
         RunDotNetCommand(pieceCoreProjectPath, "clean", $"-c {configuration}");
         RunDotNetCommand(pieceGlfwProjectPath, "clean", $"-c {configuration}");
         RunDotNetCommand(nativeBuildTargetProjectPath, "clean", $"-c {configuration}");
 
-
-        // 2. Build Piece.Core first (as it's a dependency for Glfw)
         RunDotNetCommand(pieceCoreProjectPath, "build", $"-c {configuration}");
-
-        // 3. Build Piece.Glfw (which relies on Piece.Core). This triggers the native build for wal_glfw.
         RunDotNetCommand(pieceGlfwProjectPath, "build", $"-c {configuration}");
-
-        // 4. Build NativeBuildTarget. This will then copy from Piece.Glfw's output (due to standard propagation).
         RunDotNetCommand(nativeBuildTargetProjectPath, "build", $"-c {configuration}");
+        
+        // Determine RID
+        string runtimeIdentifier = "";
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            runtimeIdentifier = "win-x64";
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            runtimeIdentifier = "linux-x64";
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            runtimeIdentifier = "osx-x64";
+        }
+        else
+        {
+            throw new PlatformNotSupportedException("Unsupported operating system for native library detection in test.");
+        }
+
+        // Construct the expected path within the runtimes folder
+        string runtimesNativeDir = Path.Combine(outputDir, "runtimes", runtimeIdentifier, "native");
 
         // 5. Verify native libraries
         foreach (string baseName in expectedNativeLibrariesBaseNames)
         {
             string nativeFileName = GetNativeLibraryFileName(baseName, configuration);
-            string nativeFilePath = Path.Combine(outputDir, nativeFileName);
-            Assert.True(File.Exists(nativeFilePath), $"Expected native library '{nativeFileName}' not found in '{outputDir}' for {configuration} build.");
+            string nativeFilePath = Path.Combine(runtimesNativeDir, nativeFileName);
+            Assert.True(File.Exists(nativeFilePath), $"Expected native library '{nativeFileName}' not found in '{runtimesNativeDir}' for {configuration} build.");
         }
         
         // 6. Run the NativeBuildTarget executable to ensure it loads and exits cleanly, implying no 'DLL not found' errors
@@ -157,7 +165,7 @@ public class BuildSystemIntegrationTests
 
         var runProcessStartInfo = new ProcessStartInfo(executableName)
         {
-            WorkingDirectory = outputDir, // Important for loading local DLLs
+            WorkingDirectory = outputDir,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
@@ -166,12 +174,100 @@ public class BuildSystemIntegrationTests
 
         using (var process = Process.Start(runProcessStartInfo))
         {
-            bool exited = process?.WaitForExit(60000) ?? false; // Wait for max 60 seconds
+            bool exited = process?.WaitForExit(60000) ?? false;
             string processOutput = process?.StandardOutput.ReadToEnd();
             string processError = process?.StandardError.ReadToEnd();
 
             Assert.True(exited, $"NativeBuildTarget process did not exit within 60 seconds for {configuration} build. Output: {processOutput}. Error: {processError}");
             Assert.True(process?.ExitCode == 0, $"NativeBuildTarget exited with non-zero code {process?.ExitCode} for {configuration} build. Output: {processOutput}. Error: {processError}");
+        }
+    }
+
+    [Theory]
+    [InlineData("Debug")]
+    [InlineData("Release")]
+    public void MissingNativeLibraryTargetFailsAtRuntime(string configuration)
+    {
+        string solutionDir = GetSolutionDirectory();
+        string pieceGlfwProjectPath = Path.Combine(solutionDir, "src", "csharp", "Piece.Glfw");
+        string missingNativeLibTargetProjectPath = Path.Combine(solutionDir, "tests", "csharp", "TestTargets", "MissingNativeLibTarget");
+        string targetFramework = "net9.0"; // Consistent for all projects
+
+        // Determine the expected output directory for MissingNativeLibTarget
+        string outputDir = Path.Combine(missingNativeLibTargetProjectPath, "bin", configuration, targetFramework);
+
+        // Determine RID
+        string runtimeIdentifier = "";
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            runtimeIdentifier = "win-x64";
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            runtimeIdentifier = "linux-x64";
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            runtimeIdentifier = "osx-x64";
+        }
+        else
+        {
+            throw new PlatformNotSupportedException("Unsupported operating system for native library detection in test.");
+        }
+
+        // Construct the expected path within the runtimes folder where the native DLL should be
+        string runtimesNativeDir = Path.Combine(outputDir, "runtimes", runtimeIdentifier, "native");
+        string nativeFileName = GetNativeLibraryFileName("wal_glfw", configuration);
+        string nativeFilePathInRuntimes = Path.Combine(runtimesNativeDir, nativeFileName);
+        string nativeFilePathInRoot = Path.Combine(outputDir, nativeFileName); // Also check root, as NuGet may flatten
+
+        // 1. Clean and Build MissingNativeLibTarget to ensure it generates all output, including the native DLL
+        RunDotNetCommand(missingNativeLibTargetProjectPath, "clean", $"-c {configuration}");
+        RunDotNetCommand(pieceGlfwProjectPath, "build", $"-c {configuration}"); // Build Piece.Glfw first as it's a dependency
+        RunDotNetCommand(missingNativeLibTargetProjectPath, "build", $"-c {configuration}");
+
+        // Ensure native library is present after build (sanity check)
+        Assert.True(File.Exists(nativeFilePathInRuntimes) || File.Exists(nativeFilePathInRoot), $"Pre-test sanity check failed: Native library '{nativeFileName}' not found after building MissingNativeLibTarget.");
+
+
+        // 2. DELIBERATELY DELETE the native library to simulate a missing dependency
+        if (File.Exists(nativeFilePathInRuntimes))
+        {
+            File.Delete(nativeFilePathInRuntimes);
+        }
+        // If NuGet flattened, it might also be in the root, delete it there too
+        if (File.Exists(nativeFilePathInRoot))
+        {
+            File.Delete(nativeFilePathInRoot);
+        }
+        
+        Assert.False(File.Exists(nativeFilePathInRuntimes) || File.Exists(nativeFilePathInRoot), $"Pre-test sanity check failed: Native library '{nativeFileName}' was not deleted successfully.");
+
+
+        // 3. Run MissingNativeLibTarget executable and assert it FAILS to load the DLL
+        string executableName = Path.Combine(outputDir, "MissingNativeLibTarget" + (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : ""));
+        Assert.True(File.Exists(executableName), $"Executable '{executableName}' not found for {configuration} build.");
+
+        var runProcessStartInfo = new ProcessStartInfo(executableName)
+        {
+            WorkingDirectory = outputDir, 
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+        };
+
+        using (var process = Process.Start(runProcessStartInfo))
+        {
+            bool exited = process?.WaitForExit(60000) ?? false;
+            string processOutput = process?.StandardOutput.ReadToEnd();
+            string processError = process?.StandardError.ReadToEnd();
+
+            Assert.True(exited, $"MissingNativeLibTarget process did not exit within 60 seconds for {configuration} build. Output: {processOutput}. Error: {processError}");
+            // Assert that the process exited with a non-zero code (indicating failure to load DLL)
+            Assert.True(process?.ExitCode != 0, $"MissingNativeLibTarget exited with code {process?.ExitCode} (expected non-zero) for {configuration} build. Output: {processOutput}. Error: {processError}");
+            // Optionally, check for specific error messages related to DLL loading failure
+            Assert.Contains("wal_glfw", processOutput + processError, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

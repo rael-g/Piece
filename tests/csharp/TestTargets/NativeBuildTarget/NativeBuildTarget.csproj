@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\src\csharp\Piece.Glfw\Piece.Glfw.csproj" />
+    <PackageReference Include="Piece.Glfw" />
   </ItemGroup>
 
 </Project>

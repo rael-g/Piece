@@ -6,10 +6,14 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NativeTarget>wal_glfw</NativeTarget>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>Piece.Glfw</PackageId>
+    <Version>0.0.1</Version>
+    <Description>GLFW windowing integration for the Piece framework.</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Piece.Core\Piece.Core.csproj" />
+    <PackageReference Include="Piece.Core" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>

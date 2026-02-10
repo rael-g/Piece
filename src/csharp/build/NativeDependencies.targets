@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
-      <NativeOS>windows</NativeOS>
+      <NativeOS>win</NativeOS>
   </PropertyGroup>
 
   <PropertyGroup Condition="$(Configuration) == 'Debug'">
@@ -21,7 +21,14 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <NativePreset>$(NativeOS)-$(NativeConfig)</NativePreset>
+    <NativeArch>x64</NativeArch>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Platform)' == 'arm64'">
+    <NativeArch>arm64</NativeArch>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <NativePreset>$(NativeOS)-$(NativeArch)-$(NativeConfig)</NativePreset>
   </PropertyGroup>
 
   <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
@@ -42,36 +49,13 @@
   <PropertyGroup>
     <PiecePackageDir>$(MSBuildThisFileDirectory)..\..\..\</PiecePackageDir>
     <NativeBinDir>$(PiecePackageDir)\build\native\bin</NativeBinDir>
+    <NativeTargetBinary>$(NativeBinDir)\$(NativePre)$(NativeTarget).$(NativeExt)</NativeTargetBinary>
   </PropertyGroup>
-
-  <PropertyGroup>
-    <NativeBuildSentinel>$(PiecePackageDir)\build\$(NativePreset)\.native_configure_completed</NativeBuildSentinel>
-  </PropertyGroup>
-
-  <Target Name="BuildNative" BeforeTargets="Build">
-    <Message Text="Checking if native CMake configuration is required for preset $(NativePreset)..." Importance="high" />
-    <Exec Condition="!Exists('$(NativeBuildSentinel)')"
-          Command="cmake --preset $(NativePreset)"
-          WorkingDirectory="$(PiecePackageDir)" />
-    <WriteLinesToFile
-        Condition="!Exists('$(NativeBuildSentinel)')"
-        File="$(NativeBuildSentinel)"
-        Lines="Completed at $([System.DateTime]::Now)"
-        Overwrite="true" />
-
-    <Message Text="Building native target $(NativeTarget) for preset $(NativePreset)..." Importance="high" />
-    <Exec
-          Command="cmake --build --preset $(NativePreset) --target $(NativeTarget) --config $(NativeConfig) --verbose"
-          WorkingDirectory="$(PiecePackageDir)" />
-    <Exec
-          Command="cmake --install build/$(NativePreset) --prefix build/native --config $(NativeConfig)"
-          WorkingDirectory="$(PiecePackageDir)" />
-  </Target>
 
   <ItemGroup>
-    <None Include="$(NativeBinDir)\$(NativePre)$(NativeTarget).$(NativeExt)" Condition="Exists('$(NativeBinDir)\$(NativePre)$(NativeTarget).$(NativeExt)')">
-      <Link>%(Filename)%(Extension)</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <None Include="$(NativeTargetBinary)" Condition="Exists('$(NativeTargetBinary)')">
+      <Pack>true</Pack>
+      <PackagePath>runtimes/$(NativeOS)-$(NativeArch)/native/</PackagePath>
     </None>
   </ItemGroup>
 

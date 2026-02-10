@@ -6,25 +6,19 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NativeTarget>piece_core</NativeTarget>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>Piece.Core</PackageId>
+    <Version>0.0.1</Version>
+    <Description>Core functionality for the Piece framework.</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Piece.Core.Abstractions\Piece.Core.Abstractions.csproj" />
+    <PackageReference Include="Piece.Core.Abstractions" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="Serilog" Version="4.3.0" />
-  </ItemGroup>
-
-  <ItemGroup Condition="$(Configuration) == 'Debug'">
-    <NativeLibraryDependency Include="fmtd" />
-    <NativeLibraryDependency Include="spdlogd" />
-  </ItemGroup>
-
-  <ItemGroup Condition="$(Configuration) == 'Release'">
-    <NativeLibraryDependency Include="fmt" />
-    <NativeLibraryDependency Include="spdlog" />
   </ItemGroup>
 
   <Import Project="../build/NativeDependencies.targets"/>
