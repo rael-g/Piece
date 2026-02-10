@@ -41,27 +41,27 @@ jobs:
 
     - name: Configure CMake (Windows Debug)
       if: startsWith(matrix.os, 'windows')
-      run: cmake --preset windows-debug
+      run: cmake --preset win-x64-debug
 
     - name: Configure CMake (Linux Debug)
       if: startsWith(matrix.os, 'ubuntu')
-      run: cmake --preset linux-debug
+      run: cmake --preset linux-x64-debug
       
     - name: Build C++ (Windows)
       if: startsWith(matrix.os, 'windows')
-      run: cmake --build --preset windows-debug --config Debug --verbose
+      run: cmake --build --preset win-x64-debug --config Debug --verbose
 
     - name: Build C++ (Linux)
       if: startsWith(matrix.os, 'ubuntu')
-      run: cmake --build --preset linux-debug
+      run: cmake --build --preset linux-x64-debug --config Debug --verbose
 
     - name: Run C++ Tests (Windows)
       if: startsWith(matrix.os, 'windows')
-      run: ctest --preset windows-debug
+      run: ctest --preset win-x64-debug -C Debug
 
     - name: Run C++ Tests (Linux)
       if: startsWith(matrix.os, 'ubuntu')
-      run: xvfb-run ctest --preset linux-debug
+      run: xvfb-run ctest --preset linux-x64-debug -C Debug
 
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
