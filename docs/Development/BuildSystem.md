@@ -85,7 +85,7 @@ These are for developers who wish to use the `PieceEngine` as a framework in the
 *   **Process:** The pipeline uses the `dotnet pack` command on the C# library projects (e.g., `Piece.Framework`, `Piece.Vulkan`).
 *   **Content:** Each `.nupkg` package contains:
     *   The C# library DLLs.
-    *   A configuration that instructs NuGet to include the correct native C++ binaries (`.dll`/.so) when packing a consuming project. This configuration is managed through custom MSBuild target files.
+    *   **The pre-built native C++ binaries** for various target runtimes (e.g., `runtimes/win-x64/native/wal_glfw.dll`).
 *   **Final Result:** A set of versioned `.nupkg` packages, ready to be published to a registry like `NuGet.org`.
 
 **3. Vcpkg Packages (For C++ Developers)**

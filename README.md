@@ -105,10 +105,35 @@ To get started with the Piece Engine, follow these high-level steps:
     2.  [CMake](https://github.com/Kitware/CMake)
     3.  [.NET SDK 8.0+](https://dotnet.microsoft.com/download)
 
-3.  **Build C# Projects (which includes C++ low-level implementations):**
-    *   Navigate to the solution directory (or your specific C# project).
-    *   Run `dotnet build` from your terminal. This will automatically trigger the CMake/vcpkg build process for C++ low-level implementations via custom MSBuild target files.
-    *   Example: `dotnet build tests/csharp/Piece.ExampleGame/Piece.ExampleGame.csproj`
+3.  **Build Process:**
+    The Piece Engine uses a hybrid C++/C# architecture.
+
+    *   **Build Native C++ Components:**
+        Navigate to the root of the repository and execute CMake commands for your desired platform and configuration. This will configure, build, and install the native libraries into the `build/native/bin` directory.
+
+        Example for `Windows Debug (x64)`:
+        ```bash
+        # Configure the project for the desired preset (e.g., win-x64-debug)
+        cmake --preset win-x64-debug
+
+        # Build the native components
+        cmake --build build/win-x64-debug --config Debug
+
+        # Install the built native components into the common native binary directory
+        cmake --install build/win-x64-debug --prefix build/native --config Debug
+        ```
+        *Repeat these steps for other desired configurations (e.g., `win-x64-release`, `linux-x64-debug`, `linux-x64-release`) before building C# projects.*
+
+    *   **Build C# Projects and NuGet Packages:**
+        After ensuring native components are built and installed, navigate to the root of the repository and build your C# projects. This will generate the C# assemblies and their corresponding NuGet packages, including the pre-built native libraries.
+
+        ```bash
+        # Clean any previous C# build artifacts
+        dotnet clean
+
+        # Build all C# projects and generate NuGet packages
+        dotnet build
+        ```
 
 4.  **Run Your Game/Example:**
     *   Executables for your C# project (and the compiled native DLLs) will be in the project's output directory (e.g., `tests/csharp/Piece.ExampleGame/bin/Debug/net8.0/`).
