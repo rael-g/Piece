@@ -20,3 +20,5 @@ target_link_libraries(piece_core_core_tests PRIVATE
 # Discover and add tests to CTest
 include(GoogleTest)
 gtest_add_tests(TARGET piece_core_core_tests)
+
+enable_runtime_dependencies(piece_core_core_tests)
