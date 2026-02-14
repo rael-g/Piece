@@ -49,11 +49,19 @@ jobs:
       
     - name: Build C++ (Windows)
       if: startsWith(matrix.os, 'windows')
-      run: cmake --build --preset win-x64-debug --config Debug --verbose
+      run: cmake --build --preset win-x64-debug --config Debug
+
+    - name: Install C++ (Windows)
+      if: startsWith(matrix.os, 'windows')
+      run: cmake --install build/win-x64-debug --prefix build/native --config Debug
 
     - name: Build C++ (Linux)
       if: startsWith(matrix.os, 'ubuntu')
-      run: cmake --build --preset linux-x64-debug --config Debug --verbose
+      run: cmake --build --preset linux-x64-debug --config Debug
+
+    - name: Install C++ (Linux)
+      if: startsWith(matrix.os, 'ubuntu')
+      run: cmake --install build/linux-x64-debug --prefix build/native --config Debug
 
     - name: Run C++ Tests (Windows)
       if: startsWith(matrix.os, 'windows')

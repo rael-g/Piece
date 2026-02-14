@@ -15,7 +15,7 @@ Built with a hybrid C++ and C# architecture, the Piece Engine leverages the perf
 *   **Hybrid Language Architecture:** Combines performance-critical C++ (for low-level and Piece.Core layers) with a rich C# framework (for Piece.Framework (C#) game logic and editor tooling).
 *   **Multi-Layered Design:** A clear separation of concerns across Low-Level (C++), Piece.Core (C++), Piece.Framework (C#), and Editor (C#) layers.
 *   **Ultimate Modularity & Extensibility:**
-    *   **Source-Compiled C++ Low-Level Implementations:** C++ low-level implementations (rendering, windowing, physics) are provided as source code within C# NuGet packages. They are compiled on-demand via custom MSBuild target files for the target platform, ensuring native performance and maximum compatibility.
+    *   **Native C++ Implementations:** C++ low-level implementations (rendering, windowing, physics) are built natively as dynamic libraries. These pre-built binaries are then integrated into C# projects using Project References, ensuring native performance and maximum compatibility.
     *   **.NET Dependency Injection:** Extensible C# framework for custom components and services, orchestrating the integration of C++ low-level implementations.
     *   **Multi-language Scripting:** Support for various scripting languages via "Bridge Components."
 *   **IDE & Platform Agnostic:** Develop on Windows, Linux, or macOS using your preferred IDE (Visual Studio, VSCode, Vim, etc.).
@@ -53,8 +53,8 @@ The Piece Engine employs a robust build system designed for hybrid language supp
     *   **vcpkg:** Manages all external C++ dependencies (e.g., GLFW, OpenGL) for native implementations. It's invoked by `MSBuild.targets` during the C++ compilation step.
     *   **.NET SDK:** For building and managing C# projects and orchestrating the native C++ builds via NuGet packages.
 *   **Hybrid Build Process:**
-    *   **C++ Low-Level Implementations:** C++ low-level implementations (WAL, RAL, PAL implementations) are distributed as source code within their respective C# NuGet wrapper packages. When a C# project referencing these NuGet packages is built, the NuGet package's custom MSBuild target files automatically invokes CMake and vcpkg to compile the native C++ code into dynamic libraries (`.dll`, `.so`) tailored for the target platform. These compiled native libraries are then placed in the C# project's output directory.
-    *   **C# Projects:** Standard .NET SDK build process.
+    *   **C++ Low-Level Implementations:** C++ low-level implementations (WAL, RAL, PAL implementations) are built natively into dynamic libraries (`.dll`, `.so`). These pre-built native libraries are then referenced by their respective C# wrapper projects (e.g., `Piece.Glfw`, `Piece.OpenGL`, `Piece.Box2d`) via Project References.
+    *   **C# Projects:** Standard .NET SDK build process. C# projects consume the pre-built native libraries, ensuring platform-native compatibility and seamless integration through .NET Dependency Injection.
 
 ## 🚀 Development Workflow
 

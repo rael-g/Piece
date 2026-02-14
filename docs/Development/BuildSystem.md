@@ -61,7 +61,7 @@ The build architecture is designed to support both local development and the del
 The compilation process is divided into two main phases:
 
 1.  **Native Compilation (C++):** Using CMake, all core engine components and low-level implementations (e.g., `wal/glfw`) are compiled into native libraries (`.dll` on Windows, `.so` on Linux). This process is self-contained and produces the low-level binaries.
-2.  **Managed Compilation (C#):** Using the .NET SDK, C# projects are compiled. C# wrapper projects (e.g., `Piece.Glfw`, `Piece.OpenGL`, `Piece.Box2d`) define P/Invoke signatures to load and interact with the C++ libraries (from Piece.Core) compiled in the previous phase.
+2.  **Managed Compilation (C#):** Using the .NET SDK, C# projects are compiled. C# wrapper projects (e.g., `Piece.Glfw`, `Piece.OpenGL`, `Piece.Box2d`) directly reference the pre-built native C++ libraries via `ProjectReference`, allowing them to define P/Invoke signatures to load and interact with these libraries.
 
 In the CI environment, these phases are executed sequentially to ensure all tests pass before proceeding to packaging.
 
@@ -76,7 +76,7 @@ This is the "download, unzip, and run" package.
 *   **Content:** This command creates a self-contained folder that includes:
     *   The `Piece.Editor` executable.
     *   All managed C# libraries (.DLLs) it depends on.
-    *   **The necessary native C++ binaries** for the target platform (e.g., `win-x64`), which are copied into the publish folder.
+    *   **The pre-built native C++ binaries** for the target platform (e.g., `win-x64`), which are copied into the publish folder.
 *   **Final Result:** The entire publish folder is compressed into a single `.zip` file (e.g., `PieceEngine-Editor-win-x64.zip`), ready for distribution.
 
 **2. NuGet Packages (For Developers)**
@@ -85,7 +85,7 @@ These are for developers who wish to use the `PieceEngine` as a framework in the
 *   **Process:** The pipeline uses the `dotnet pack` command on the C# library projects (e.g., `Piece.Framework`, `Piece.Vulkan`).
 *   **Content:** Each `.nupkg` package contains:
     *   The C# library DLLs.
-    *   **The pre-built native C++ binaries** for various target runtimes (e.g., `runtimes/win-x64/native/wal_glfw.dll`).
+    *   **The pre-built native C++ binaries** for various target runtimes (e.g., `runtimes/win-x64/native/wal_glfw.dll`). These binaries are configured to be copied to the referencing C# project's output directory upon build.
 *   **Final Result:** A set of versioned `.nupkg` packages, ready to be published to a registry like `NuGet.org`.
 
 **3. Vcpkg Packages (For C++ Developers)**
