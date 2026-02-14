@@ -46,15 +46,24 @@
     <NativePre></NativePre>
   </PropertyGroup>
 
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+    <NativeTypeDir>bin</NativeTypeDir>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
+    <NativeTypeDir>lib</NativeTypeDir>
+  </PropertyGroup>
+
+
   <PropertyGroup>
     <PiecePackageDir>$(MSBuildThisFileDirectory)..\..\..\</PiecePackageDir>
-    <NativeBinDir>$(PiecePackageDir)\build\native\bin</NativeBinDir>
-    <NativeTargetBinary>$(NativeBinDir)\$(NativePre)$(NativeTarget).$(NativeExt)</NativeTargetBinary>
+    <NativeFinalDir>$(PiecePackageDir)\build\native\$(NativeTypeDir)</NativeFinalDir>
+    <NativeTargetBinary>$(NativeFinalDir)\$(NativePre)$(NativeTarget).$(NativeExt)</NativeTargetBinary>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="$(NativeTargetBinary)" Condition="Exists('$(NativeTargetBinary)')">
-      <Link>$(NativeTarget).$(NativeExt)</Link>
+      <Link>$(NativePre)$(NativeTarget).$(NativeExt)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

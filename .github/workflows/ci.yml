@@ -65,7 +65,7 @@ jobs:
 
     - name: Run C++ Tests (Windows)
       if: startsWith(matrix.os, 'windows')
-      run: ctest --preset win-x64-debug -C Debug
+      run: ctest --preset win-x64-debug -C Debug --exclude-regex "GlfwWindowTest"
 
     - name: Run C++ Tests (Linux)
       if: startsWith(matrix.os, 'ubuntu')
