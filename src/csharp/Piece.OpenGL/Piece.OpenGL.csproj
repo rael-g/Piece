@@ -6,24 +6,13 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NativeTarget>ral_opengl</NativeTarget>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>Piece.OpenGL</PackageId>
     <Version>0.0.1</Version>
     <Description>OpenGL rendering integration for the Piece framework.</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Piece.Core" Version="1.0.0" />
-  </ItemGroup>
-
-  <ItemGroup Condition="$(Configuration) == 'Debug'">
-    <NativeLibraryDependency Include="glfw3" />
-    <NativeLibraryDependency Include="fmtd" />
-  </ItemGroup>
-
-  <ItemGroup Condition="$(Configuration) == 'Release'">
-    <NativeLibraryDependency Include="glfw3" />
-    <NativeLibraryDependency Include="fmt" />
+    <ProjectReference Include="..\Piece.Core\Piece.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

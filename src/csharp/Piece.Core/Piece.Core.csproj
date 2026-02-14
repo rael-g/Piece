@@ -6,14 +6,13 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NativeTarget>piece_core</NativeTarget>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>Piece.Core</PackageId>
     <Version>0.0.1</Version>
     <Description>Core functionality for the Piece framework.</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Piece.Core.Abstractions" Version="1.0.0" />
+    <ProjectReference Include="..\Piece.Core.Abstractions\Piece.Core.Abstractions.csproj" />
   </ItemGroup>
 
   <ItemGroup>

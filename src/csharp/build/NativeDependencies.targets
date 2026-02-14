@@ -54,8 +54,8 @@
 
   <ItemGroup>
     <None Include="$(NativeTargetBinary)" Condition="Exists('$(NativeTargetBinary)')">
-      <Pack>true</Pack>
-      <PackagePath>runtimes/$(NativeOS)-$(NativeArch)/native/</PackagePath>
+      <Link>$(NativeTarget).$(NativeExt)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 

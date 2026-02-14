@@ -129,35 +129,12 @@ public class BuildSystemIntegrationTests
         RunDotNetCommand(pieceGlfwProjectPath, "build", $"-c {configuration}");
         RunDotNetCommand(nativeBuildTargetProjectPath, "build", $"-c {configuration}");
         
-        // Determine RID
-        string runtimeIdentifier = "";
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            runtimeIdentifier = "win-x64";
-        }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            runtimeIdentifier = "linux-x64";
-        }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            runtimeIdentifier = "osx-x64";
-        }
-        else
-        {
-            throw new PlatformNotSupportedException("Unsupported operating system for native library detection in test.");
-        }
-
-        // Construct the expected path within the runtimes folder
-        string runtimesNativeDir = Path.Combine(outputDir, "runtimes", runtimeIdentifier, "native");
-
+        // Construct the expected path in the root output directory
+        string nativeFileName = GetNativeLibraryFileName(expectedNativeLibrariesBaseNames[0], configuration);
+        string nativeFilePath = Path.Combine(outputDir, nativeFileName);
+        
         // 5. Verify native libraries
-        foreach (string baseName in expectedNativeLibrariesBaseNames)
-        {
-            string nativeFileName = GetNativeLibraryFileName(baseName, configuration);
-            string nativeFilePath = Path.Combine(runtimesNativeDir, nativeFileName);
-            Assert.True(File.Exists(nativeFilePath), $"Expected native library '{nativeFileName}' not found in '{runtimesNativeDir}' for {configuration} build.");
-        }
+        Assert.True(File.Exists(nativeFilePath), $"Expected native library '{nativeFileName}' not found in '{outputDir}' for {configuration} build.");
         
         // 6. Run the NativeBuildTarget executable to ensure it loads and exits cleanly, implying no 'DLL not found' errors
         string executableName = Path.Combine(outputDir, "NativeBuildTarget" + (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : ""));
@@ -195,31 +172,9 @@ public class BuildSystemIntegrationTests
 
         // Determine the expected output directory for MissingNativeLibTarget
         string outputDir = Path.Combine(missingNativeLibTargetProjectPath, "bin", configuration, targetFramework);
-
-        // Determine RID
-        string runtimeIdentifier = "";
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            runtimeIdentifier = "win-x64";
-        }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            runtimeIdentifier = "linux-x64";
-        }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            runtimeIdentifier = "osx-x64";
-        }
-        else
-        {
-            throw new PlatformNotSupportedException("Unsupported operating system for native library detection in test.");
-        }
-
-        // Construct the expected path within the runtimes folder where the native DLL should be
-        string runtimesNativeDir = Path.Combine(outputDir, "runtimes", runtimeIdentifier, "native");
+        
         string nativeFileName = GetNativeLibraryFileName("wal_glfw", configuration);
-        string nativeFilePathInRuntimes = Path.Combine(runtimesNativeDir, nativeFileName);
-        string nativeFilePathInRoot = Path.Combine(outputDir, nativeFileName); // Also check root, as NuGet may flatten
+        string nativeFilePathInRoot = Path.Combine(outputDir, nativeFileName);
 
         // 1. Clean and Build MissingNativeLibTarget to ensure it generates all output, including the native DLL
         RunDotNetCommand(missingNativeLibTargetProjectPath, "clean", $"-c {configuration}");
@@ -227,21 +182,16 @@ public class BuildSystemIntegrationTests
         RunDotNetCommand(missingNativeLibTargetProjectPath, "build", $"-c {configuration}");
 
         // Ensure native library is present after build (sanity check)
-        Assert.True(File.Exists(nativeFilePathInRuntimes) || File.Exists(nativeFilePathInRoot), $"Pre-test sanity check failed: Native library '{nativeFileName}' not found after building MissingNativeLibTarget.");
+        Assert.True(File.Exists(nativeFilePathInRoot), $"Pre-test sanity check failed: Native library '{nativeFileName}' not found after building MissingNativeLibTarget.");
 
 
         // 2. DELIBERATELY DELETE the native library to simulate a missing dependency
-        if (File.Exists(nativeFilePathInRuntimes))
-        {
-            File.Delete(nativeFilePathInRuntimes);
-        }
-        // If NuGet flattened, it might also be in the root, delete it there too
         if (File.Exists(nativeFilePathInRoot))
         {
             File.Delete(nativeFilePathInRoot);
         }
         
-        Assert.False(File.Exists(nativeFilePathInRuntimes) || File.Exists(nativeFilePathInRoot), $"Pre-test sanity check failed: Native library '{nativeFileName}' was not deleted successfully.");
+        Assert.False(File.Exists(nativeFilePathInRoot), $"Pre-test sanity check failed: Native library '{nativeFileName}' was not deleted successfully.");
 
 
         // 3. Run MissingNativeLibTarget executable and assert it FAILS to load the DLL

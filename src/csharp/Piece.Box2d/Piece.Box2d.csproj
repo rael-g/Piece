@@ -6,14 +6,13 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NativeTarget>pal_box2d</NativeTarget>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>Piece.Box2d</PackageId>
     <Version>0.0.1</Version>
     <Description>Box2d physics integration for the Piece framework.</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Piece.Core" Version="1.0.0" />
+    <ProjectReference Include="..\Piece.Core\Piece.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
