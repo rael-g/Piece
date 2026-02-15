@@ -19,8 +19,7 @@ Checks: >
   llvm-include-order,
   llvm-namespace-comment,
   -modernize-use-trailing-return-type,
-  -readability-identifier-naming
-
+  readability-identifier-naming
 HeaderFilterRegex: '.*'
 
 FormatStyle: file
@@ -29,6 +28,28 @@ CheckOptions:
   # ============================================================================
   # ===== Naming Conventions =====
   # ============================================================================
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability-identifier-naming.ClassCaseForEnums
+    value: CamelCase
+  - key: readability-identifier-naming.ClassCaseForStructs
+    value: CamelCase
+  - key: readability-identifier-naming.FunctionCase
+    value: CamelCase
+  - key: readability-identifier-naming.VariableCase
+    value: snake_case
+  - key: readability-identifier-naming.MemberCase
+    value: snake_case
+  - key: readability-identifier-naming.ConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.ConstantMemberCase
+    value: CamelCase
+  - key: readability-identifier-naming.ConstantMemberPrefix
+    value: k
+  - key: readability-identifier-naming.EnumConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumConstantPrefix
+    value: k
 
 
   # ============================================================================

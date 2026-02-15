@@ -162,15 +162,7 @@ Rules:
 
 ## Naming conventions (C++)
 
-This project adopts a convention heavily based on the **Google C++ Style Guide** to ensure clarity, consistency, and universality for the C++ core.
-
-*   **Types (Classes, Structs, Enums):** `PascalCase` (e.g., `class RenderDevice;`)
-*   **Interfaces (Abstract Classes):** `I` prefixed `PascalCase` (e.g., `class IWindow;`)
-*   **Functions and Methods:** `PascalCase` (e.g., `void CreateWindow();`)
-*   **Variables (Locals, Parameters):** `snake_case` (e.g., `int initial_width;`)
-*   **Member Variables (Private):** `_` prefixed `snake_case` (e.g., `int _width;`)
-*   **Constants and Enum Members:** `k` prefixed `PascalCase` (e.g., `const int kMaxLights = 16;`, `enum class Color { kRed };`)
-*   
+This project strictly adheres to the **Google C++ Style Guide** for all C++ naming conventions. This ensures clarity, consistency, and universality across the C++ codebase. Developers and AI agents must consult the official Google C++ Style Guide for specific rules regarding types, functions, variables, member variables, and constants.
 
 Abbreviations MUST be avoided unless industry-standard.
 
@@ -219,20 +211,7 @@ If CMake becomes hard to understand, it is considered a design defect.
 
 ## Formatting and indentation
 
-* Indentation: **4 spaces**, no tabs
-* Braces on their own line (Allman style)
-* One statement per line
-
-Example:
-
-```
-if (condition)
-{
-    DoThing();
-}
-```
-
-Formatting consistency is mandatory. Style debates are not.
+C++ code formatting adheres to the **Microsoft C++ style**, as enforced by `clang-format`. This ensures consistent indentation, brace style, and overall code presentation across the project.
 
 ---
 
