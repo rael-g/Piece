@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RAL_OPENGL_OPENGL_RENDER_CONTEXT_H_
+#define RAL_OPENGL_OPENGL_RENDER_CONTEXT_H_
 
 #include <ral/irender_context.h>
 
@@ -20,3 +21,5 @@ class OpenGLRenderContext : public IRenderContext
     void SwapBuffers(); // Note: This is not an override from IRenderContext, keep as a custom method
 };
 } // namespace Piece::RAL
+
+#endif // RAL_OPENGL_OPENGL_RENDER_CONTEXT_H_

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PAL_BOX2D_BOX2D_PHYSICS_WORLD_FACTORY_H_
+#define PAL_BOX2D_BOX2D_PHYSICS_WORLD_FACTORY_H_
 
 #include "pal_box2d_exports.h"
 #include <pal/iphysics_body.h>
@@ -83,3 +84,5 @@ extern "C"
     PAL_BOX2D_API Piece::PAL::IPhysicsWorldFactory *CreateBox2DPhysicsWorldFactory(); // Changed Piece::Core to
                                                                                       // Piece::PAL
 }
+
+#endif // PAL_BOX2D_BOX2D_PHYSICS_WORLD_FACTORY_H_

@@ -107,8 +107,8 @@ Headers MUST NOT:
 
 ### Include guards
 
-* Use `#pragma once` consistently
-* Do not mix include guard styles
+* All header files MUST use traditional include guards (`#ifndef`/`#define`/`#endif`).
+
 
 ---
 

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RAL_OPENGL_OPENGL_GRAPHICS_DEVICE_FACTORY_H_
+#define RAL_OPENGL_OPENGL_GRAPHICS_DEVICE_FACTORY_H_
 
 #include "opengl_graphics_device.h"       // Assuming this is needed here
 #include <ral/igraphics_device_factory.h> // Corrected include
@@ -16,3 +17,5 @@ class OpenGLGraphicsDeviceFactory : public Piece::RAL::IGraphicsDeviceFactory
                                                                const NativeGraphicsOptions *options) override;
 };
 } // namespace Piece::RAL
+
+#endif // RAL_OPENGL_OPENGL_GRAPHICS_DEVICE_FACTORY_H_

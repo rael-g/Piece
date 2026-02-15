@@ -11,46 +11,46 @@ OpenGLGraphicsDevice::~OpenGLGraphicsDevice() = default;
 
 void OpenGLGraphicsDevice::Init()
 {
-    // Futuramente: Inicializar GLEW/GLAD aqui
+    // TODO(graphics): Initialize GLEW/GLAD. Deferring to focus on core API design first.
 }
 
 void OpenGLGraphicsDevice::BeginFrame()
 {
-    // Stub
+    // Stub: Implementation pending specific graphics backend requirements.
 }
 
 void OpenGLGraphicsDevice::EndFrame()
 {
-    // Stub
+    // Stub: Implementation pending specific graphics backend requirements.
 }
 
 IRenderContext *OpenGLGraphicsDevice::GetImmediateContext()
 {
-    // Stub
+    // Stub: Implementation pending specific graphics backend requirements.
     return nullptr;
 }
 
 std::unique_ptr<IVertexBuffer> OpenGLGraphicsDevice::CreateVertexBuffer()
 {
-    // Stub
+    // Stub: Implementation pending specific graphics backend requirements.
     return nullptr;
 }
 
 std::unique_ptr<IIndexBuffer> OpenGLGraphicsDevice::CreateIndexBuffer()
 {
-    // Stub
+    // Stub: Implementation pending specific graphics backend requirements.
     return nullptr;
 }
 
-std::unique_ptr<IShader> OpenGLGraphicsDevice::CreateShader()
+std::unique_ptr<IShader> CreateShader()
 {
-    // Stub
+    // Stub: Implementation pending specific graphics backend requirements.
     return nullptr;
 }
 
-std::unique_ptr<IShaderProgram> OpenGLGraphicsDevice::CreateShaderProgram()
+std::unique_ptr<IShaderProgram> CreateShaderProgram()
 {
-    // Stub
+    // Stub: Implementation pending specific graphics backend requirements.
     return nullptr;
 }
 } // namespace Piece::RAL

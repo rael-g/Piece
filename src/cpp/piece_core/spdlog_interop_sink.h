@@ -3,7 +3,8 @@
  * @brief Defines a custom spdlog sink to forward log messages to a C-style interop function.
  *        This allows the native C++ logging to be captured by a managed C# application.
  */
-#pragma once
+#ifndef PIECE_CORE_SPDLOG_INTEROP_SINK_H_
+#define PIECE_CORE_SPDLOG_INTEROP_SINK_H_
 
 #include <mutex>
 #include <spdlog/details/null_mutex.h>
@@ -84,3 +85,5 @@ using InteropSink_mt = InteropSink<std::mutex>;
 using InteropSink_st = InteropSink<spdlog::details::null_mutex>;
 
 } // namespace Piece::Core
+
+#endif // PIECE_CORE_SPDLOG_INTEROP_SINK_H_

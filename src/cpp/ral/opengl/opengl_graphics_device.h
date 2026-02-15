@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RAL_OPENGL_OPENGL_GRAPHICS_DEVICE_H_
+#define RAL_OPENGL_OPENGL_GRAPHICS_DEVICE_H_
 
 #include <ral/igraphics_device.h>
 
@@ -21,3 +22,5 @@ class OpenGLGraphicsDevice : public IGraphicsDevice
     std::unique_ptr<IShaderProgram> CreateShaderProgram() override;
 };
 } // namespace Piece::RAL
+
+#endif // RAL_OPENGL_OPENGL_GRAPHICS_DEVICE_H_

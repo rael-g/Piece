@@ -2,7 +2,8 @@
  * @file logging_api.h
  * @brief Defines the LogLevel enum for the Piece engine's logging system.
  */
-#pragma once
+#ifndef PIECE_CORE_LOGGING_API_H_
+#define PIECE_CORE_LOGGING_API_H_
 
 #include <cstdint>
 
@@ -39,3 +40,5 @@ enum class LogLevel : uint8_t
     kFatal
 };
 } // namespace Piece
+
+#endif // PIECE_CORE_LOGGING_API_H_

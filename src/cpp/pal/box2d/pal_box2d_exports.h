@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PAL_BOX2D_PAL_BOX2D_EXPORTS_H_
+#define PAL_BOX2D_PAL_BOX2D_EXPORTS_H_
 
 #ifdef _WIN32
 #ifdef PAL_BOX2D_BUILD_DLL
@@ -13,3 +14,5 @@
 #define PAL_BOX2D_API
 #endif
 #endif
+
+#endif // PAL_BOX2D_PAL_BOX2D_EXPORTS_H_
