@@ -1,0 +1,89 @@
+---
+# This .clang-tidy configuration is aligned with docs/Development/ProjectGuidelines.md
+Checks: >
+  -*,
+  bugprone-*,
+  clang-analyzer-*,
+  cppcoreguidelines-*,
+  modernize-*,
+  performance-*,
+  readability-*
+
+WarningsAsErrors: '*'
+
+AnalyzeTemporaryDtors: false
+
+HeaderFilterRegex: '.*'
+
+FormatStyle: file
+
+CheckOptions:
+  # ============================================================================
+  # ===== Naming Conventions (PROJECT_GUIDELINES_REVISED.md) =====
+  # ============================================================================
+  - key: readability-identifier-naming.ClassCase
+    value: PascalCase
+  - key: readability-identifier-naming.StructCase
+    value: PascalCase
+  - key: readability-identifier-naming.InterfaceCase
+    value: PascalCase
+  - key: readability-identifier-naming.FunctionCase
+    value: PascalCase
+  - key: readability-identifier-naming.MethodCase
+    value: PascalCase
+  - key: readability-identifier-naming.VariableCase
+    value: snake_case
+  - key: readability-identifier-naming.MemberCase
+    value: snake_case
+  - key: readability-identifier-naming.PrivateMemberPrefix
+    value: '_'
+  - key: readability-identifier-naming.ConstantCase
+    value: PascalCase
+  - key: readability-identifier-naming.ConstantPrefix
+    value: 'k'
+  - key: readability-identifier-naming.EnumConstantCase
+    value: PascalCase
+  - key: readability-identifier-naming.EnumConstantPrefix
+    value: 'k'
+  - key: readability-identifier-naming.NamespaceCase
+    value: 'PascalCase' # Corresponds to Piece, Piece::Wal, etc.
+
+  # ============================================================================
+  # ===== C++ Core Guidelines & Modernization =====
+  # ============================================================================
+  # Enforce RAII and modern smart pointer creation.
+  - key: modernize-use-make-shared
+    value: 'true'
+  - key: modernize-use-make-unique
+    value: 'true'
+  - key: modernize-use-nullptr.NullMacros
+    value: 'NULL'
+  - key: modernize-use-using.IgnoreMacros
+    value: 'true'
+
+  # Relax some strict pointer rules often needed in low-level engine code.
+  - key: cppcoreguidelines-pro-bounds-pointer-arithmetic
+    value: 'false'
+  - key: cppcoreguidelines-pro-type-reinterpret-cast
+    value: 'false'
+
+  # ============================================================================
+  # ===== Readability & Style (PROJECT_GUIDELINES_REVISED.md) =====
+  # ============================================================================
+  # Enforce const-correctness aggressively.
+  - key: readability-const-correctness-call-argument
+    value: 'true'
+  - key: readability-const-correctness-member-fn
+    value: 'true'
+  - key: readability-const-correctness-return-type
+    value: 'true'
+  - key: readability-const-correctness-variable
+    value: 'true'
+  
+  # Enforce braces around statements for clarity and bug prevention.
+  - key: readability-braces-around-statements.ShortStatementLines
+    value: '0'
+
+  # Avoid magic numbers, but allow them for floating point values in graphics code.
+  - key: cppcoreguidelines-avoid-magic-numbers.IgnoreAllFloatingPointValues
+    value: 'true'
