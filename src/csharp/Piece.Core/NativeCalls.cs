@@ -13,11 +13,11 @@ public static partial class NativeCalls
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void CppLogCallback(int level, IntPtr messagePtr);
 
-    [LibraryImport("piece_core.dll", EntryPoint = "PieceCore_RegisterLogCallback")] // Changed to piece_core.dll
+    [LibraryImport("piece_core.dll", EntryPoint = "PieceCoreRegisterLogCallback")] // Changed to piece_core.dll
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     public static partial void RegisterLogCallback(CppLogCallback callback);
 
-    [LibraryImport("piece_core.dll", EntryPoint = "PieceCore_Log")] // Changed to piece_core.dll
+    [LibraryImport("piece_core.dll", EntryPoint = "PieceCoreLog")] // Changed to piece_core.dll
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     public static partial void PieceCoreLog(int level, IntPtr messagePtr); // Changed name to avoid conflict and align with PieceCore_
 
@@ -63,19 +63,19 @@ public static partial class NativeCalls
     public static partial void SetPhysicsWorldFactory(IntPtr factoryPtr);
 
     // Engine Lifecycle
-    [LibraryImport("piece_core.dll", EntryPoint = "Engine_Initialize")] // Changed to piece_core.dll
+    [LibraryImport("piece_core.dll", EntryPoint = "EngineInitialize")] // Changed to piece_core.dll
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    public static partial IntPtr Engine_Initialize();
+    public static partial IntPtr EngineInitialize();
 
-    [LibraryImport("piece_core.dll", EntryPoint = "Engine_Destroy")] // Changed to piece_core.dll
+    [LibraryImport("piece_core.dll", EntryPoint = "EngineDestroy")] // Changed to piece_core.dll
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    public static partial void Engine_Destroy(IntPtr engineCorePtr);
+    public static partial void EngineDestroy(IntPtr engineCorePtr);
 
-    [LibraryImport("piece_core.dll", EntryPoint = "Engine_Update")] // Added
+    [LibraryImport("piece_core.dll", EntryPoint = "EngineUpdate")] // Added
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    public static partial void Engine_Update(IntPtr engineCorePtr, float deltaTime); // Added
+    public static partial void EngineUpdate(IntPtr engineCorePtr, float deltaTime); // Added
 
-    [LibraryImport("piece_core.dll", EntryPoint = "Engine_Render")] // Added
+    [LibraryImport("piece_core.dll", EntryPoint = "EngineRender")] // Added
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    public static partial void Engine_Render(IntPtr engineCorePtr); // Added
+    public static partial void EngineRender(IntPtr engineCorePtr); // Added
 }
