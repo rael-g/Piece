@@ -175,7 +175,7 @@ extern "C"
      * @brief C-style export to initialize the engine.
      * @return A pointer to the newly created EngineCore instance.
      */
-    PIECE_CORE_API Piece::Core::EngineCore *Engine_Initialize()
+    PIECE_CORE_API Piece::Core::EngineCore *EngineInitialize()
     {
         static bool loggerInitialized = false;
         if (!loggerInitialized)
@@ -197,7 +197,7 @@ extern "C"
      * @brief C-style export to destroy the engine.
      * @param corePtr A pointer to the EngineCore instance to destroy.
      */
-    void Engine_Destroy(Piece::Core::EngineCore *corePtr)
+    void EngineDestroy(Piece::Core::EngineCore *corePtr)
     {
         spdlog::info("Engine_Destroy called.");
         if (corePtr)
@@ -214,7 +214,7 @@ extern "C"
      * @brief C-style export to update the engine.
      * @param corePtr A pointer to the EngineCore instance.
      */
-    void Engine_Update(Piece::Core::EngineCore *corePtr, float deltaTime)
+    void EngineUpdate(Piece::Core::EngineCore *corePtr, float deltaTime)
     {
         if (corePtr)
         {
@@ -226,7 +226,7 @@ extern "C"
      * @brief C-style export to render a frame.
      * @param corePtr A pointer to the EngineCore instance.
      */
-    void Engine_Render(Piece::Core::EngineCore *corePtr)
+    void EngineRender(Piece::Core::EngineCore *corePtr)
     {
         if (corePtr)
         {
@@ -243,7 +243,7 @@ extern "C"
      * @brief C-style export to register a log callback function from the host application.
      * @param callback The callback function.
      */
-    PIECE_CORE_API void PieceCore_RegisterLogCallback(LogCallback callback)
+    PIECE_CORE_API void PieceCoreRegisterLogCallback(LogCallback callback)
     {
         s_log_callback = callback;
         if (s_log_callback)
@@ -261,7 +261,7 @@ extern "C"
      * @param level The log level.
      * @param message The log message.
      */
-    PIECE_CORE_API void PieceCore_Log(int level, const char *message)
+    PIECE_CORE_API void PieceCoreLog(int level, const char *message)
     {
         if (s_log_callback)
         {

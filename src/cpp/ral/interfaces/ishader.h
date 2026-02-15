@@ -15,11 +15,11 @@ namespace Piece::RAL
  */
 enum class ShaderType
 {
-    Vertex,   /**< Vertex shader. */
-    Fragment, /**< Fragment (or pixel) shader. */
-    Geometry, /**< Geometry shader. */
-    Compute,  /**< Compute shader. */
-    Unknown   /**< Unknown shader type. */
+    kVertex,   /**< Vertex shader. */
+    kFragment, /**< Fragment (or pixel) shader. */
+    kGeometry, /**< Geometry shader. */
+    kCompute,  /**< Compute shader. */
+    kUnknown   /**< Unknown shader type. */
 };
 
 /**

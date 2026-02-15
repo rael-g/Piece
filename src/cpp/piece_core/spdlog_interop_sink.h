@@ -17,25 +17,25 @@
  * @param spd_level The spdlog level enum.
  * @return The corresponding Piece::LogLevel.
  */
-inline Piece::LogLevel spdlog_level_to_piece_log_level(spdlog::level::level_enum spd_level)
+inline Piece::LogLevel SpdlogLevelToPieceLogLevel(spdlog::level::level_enum spd_level)
 {
     switch (spd_level)
     {
     case spdlog::level::trace:
-        return Piece::LogLevel::Trace;
+        return Piece::LogLevel::kTrace;
     case spdlog::level::debug:
-        return Piece::LogLevel::Debug;
+        return Piece::LogLevel::kDebug;
     case spdlog::level::info:
-        return Piece::LogLevel::Info;
+        return Piece::LogLevel::kInfo;
     case spdlog::level::warn:
-        return Piece::LogLevel::Warning;
+        return Piece::LogLevel::kWarning;
     case spdlog::level::err:
-        return Piece::LogLevel::Error;
+        return Piece::LogLevel::kError;
     case spdlog::level::critical:
-        return Piece::LogLevel::Fatal;
+        return Piece::LogLevel::kFatal;
     case spdlog::level::off:
     default:
-        return Piece::LogLevel::Trace;
+        return Piece::LogLevel::kTrace;
     }
 }
 
@@ -61,9 +61,9 @@ template <typename Mutex> class InteropSink : public spdlog::sinks::base_sink<Mu
         formatted.push_back('\0');
         const char *message = formatted.data();
 
-        int level = static_cast<int>(spdlog_level_to_piece_log_level(msg.level));
+        int level = static_cast<int>(SpdlogLevelToPieceLogLevel(msg.level));
 
-        PieceCore_Log(level, message);
+        PieceCoreLog(level, message);
     }
 
     /**

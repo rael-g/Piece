@@ -16,7 +16,7 @@ namespace Piece::WAL
  */
 enum class KeyCode : int
 {
-    Unknown = -1,
+    kUnknown = -1,
 
     // Printable keys
     kSpace = 32,

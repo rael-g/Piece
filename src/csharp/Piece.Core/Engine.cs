@@ -32,7 +32,7 @@ public class Engine : IDisposable
         GCHandle.Alloc(_logCallbackDelegate); 
         NativeCalls.RegisterLogCallback(_logCallbackDelegate);
 
-        _nativeEngineCorePtr = NativeCalls.Engine_Initialize();
+        _nativeEngineCorePtr = NativeCalls.EngineInitialize();
 
         if (_nativeEngineCorePtr == IntPtr.Zero)
         {
@@ -47,7 +47,7 @@ public class Engine : IDisposable
         ThrowIfDisposed();
         if (_nativeEngineCorePtr != IntPtr.Zero)
         {
-            NativeCalls.Engine_Update(_nativeEngineCorePtr, deltaTime);
+            NativeCalls.EngineUpdate(_nativeEngineCorePtr, deltaTime);
         }
     }
 
@@ -56,7 +56,7 @@ public class Engine : IDisposable
         ThrowIfDisposed();
         if (_nativeEngineCorePtr != IntPtr.Zero)
         {
-            NativeCalls.Engine_Render(_nativeEngineCorePtr);
+            NativeCalls.EngineRender(_nativeEngineCorePtr);
         }
     }
 
@@ -66,7 +66,7 @@ public class Engine : IDisposable
         {
             if (_nativeEngineCorePtr != IntPtr.Zero)
             {
-                NativeCalls.Engine_Destroy(_nativeEngineCorePtr);
+                NativeCalls.EngineDestroy(_nativeEngineCorePtr);
                 _nativeEngineCorePtr = IntPtr.Zero;
                 Log.Information("Native EngineCore destroyed.");
             }
