@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
-#include <wal/native_window_options.h> // New include
 #include <wal/glfw/glfw_window.h>
 #include <wal/glfw/glfw_window_factory.h>
+#include <wal/native_window_options.h> // New include
 
 // Test fixture for GlfwWindow
 class GlfwWindowTest : public ::testing::Test

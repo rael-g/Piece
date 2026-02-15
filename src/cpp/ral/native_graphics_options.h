@@ -5,11 +5,9 @@
 #ifndef RAL_NATIVE_GRAPHICS_OPTIONS_H
 #define RAL_NATIVE_GRAPHICS_OPTIONS_H
 
-#include <stdint.h>
+#include <cstdint>
 
-namespace Piece
-{
-namespace RAL
+namespace Piece::RAL
 {
 
 /**
@@ -23,7 +21,6 @@ struct NativeGraphicsOptions
     int max_frames_in_flight;
 };
 
-} // namespace RAL
-} // namespace Piece
+} // namespace Piece::RAL
 
 #endif // RAL_NATIVE_GRAPHICS_OPTIONS_H

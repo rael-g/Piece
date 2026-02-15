@@ -1,7 +1,8 @@
 /**
  * @file engine_core.h
  * @brief Defines the main EngineCore class, which manages the lifecycle and core functionalities of the Piece engine.
- *        This includes initialization, updating, rendering, and managing core services like windowing, graphics, and physics.
+ *        This includes initialization, updating, rendering, and managing core services like windowing, graphics, and
+ * physics.
  */
 #ifndef PIECE_CORE_ENGINE_CORE_H_
 #define PIECE_CORE_ENGINE_CORE_H_
@@ -13,15 +14,13 @@
 #include <memory>
 
 #include "core/service_locator.h"
-#include <ral/igraphics_device_factory.h>
 #include <pal/iphysics_world_factory.h>
+#include <ral/igraphics_device_factory.h>
 #include <wal/iwindow_factory.h>
 
 #include "piece_core_exports.h" // Defines PIECE_CORE_API
 
-namespace Piece
-{
-namespace Core
+namespace Piece::Core
 {
 
 /**
@@ -81,7 +80,6 @@ class PIECE_CORE_API EngineCore
     std::unique_ptr<PAL::IPhysicsWorld> physics_world_;
 };
 
-} // namespace Core
-} // namespace Piece
+} // namespace Piece::Core
 
 #endif // PIECE_CORE_ENGINE_CORE_H_

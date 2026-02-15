@@ -7,9 +7,7 @@
 
 #include <cstdint>
 
-namespace Piece
-{
-namespace RAL
+namespace Piece::RAL
 {
 
 /**
@@ -36,10 +34,9 @@ class IVertexBuffer
      * @brief Gets the number of vertices in the buffer.
      * @return The number of vertices.
      */
-    virtual uint32_t GetCount() const = 0;
+    [[nodiscard]] virtual uint32_t GetCount() const = 0;
 };
 
-} // namespace RAL
-} // namespace Piece
+} // namespace Piece::RAL
 
 #endif // PIECE_RAL_INTERFACES_IVERTEX_BUFFER_H_

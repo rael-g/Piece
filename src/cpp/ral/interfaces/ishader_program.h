@@ -6,12 +6,10 @@
 #define PIECE_RAL_INTERFACES_ISHADER_PROGRAM_H_
 
 #include <cstdint>
-#include <string>
 #include <glm/glm.hpp> // Required for glm::mat4 and glm::vec3
+#include <string>
 
-namespace Piece
-{
-namespace RAL
+namespace Piece::RAL
 {
 
 class IShader;
@@ -47,7 +45,7 @@ class IShaderProgram
      * @brief Gets the native renderer ID of the shader program.
      * @return The renderer-specific ID.
      */
-    virtual uint32_t GetRendererID() const = 0;
+    [[nodiscard]] virtual uint32_t GetRendererID() const = 0;
 
     /**
      * @brief Sets an integer uniform variable.
@@ -66,16 +64,15 @@ class IShaderProgram
      * @param name The name of the uniform.
      * @param matrix The matrix to set.
      */
-    virtual void SetUniformMat4f(const std::string& name, const glm::mat4& matrix) = 0;
+    virtual void SetUniformMat4f(const std::string &name, const glm::mat4 &matrix) = 0;
     /**
      * @brief Sets a 3-component float vector uniform variable.
      * @param name The name of the uniform.
      * @param vector The vector to set.
      */
-    virtual void SetUniformVec3f(const std::string& name, const glm::vec3& vector) = 0;
+    virtual void SetUniformVec3f(const std::string &name, const glm::vec3 &vector) = 0;
 };
 
-} // namespace RAL
-} // namespace Piece
+} // namespace Piece::RAL
 
 #endif // PIECE_RAL_INTERFACES_ISHADER_PROGRAM_H_

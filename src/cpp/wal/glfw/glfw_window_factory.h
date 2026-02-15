@@ -10,9 +10,7 @@
 
 #include "glfw_window.h" // For GlfwWindow concrete implementation
 
-namespace Piece
-{
-namespace WAL
+namespace Piece::WAL
 {
 
 #include "wal_glfw_exports.h"
@@ -29,25 +27,24 @@ class WAL_GLFW_API GlfwWindowFactory : public Piece::WAL::IWindowFactory
      * @brief Constructs a GlfwWindowFactory instance.
      * @param options The native window options to be used for window creation.
      */
-    GlfwWindowFactory(const Piece::WAL::NativeWindowOptions *options);
+    explicit GlfwWindowFactory(const Piece::WAL::NativeWindowOptions *options);
     /**
      * @brief Virtual destructor.
      */
-    virtual ~GlfwWindowFactory() = default;
+    ~GlfwWindowFactory() override = default;
 
     /**
      * @brief Creates a new GlfwWindow instance.
      * @param options Configuration options for the window.
      * @return A unique_ptr to the newly created IWindow instance.
      */
-    virtual std::unique_ptr<WAL::IWindow> CreateWindow(const Piece::WAL::NativeWindowOptions *options) override;
+    std::unique_ptr<WAL::IWindow> CreateWindow(const Piece::WAL::NativeWindowOptions *options) override;
 
   private:
     /** @brief Stores the native window options for later use. */
     Piece::WAL::NativeWindowOptions options_;
 };
 
-} // namespace WAL
-} // namespace Piece
+} // namespace Piece::WAL
 
 #endif // WAL_GLFW_WINDOW_FACTORY_H_

@@ -5,14 +5,12 @@
 #ifndef PAL_IPHYSICS_WORLD_FACTORY_H_
 #define PAL_IPHYSICS_WORLD_FACTORY_H_
 
-#include <pal/iphysics_world.h>
 #include "native_physics_options.h" // New include
+#include <pal/iphysics_world.h>
 
 #include <memory>
 
-namespace Piece
-{
-namespace PAL
+namespace Piece::PAL
 {
 
 /**
@@ -34,7 +32,6 @@ class IPhysicsWorldFactory
     virtual std::unique_ptr<PAL::IPhysicsWorld> CreatePhysicsWorld(const NativePhysicsOptions *options) = 0;
 };
 
-} // namespace PAL
-} // namespace Piece
+} // namespace Piece::PAL
 
 #endif // PAL_IPHYSICS_WORLD_FACTORY_H_

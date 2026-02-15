@@ -5,11 +5,9 @@
 #ifndef PAL_NATIVE_PHYSICS_OPTIONS_H
 #define PAL_NATIVE_PHYSICS_OPTIONS_H
 
-#include <stdint.h>
+#include <cstdint>
 
-namespace Piece
-{
-namespace PAL
+namespace Piece::PAL
 {
 
 /**
@@ -23,7 +21,6 @@ struct NativePhysicsOptions
     uint32_t max_physics_steps;
 };
 
-} // namespace PAL
-} // namespace Piece
+} // namespace Piece::PAL
 
 #endif // PAL_NATIVE_PHYSICS_OPTIONS_H

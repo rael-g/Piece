@@ -7,9 +7,7 @@
 
 #include <glm/vec4.hpp>
 
-namespace Piece
-{
-namespace RAL
+namespace Piece::RAL
 {
 
 /**
@@ -35,8 +33,7 @@ class IRenderContext
      * @param startIndexLocation The location of the first index to read from the index buffer.
      * @param baseVertexLocation A value added to each index before reading from the vertex buffer.
      */
-    virtual void DrawIndexed(uint32_t indexCount, uint32_t startIndexLocation,
-    uint32_t baseVertexLocation) = 0;
+    virtual void DrawIndexed(uint32_t indexCount, uint32_t startIndexLocation, uint32_t baseVertexLocation) = 0;
     /**
      * @brief Sets the viewport for rendering.
      * @param x The x coordinate of the top-left corner of the viewport.
@@ -55,7 +52,6 @@ class IRenderContext
     virtual void SetScissorRect(float x, float y, float width, float height) = 0;
 };
 
-} // namespace RAL
-} // namespace Piece
+} // namespace Piece::RAL
 
 #endif // PIECE_RAL_IRENDER_CONTEXT_H_

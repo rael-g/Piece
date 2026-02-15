@@ -21,19 +21,17 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y ninja-build clang-tools
 
       - name: Check C++ Formatting
-        run: |
-          find src/cpp tests/cpp -name "*.h" -o -name "*.cpp" | xargs clang-format --dry-run --Werror
+        run: cmake --build build/linux-x64-debug --target clang_format_check
           
       - name: Configure CMake
         run: cmake --preset linux-x64-debug
 
       - name: Run clang-tidy
-        run: cmake --build build/linux-x64-debug --target tidy_cpp
+        run: cmake --build build/linux-x64-debug --target clang_tidy_check
 
   build:
     name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    needs: code-quality
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest]

@@ -8,9 +8,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-namespace Piece
-{
-namespace PAL
+namespace Piece::PAL
 {
 
 /**
@@ -36,7 +34,7 @@ class IPhysicsBody
      * @brief Gets the position of the physics body.
      * @return The current position of the body in world space.
      */
-    virtual glm::vec3 GetPosition() const = 0;
+    [[nodiscard]] virtual glm::vec3 GetPosition() const = 0;
 
     /**
      * @brief Sets the rotation of the physics body.
@@ -48,7 +46,7 @@ class IPhysicsBody
      * @brief Gets the rotation of the physics body.
      * @return The current rotation of the body as a quaternion.
      */
-    virtual glm::quat GetRotation() const = 0;
+    [[nodiscard]] virtual glm::quat GetRotation() const = 0;
 
     /**
      * @brief Applies a continuous force to the center of mass of the physics body.
@@ -72,7 +70,7 @@ class IPhysicsBody
      * @brief Gets the linear velocity of the physics body.
      * @return The current linear velocity of the body.
      */
-    virtual glm::vec3 GetLinearVelocity() const = 0;
+    [[nodiscard]] virtual glm::vec3 GetLinearVelocity() const = 0;
 
     /**
      * @brief Sets the angular velocity of the physics body.
@@ -84,10 +82,9 @@ class IPhysicsBody
      * @brief Gets the angular velocity of the physics body.
      * @return The current angular velocity of the body.
      */
-    virtual glm::vec3 GetAngularVelocity() const = 0;
+    [[nodiscard]] virtual glm::vec3 GetAngularVelocity() const = 0;
 };
 
-} // namespace PAL
-} // namespace Piece
+} // namespace Piece::PAL
 
 #endif // PIECE_PAL_IPHYSICS_BODY_H_

@@ -9,12 +9,12 @@
 #include <ral/interfaces/ivertex_buffer.h>
 
 // New includes for moved factories and options
-#include <ral/igraphics_device_factory.h>
 #include <pal/iphysics_world_factory.h>
+#include <pal/native_physics_options.h>
+#include <ral/igraphics_device_factory.h>
+#include <ral/native_graphics_options.h> // Changed include
 #include <wal/iwindow_factory.h>
 #include <wal/native_window_options.h>
-#include <ral/native_graphics_options.h> // Changed include
-#include <pal/native_physics_options.h>
 
 // Mocks for low-level interfaces
 class MockWindow : public Piece::WAL::IWindow
@@ -57,21 +57,23 @@ class MockPhysicsWorld : public Piece::PAL::IPhysicsWorld
 class MockWindowFactory : public Piece::WAL::IWindowFactory
 {
   public:
-    MOCK_METHOD(std::unique_ptr<Piece::WAL::IWindow>, CreateWindow, (const Piece::WAL::NativeWindowOptions *options), (override));
+    MOCK_METHOD(std::unique_ptr<Piece::WAL::IWindow>, CreateWindow, (const Piece::WAL::NativeWindowOptions *options),
+                (override));
 };
 
 class MockGraphicsDeviceFactory : public Piece::RAL::IGraphicsDeviceFactory
 {
   public:
     MOCK_METHOD(std::unique_ptr<Piece::RAL::IGraphicsDevice>, CreateGraphicsDevice,
-                (Piece::WAL::IWindow * window, const Piece::RAL::NativeGraphicsOptions *options), (override)); // Changed here
+                (Piece::WAL::IWindow * window, const Piece::RAL::NativeGraphicsOptions *options),
+                (override)); // Changed here
 };
 
 class MockPhysicsWorldFactory : public Piece::PAL::IPhysicsWorldFactory
 {
   public:
-    MOCK_METHOD(std::unique_ptr<Piece::PAL::IPhysicsWorld>, CreatePhysicsWorld, (const Piece::PAL::NativePhysicsOptions *options),
-                (override));
+    MOCK_METHOD(std::unique_ptr<Piece::PAL::IPhysicsWorld>, CreatePhysicsWorld,
+                (const Piece::PAL::NativePhysicsOptions *options), (override));
 };
 
 // Test fixture for EngineCore
@@ -91,7 +93,8 @@ class EngineCoreTest : public ::testing::Test
 
         // Register mock factories with the ServiceLocator
         // The ServiceLocator will take ownership of the factories
-        Piece::Core::ServiceLocator::Get().SetWindowFactory(std::unique_ptr<Piece::WAL::IWindowFactory>(window_factory_mock));
+        Piece::Core::ServiceLocator::Get().SetWindowFactory(
+            std::unique_ptr<Piece::WAL::IWindowFactory>(window_factory_mock));
         Piece::Core::ServiceLocator::Get().SetGraphicsDeviceFactory(
             std::unique_ptr<Piece::RAL::IGraphicsDeviceFactory>(graphics_factory_mock));
         Piece::Core::ServiceLocator::Get().SetPhysicsWorldFactory(

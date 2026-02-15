@@ -6,9 +6,7 @@
 
 #include <iostream>
 
-namespace Piece
-{
-namespace WAL
+namespace Piece::WAL
 {
 
 /**
@@ -50,5 +48,4 @@ std::unique_ptr<WAL::IWindow> GlfwWindowFactory::CreateWindow(const Piece::WAL::
     return window;
 }
 
-} // namespace WAL
-} // namespace Piece
+} // namespace Piece::WAL

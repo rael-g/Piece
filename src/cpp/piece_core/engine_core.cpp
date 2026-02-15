@@ -16,9 +16,7 @@
 #include "native_exports.h"
 #include "spdlog_interop_sink.h"
 
-namespace Piece
-{
-namespace Core
+namespace Piece::Core
 {
 /**
  * @brief Global logger instance.
@@ -128,8 +126,7 @@ void EngineCore::Render()
     }
 }
 
-} // namespace Core
-} // namespace Piece
+} // namespace Piece::Core
 
 /**
  * @brief Checks if a factory pointer is valid.
@@ -158,8 +155,7 @@ extern "C"
             spdlog::error("Received null IWindowFactory pointer.");
             return;
         }
-        Piece::Core::ServiceLocator::Get().SetWindowFactory(
-            std::unique_ptr<Piece::WAL::IWindowFactory>(factory_ptr));
+        Piece::Core::ServiceLocator::Get().SetWindowFactory(std::unique_ptr<Piece::WAL::IWindowFactory>(factory_ptr));
         spdlog::info("SetWindowFactory called.");
     }
 
@@ -188,13 +184,13 @@ extern "C"
             loggerInitialized = true;
         }
         spdlog::info("Engine_Initialize called. Attempting to create EngineCore...");
-        Piece::Core::EngineCore *core = new Piece::Core::EngineCore();
+        auto *core = new Piece::Core::EngineCore();
         if (!core)
         {
             spdlog::error("Failed to allocate EngineCore.");
             return nullptr;
         }
-        return reinterpret_cast<Piece::Core::EngineCore *>(core);
+        return core;
     }
 
     /**
@@ -206,7 +202,7 @@ extern "C"
         spdlog::info("Engine_Destroy called.");
         if (corePtr)
         {
-            delete reinterpret_cast<Piece::Core::EngineCore *>(corePtr);
+            delete corePtr;
         }
         else
         {
@@ -222,7 +218,7 @@ extern "C"
     {
         if (corePtr)
         {
-            reinterpret_cast<Piece::Core::EngineCore *>(corePtr)->Update(deltaTime);
+            corePtr->Update(deltaTime);
         }
     }
 
@@ -234,7 +230,7 @@ extern "C"
     {
         if (corePtr)
         {
-            reinterpret_cast<Piece::Core::EngineCore *>(corePtr)->Render();
+            corePtr->Render();
         }
     }
 

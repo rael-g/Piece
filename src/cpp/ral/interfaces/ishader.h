@@ -7,9 +7,7 @@
 
 #include <string>
 
-namespace Piece
-{
-namespace RAL
+namespace Piece::RAL
 {
 
 /**
@@ -47,10 +45,9 @@ class IShader
      * @brief Gets the native renderer ID of the shader object.
      * @return The renderer-specific ID.
      */
-    virtual uint32_t GetRendererID() const = 0;
+    [[nodiscard]] virtual uint32_t GetRendererID() const = 0;
 };
 
-} // namespace RAL
-} // namespace Piece
+} // namespace Piece::RAL
 
 #endif // PIECE_RAL_INTERFACES_ISHADER_H_

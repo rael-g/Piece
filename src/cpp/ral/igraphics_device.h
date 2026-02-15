@@ -9,9 +9,7 @@
 
 #include "irender_context.h"
 
-namespace Piece
-{
-namespace RAL
+namespace Piece::RAL
 {
 
 class IVertexBuffer;
@@ -73,7 +71,6 @@ class IGraphicsDevice
     virtual std::unique_ptr<IShaderProgram> CreateShaderProgram() = 0;
 };
 
-} // namespace RAL
-} // namespace Piece
+} // namespace Piece::RAL
 
 #endif // PIECE_RAL_IGRAPHICS_DEVICE_H_

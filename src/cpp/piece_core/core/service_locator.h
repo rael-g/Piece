@@ -5,15 +5,13 @@
 #ifndef PIECE_CORE_SERVICE_LOCATOR_H_
 #define PIECE_CORE_SERVICE_LOCATOR_H_
 
-#include <ral/igraphics_device_factory.h>
 #include <pal/iphysics_world_factory.h>
+#include <ral/igraphics_device_factory.h>
 #include <wal/iwindow_factory.h>
 
 #include <memory>
 
-namespace Piece
-{
-namespace Core
+namespace Piece::Core
 {
 
 /**
@@ -66,7 +64,7 @@ class ServiceLocator
      * @brief Gets the graphics device factory.
      * @return A pointer to the graphics device factory.
      */
-    RAL::IGraphicsDeviceFactory *GetGraphicsDeviceFactory() const
+    [[nodiscard]] RAL::IGraphicsDeviceFactory *GetGraphicsDeviceFactory() const
     {
         return graphics_device_factory_.get();
     }
@@ -74,7 +72,7 @@ class ServiceLocator
      * @brief Gets the window factory.
      * @return A pointer to the window factory.
      */
-    WAL::IWindowFactory *GetWindowFactory() const
+    [[nodiscard]] WAL::IWindowFactory *GetWindowFactory() const
     {
         return window_factory_.get();
     }
@@ -82,7 +80,7 @@ class ServiceLocator
      * @brief Gets the physics world factory.
      * @return A pointer to the physics world factory.
      */
-    PAL::IPhysicsWorldFactory *GetPhysicsWorldFactory() const
+    [[nodiscard]] PAL::IPhysicsWorldFactory *GetPhysicsWorldFactory() const
     {
         return physics_world_factory_.get();
     }
@@ -101,7 +99,6 @@ class ServiceLocator
     std::unique_ptr<PAL::IPhysicsWorldFactory> physics_world_factory_;
 };
 
-} // namespace Core
-} // namespace Piece
+} // namespace Piece::Core
 
 #endif // PIECE_CORE_SERVICE_LOCATOR_H_

@@ -5,12 +5,10 @@
 #ifndef PIECE_WAL_GLFW_WINDOW_H_
 #define PIECE_WAL_GLFW_WINDOW_H_
 
-#include <GLFW/glfw3.h> 
+#include <GLFW/glfw3.h>
 #include <wal/iwindow.h>
 
-namespace Piece
-{
-namespace WAL
+namespace Piece::WAL
 {
 
 #include "wal_glfw_exports.h"
@@ -28,7 +26,7 @@ class WAL_GLFW_API GlfwWindow : public IWindow
     /**
      * @brief Destroys the GlfwWindow instance, cleaning up the GLFW window.
      */
-    virtual ~GlfwWindow();
+    ~GlfwWindow() override;
 
     /**
      * @brief Initializes the GLFW window.
@@ -37,25 +35,25 @@ class WAL_GLFW_API GlfwWindow : public IWindow
      * @param title The title of the window.
      * @return True if initialization was successful, false otherwise.
      */
-    virtual bool Init(int width, int height, const std::string &title) override;
+    bool Init(int width, int height, const std::string &title) override;
     /**
      * @brief Polls for GLFW events.
      */
-    virtual void PollEvents() override;
+    void PollEvents() override;
     /**
      * @brief Swaps the front and back buffers of the GLFW window.
      */
-    virtual void SwapBuffers() override;
+    void SwapBuffers() override;
     /**
      * @brief Checks if the GLFW window should close.
      * @return True if the window should close, false otherwise.
      */
-    virtual bool ShouldClose() const override;
+    [[nodiscard]] bool ShouldClose() const override;
     /**
      * @brief Gets the native GLFW window handle.
      * @return A void pointer to the native GLFWwindow.
      */
-    virtual void *GetNativeWindow() const override;
+    [[nodiscard]] void *GetNativeWindow() const override;
 
     // Input Methods
     /**
@@ -63,35 +61,34 @@ class WAL_GLFW_API GlfwWindow : public IWindow
      * @param keycode The key to check.
      * @return True if the key is pressed, false otherwise.
      */
-    virtual bool IsKeyPressed(KeyCode keycode) const override;
+    [[nodiscard]] bool IsKeyPressed(KeyCode keycode) const override;
     /**
      * @brief Checks if a specific mouse button is currently pressed.
      * @param button The mouse button to check.
      * @return True if the button is pressed, false otherwise.
      */
-    virtual bool IsMouseButtonPressed(KeyCode button) const override;
+    [[nodiscard]] bool IsMouseButtonPressed(KeyCode button) const override;
     /**
      * @brief Gets the current position of the mouse cursor.
      * @return A pair of floats representing the x and y coordinates of the mouse.
      */
-    virtual std::pair<float, float> GetMousePosition() const override;
+    [[nodiscard]] std::pair<float, float> GetMousePosition() const override;
     /**
      * @brief Gets the x-coordinate of the mouse cursor.
      * @return The x-coordinate of the mouse.
      */
-    virtual float GetMouseX() const override;
+    [[nodiscard]] float GetMouseX() const override;
     /**
      * @brief Gets the y-coordinate of the mouse cursor.
      * @return The y-coordinate of the mouse.
      */
-    virtual float GetMouseY() const override;
+    [[nodiscard]] float GetMouseY() const override;
 
   private:
     /** @brief Pointer to the native GLFW window object. */
     GLFWwindow *window_;
 };
 
-} // namespace WAL
-} // namespace Piece
+} // namespace Piece::WAL
 
 #endif // PIECE_WAL_GLFW_WINDOW_H_

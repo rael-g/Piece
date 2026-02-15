@@ -5,11 +5,9 @@
 #ifndef WAL_NATIVE_WINDOW_OPTIONS_H
 #define WAL_NATIVE_WINDOW_OPTIONS_H
 
-#include <stdint.h>
+#include <cstdint>
 
-namespace Piece
-{
-namespace WAL
+namespace Piece::WAL
 {
 
 /**
@@ -27,7 +25,6 @@ struct NativeWindowOptions
     const char *window_title;
 };
 
-} // namespace WAL
-} // namespace Piece
+} // namespace Piece::WAL
 
 #endif // WAL_NATIVE_WINDOW_OPTIONS_H

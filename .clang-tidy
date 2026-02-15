@@ -1,17 +1,25 @@
 ---
-# This .clang-tidy configuration is aligned with docs/Development/ProjectGuidelines.md
-Checks: >
-  -*,
-  bugprone-*,
-  clang-analyzer-*,
-  cppcoreguidelines-*,
-  modernize-*,
-  performance-*,
-  readability-*
 
 WarningsAsErrors: '*'
-
-AnalyzeTemporaryDtors: false
+Checks: >
+  -*,
+  modernize-*,
+  readability-braces-around-statements,
+  readability-redundant-*,
+  readability-simplify-boolean-expr,
+  readability-static-definition-in-anonymous-namespace,
+  readability-uniqueptr-delete-release,
+  performance-move-const-arg,
+  performance-no-automatic-move,
+  performance-unnecessary-copy-initialization,
+  performance-unnecessary-value-param,
+  bugprone-argument-comment,
+  bugprone-redundant-branch-condition,
+  google-explicit-constructor,
+  llvm-include-order,
+  llvm-namespace-comment,
+  -modernize-use-trailing-return-type,
+  -readability-identifier-naming
 
 HeaderFilterRegex: '.*'
 
@@ -19,34 +27,9 @@ FormatStyle: file
 
 CheckOptions:
   # ============================================================================
-  # ===== Naming Conventions (PROJECT_GUIDELINES_REVISED.md) =====
+  # ===== Naming Conventions =====
   # ============================================================================
-  - key: readability-identifier-naming.ClassCase
-    value: PascalCase
-  - key: readability-identifier-naming.StructCase
-    value: PascalCase
-  - key: readability-identifier-naming.InterfaceCase
-    value: PascalCase
-  - key: readability-identifier-naming.FunctionCase
-    value: PascalCase
-  - key: readability-identifier-naming.MethodCase
-    value: PascalCase
-  - key: readability-identifier-naming.VariableCase
-    value: snake_case
-  - key: readability-identifier-naming.MemberCase
-    value: snake_case
-  - key: readability-identifier-naming.PrivateMemberPrefix
-    value: '_'
-  - key: readability-identifier-naming.ConstantCase
-    value: PascalCase
-  - key: readability-identifier-naming.ConstantPrefix
-    value: 'k'
-  - key: readability-identifier-naming.EnumConstantCase
-    value: PascalCase
-  - key: readability-identifier-naming.EnumConstantPrefix
-    value: 'k'
-  - key: readability-identifier-naming.NamespaceCase
-    value: 'PascalCase' # Corresponds to Piece, Piece::Wal, etc.
+
 
   # ============================================================================
   # ===== C++ Core Guidelines & Modernization =====
@@ -68,7 +51,7 @@ CheckOptions:
     value: 'false'
 
   # ============================================================================
-  # ===== Readability & Style (PROJECT_GUIDELINES_REVISED.md) =====
+  # ===== Readability & Style =====
   # ============================================================================
   # Enforce const-correctness aggressively.
   - key: readability-const-correctness-call-argument

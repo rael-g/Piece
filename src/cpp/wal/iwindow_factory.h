@@ -5,14 +5,12 @@
 #ifndef WAL_IWINDOW_FACTORY_H_
 #define WAL_IWINDOW_FACTORY_H_
 
-#include <wal/iwindow.h>
 #include "native_window_options.h" // New include
+#include <wal/iwindow.h>
 
 #include <memory>
 
-namespace Piece
-{
-namespace WAL
+namespace Piece::WAL
 {
 
 /**
@@ -34,7 +32,6 @@ class IWindowFactory
     virtual std::unique_ptr<WAL::IWindow> CreateWindow(const NativeWindowOptions *options) = 0;
 };
 
-} // namespace WAL
-} // namespace Piece
+} // namespace Piece::WAL
 
 #endif // WAL_IWINDOW_FACTORY_H_

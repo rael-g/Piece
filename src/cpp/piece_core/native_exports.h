@@ -1,18 +1,15 @@
 #ifndef NATIVE_EXPORTS_H
 #define NATIVE_EXPORTS_H
 
+#include <pal/iphysics_world_factory.h>
 #include <piece_core/piece_core_exports.h>
 #include <ral/igraphics_device_factory.h>
-#include <pal/iphysics_world_factory.h>
 #include <wal/iwindow_factory.h>
 
-namespace Piece
-{
-namespace Core
+namespace Piece::Core
 {
 struct EngineCore; // Opaque struct moved here
-} // namespace Core
-} // namespace Piece
+} // namespace Piece::Core
 
 extern "C"
 {
@@ -50,7 +47,7 @@ extern "C"
      * @param level The log level.
      * @param message The log message.
      */
-    typedef void (*LogCallback)(int level, const char *message);
+    using LogCallback = void (*)(int level, const char *message);
     /**
      * @brief Registers a log callback function.
      * @param callback The callback function to register.

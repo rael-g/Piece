@@ -9,9 +9,7 @@
 
 #include "iphysics_body.h"
 
-namespace Piece
-{
-namespace PAL
+namespace Piece::PAL
 {
 
 /**
@@ -45,7 +43,6 @@ class IPhysicsWorld
     virtual std::unique_ptr<IPhysicsBody> CreatePhysicsBody() = 0;
 };
 
-} // namespace PAL
-} // namespace Piece
+} // namespace Piece::PAL
 
 #endif // PIECE_PAL_IPHYSICS_WORLD_H_

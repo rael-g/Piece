@@ -5,15 +5,12 @@
  */
 #pragma once
 
+#include <mutex>
 #include <spdlog/details/null_mutex.h>
 #include <spdlog/sinks/base_sink.h>
 
 #include "native_exports.h"
-
-namespace Piece
-{
-enum class LogLevel : uint8_t;
-}
+#include <logging_api.h>
 
 /**
  * @brief Converts an spdlog level to a Piece::LogLevel.
@@ -42,9 +39,7 @@ inline Piece::LogLevel spdlog_level_to_piece_log_level(spdlog::level::level_enum
     }
 }
 
-namespace Piece
-{
-namespace Core
+namespace Piece::Core
 {
 
 /**
@@ -88,5 +83,4 @@ using InteropSink_mt = InteropSink<std::mutex>;
  */
 using InteropSink_st = InteropSink<spdlog::details::null_mutex>;
 
-} // namespace Core
-} // namespace Piece
+} // namespace Piece::Core

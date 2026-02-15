@@ -8,9 +8,7 @@
 #include <string>
 #include <utility>
 
-namespace Piece
-{
-namespace WAL
+namespace Piece::WAL
 {
 
 /**
@@ -189,43 +187,42 @@ class IWindow
      * @brief Checks if the window should close.
      * @return True if the window should close, false otherwise.
      */
-    virtual bool ShouldClose() const = 0;
+    [[nodiscard]] virtual bool ShouldClose() const = 0;
     /**
      * @brief Gets a pointer to the native, underlying window handle.
      * @return A void pointer to the native window handle.
      */
-    virtual void *GetNativeWindow() const = 0;
+    [[nodiscard]] virtual void *GetNativeWindow() const = 0;
 
     /**
      * @brief Checks if a specific key is currently pressed.
      * @param keycode The key to check.
      * @return True if the key is pressed, false otherwise.
      */
-    virtual bool IsKeyPressed(KeyCode keycode) const = 0;
+    [[nodiscard]] virtual bool IsKeyPressed(KeyCode keycode) const = 0;
     /**
      * @brief Checks if a specific mouse button is currently pressed.
      * @param button The mouse button to check.
      * @return True if the button is pressed, false otherwise.
      */
-    virtual bool IsMouseButtonPressed(KeyCode button) const = 0;
+    [[nodiscard]] virtual bool IsMouseButtonPressed(KeyCode button) const = 0;
     /**
      * @brief Gets the current position of the mouse cursor.
      * @return A pair of floats representing the x and y coordinates of the mouse.
      */
-    virtual std::pair<float, float> GetMousePosition() const = 0;
+    [[nodiscard]] virtual std::pair<float, float> GetMousePosition() const = 0;
     /**
      * @brief Gets the x-coordinate of the mouse cursor.
      * @return The x-coordinate of the mouse.
      */
-    virtual float GetMouseX() const = 0;
+    [[nodiscard]] virtual float GetMouseX() const = 0;
     /**
      * @brief Gets the y-coordinate of the mouse cursor.
      * @return The y-coordinate of the mouse.
      */
-    virtual float GetMouseY() const = 0;
+    [[nodiscard]] virtual float GetMouseY() const = 0;
 };
 
-} // namespace WAL
-} // namespace Piece
+} // namespace Piece::WAL
 
 #endif // PIECE_WAL_IWINDOW_H_

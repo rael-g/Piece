@@ -5,15 +5,13 @@
 #ifndef RAL_IGRAPHICS_DEVICE_FACTORY_H_
 #define RAL_IGRAPHICS_DEVICE_FACTORY_H_
 
+#include "native_graphics_options.h" // Changed include
 #include <ral/igraphics_device.h>
 #include <wal/iwindow.h>
-#include "native_graphics_options.h" // Changed include
 
 #include <memory>
 
-namespace Piece
-{
-namespace RAL
+namespace Piece::RAL
 {
 
 /**
@@ -47,7 +45,6 @@ class IGraphicsDeviceFactory
                                                                        const NativeGraphicsOptions *options) = 0;
 };
 
-} // namespace RAL
-} // namespace Piece
+} // namespace Piece::RAL
 
 #endif // RAL_IGRAPHICS_DEVICE_FACTORY_H_

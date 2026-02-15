@@ -6,9 +6,7 @@
 
 #include <iostream>
 
-namespace Piece
-{
-namespace WAL
+namespace Piece::WAL
 {
 
 /**
@@ -166,5 +164,4 @@ float GlfwWindow::GetMouseY() const
     return GetMousePosition().second;
 }
 
-} // namespace WAL
-} // namespace Piece
+} // namespace Piece::WAL
