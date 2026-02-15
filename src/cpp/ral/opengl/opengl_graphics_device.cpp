@@ -42,13 +42,13 @@ std::unique_ptr<IIndexBuffer> OpenGLGraphicsDevice::CreateIndexBuffer()
     return nullptr;
 }
 
-std::unique_ptr<IShader> CreateShader()
+std::unique_ptr<IShader> OpenGLGraphicsDevice::CreateShader()
 {
     // Stub: Implementation pending specific graphics backend requirements.
     return nullptr;
 }
 
-std::unique_ptr<IShaderProgram> CreateShaderProgram()
+std::unique_ptr<IShaderProgram> OpenGLGraphicsDevice::CreateShaderProgram()
 {
     // Stub: Implementation pending specific graphics backend requirements.
     return nullptr;
