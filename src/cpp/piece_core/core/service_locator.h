@@ -11,6 +11,7 @@
 
 #include <memory>
 #include <piece_core/logging_api.h>
+#include <piece_core/piece_core_exports.h> // For PIECE_CORE_API
 
 namespace Piece::Core
 {
@@ -27,12 +28,7 @@ class ServiceLocator
      * @brief Gets the single instance of the ServiceLocator.
      * @return A reference to the ServiceLocator instance.
      */
-    static ServiceLocator &Get()
-    {
-        PIECE_TRACE("ServiceLocator::Get()");
-        static ServiceLocator instance;
-        return instance;
-    }
+    static PIECE_CORE_API ServiceLocator &Get();
 
     ServiceLocator(const ServiceLocator &) = delete;
     ServiceLocator &operator=(const ServiceLocator &) = delete;
@@ -52,7 +48,14 @@ class ServiceLocator
      */
     void SetWindowFactory(std::unique_ptr<Piece::WAL::IWindowFactory> factory)
     {
-        PIECE_INFO("ServiceLocator::SetWindowFactory(factory: {0})", fmt::ptr(factory.get()));
+        if (factory)
+        {
+            PIECE_INFO("ServiceLocator::SetWindowFactory - Setting factory: {0}", fmt::ptr(factory.get()));
+        }
+        else
+        {
+            PIECE_INFO("ServiceLocator::SetWindowFactory - Setting factory to nullptr.");
+        }
         window_factory_ = std::move(factory);
     }
     /**
@@ -80,7 +83,7 @@ class ServiceLocator
      */
     [[nodiscard]] Piece::WAL::IWindowFactory *GetWindowFactory() const
     {
-        PIECE_TRACE("ServiceLocator::GetWindowFactory() -> {0}", fmt::ptr(window_factory_.get()));
+        PIECE_INFO("ServiceLocator::GetWindowFactory() -> {0}", fmt::ptr(window_factory_.get()));
         return window_factory_.get();
     }
     /**
@@ -97,10 +100,7 @@ class ServiceLocator
     /**
      * @brief Private constructor to enforce singleton pattern.
      */
-    ServiceLocator()
-    {
-        PIECE_INFO("ServiceLocator instance created.");
-    }
+    ServiceLocator();
 
     /** @brief The graphics device factory instance. */
     std::unique_ptr<Piece::RAL::IGraphicsDeviceFactory> graphics_device_factory_;
