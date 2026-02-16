@@ -191,8 +191,8 @@
   - tags: [v1.0.0, cli, c#, tooling]
   - priority: high
   - steps:
-      - [ ] Create `Piece.Cli` console application project.
-      - [ ] Implement `Program.cs` to configure HostBuilder, register services, and setup `System.CommandLine`.
+      - [x] Create `Piece.Cli` console application project.
+      - [x] Implement `Program.cs` to configure HostBuilder, register services, and setup `System.CommandLine`.
       - [ ] Create `CliServiceCollectionExtensions.cs` for CLI-specific service registrations.
       - [ ] Define base command structure in `Commands/` directory.
       - [ ] Implement `piece project new` command (`NewProjectCommand.cs`) using `IProjectManager`.
