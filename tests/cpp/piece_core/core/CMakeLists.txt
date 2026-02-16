@@ -6,6 +6,8 @@ find_package(GTest REQUIRED)
 add_executable(piece_core_core_tests
     test_service_locator.cpp
     test_engine_core.cpp
+    # test_resource_manager.cpp
+    # test_native_exports.cpp
 )
 
 # Link against our engine libraries and GTest
@@ -15,6 +17,10 @@ target_link_libraries(piece_core_core_tests PRIVATE
     GTest::gtest_main
     GTest::gmock
     GTest::gmock_main
+)
+
+target_include_directories(piece_core_core_tests PRIVATE
+    ${CMAKE_SOURCE_DIR}/src/cpp
 )
 
 # Discover and add tests to CTest

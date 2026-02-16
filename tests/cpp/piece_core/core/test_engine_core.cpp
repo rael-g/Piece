@@ -70,6 +70,35 @@ class MockGraphicsDevice : public Piece::RAL::IGraphicsDevice
                 (override));
 };
 
+class MockRenderContext : public Piece::RAL::IRenderContext
+{
+  public:
+    MOCK_METHOD(void, Clear, (float r, float g, float b, float a), (override));
+    MOCK_METHOD(void, SetViewport, (int x, int y, int width, int height), (override));
+    MOCK_METHOD(void, BindFrameBuffer, (Piece::RAL::IFrameBuffer * framebuffer), (override));
+    MOCK_METHOD(void, SetVertexBuffer, (Piece::RAL::IVertexBuffer * vertexBuffer), (override));
+    MOCK_METHOD(void, SetIndexBuffer, (Piece::RAL::IIndexBuffer * indexBuffer), (override));
+    MOCK_METHOD(void, SetShaderProgram, (Piece::RAL::IShaderProgram * shaderProgram), (override));
+    MOCK_METHOD(void, SetTexture, (Piece::RAL::ITexture * texture, uint32_t slot), (override));
+    MOCK_METHOD(void, SetSampler, (Piece::RAL::ISampler * sampler, uint32_t slot), (override));
+    MOCK_METHOD(void, SetUniformBuffer, (Piece::RAL::IUniformBuffer * uniformBuffer, uint32_t bindingPoint), (override));
+    MOCK_METHOD(void, SetStorageBuffer, (Piece::RAL::IComputeBuffer * computeBuffer, uint32_t bindingPoint), (override));
+    MOCK_METHOD(void, SetAccelerationStructure, (Piece::RAL::IAccelerationStructure * as), (override));
+    MOCK_METHOD(void, SetDepthTest, (bool enable), (override));
+    MOCK_METHOD(void, SetDepthFunc, (Piece::RAL::DepthFunc func), (override));
+    MOCK_METHOD(void, SetDepthMask, (bool enable), (override));
+    MOCK_METHOD(void, SetBlendMode, (Piece::RAL::BlendMode mode), (override));
+    MOCK_METHOD(void, SetCullMode, (Piece::RAL::CullMode mode), (override));
+    MOCK_METHOD(void, DrawIndexed, (uint32_t indexCount, uint32_t startIndex, int32_t baseVertex), (override));
+    MOCK_METHOD(void, DrawArrays, (uint32_t vertexCount, uint32_t startVertex), (override));
+    MOCK_METHOD(void, DrawIndexedInstanced, (uint32_t indexCount, uint32_t instanceCount, uint32_t startIndex, int32_t baseVertex, uint32_t baseInstance), (override));
+    MOCK_METHOD(void, DrawArraysInstanced, (uint32_t vertexCount, uint32_t instanceCount, uint32_t startVertex, uint32_t baseInstance), (override));
+    MOCK_METHOD(void, DispatchCompute, (uint32_t groupX, uint32_t groupY, uint32_t groupZ), (override));
+    MOCK_METHOD(void, DispatchMesh, (uint32_t groupX, uint32_t groupY, uint32_t groupZ), (override));
+    MOCK_METHOD(void, TraceRays, (uint32_t width, uint32_t height, uint32_t depth), (override));
+    MOCK_METHOD(void, SetVariableRateShading, (const Piece::RAL::VRSSettings &settings), (override));
+};
+
 class MockPhysicsWorld : public Piece::PAL::IPhysicsWorld
 {
   public:
@@ -113,85 +142,321 @@ class EngineCoreTest : public ::testing::Test
   protected:
     void SetUp() override
     {
-        // Create mocks
-        window_factory_mock = new MockWindowFactory();
-        graphics_factory_mock = new MockGraphicsDeviceFactory();
-        physics_factory_mock = new MockPhysicsWorldFactory();
+        // Create mocks and manage their ownership with unique_ptr
+        auto owned_window_factory_mock = std::make_unique<MockWindowFactory>();
+        window_factory_mock = owned_window_factory_mock.get();
+        auto owned_graphics_factory_mock = std::make_unique<MockGraphicsDeviceFactory>();
+        graphics_factory_mock = owned_graphics_factory_mock.get();
+        auto owned_physics_factory_mock = std::make_unique<MockPhysicsWorldFactory>();
+        physics_factory_mock = owned_physics_factory_mock.get();
 
-        window_mock = new MockWindow();
-        graphics_mock = new MockGraphicsDevice();
-        physics_mock = new MockPhysicsWorld();
+
+
 
         // Register mock factories with the ServiceLocator
-        // The ServiceLocator will take ownership of the factories
-        Piece::Core::ServiceLocator::Get().SetWindowFactory(
-            std::unique_ptr<Piece::WAL::IWindowFactory>(window_factory_mock));
-        Piece::Core::ServiceLocator::Get().SetGraphicsDeviceFactory(
-            std::unique_ptr<Piece::RAL::IGraphicsDeviceFactory>(graphics_factory_mock));
-        Piece::Core::ServiceLocator::Get().SetPhysicsWorldFactory(
-            std::unique_ptr<Piece::PAL::IPhysicsWorldFactory>(physics_factory_mock));
+        // The ServiceLocator will take ownership of the unique_ptr
+        Piece::Core::ServiceLocator::Get().SetWindowFactory(std::move(owned_window_factory_mock));
+        Piece::Core::ServiceLocator::Get().SetGraphicsDeviceFactory(std::move(owned_graphics_factory_mock));
+        Piece::Core::ServiceLocator::Get().SetPhysicsWorldFactory(std::move(owned_physics_factory_mock));
     }
 
-    MockWindowFactory *window_factory_mock;
-    MockGraphicsDeviceFactory *graphics_factory_mock;
-    MockPhysicsWorldFactory *physics_factory_mock;
+    // Raw pointers to mocks for EXPECT_CALL setup. Ownership is transferred to ServiceLocator.
+    MockWindowFactory *window_factory_mock = nullptr;
+    MockGraphicsDeviceFactory *graphics_factory_mock = nullptr;
+    MockPhysicsWorldFactory *physics_factory_mock = nullptr;
 
-    MockWindow *window_mock;
-    MockGraphicsDevice *graphics_mock;
-    MockPhysicsWorld *physics_mock;
+    // Do NOT store raw pointers to mocks created by factories here. Their ownership is
+    // transferred to EngineCore or handled within the test method's EXPECT_CALL.
+
+    void TearDown() override
+    {
+        // Explicitly clear factories in ServiceLocator.
+        // This will destroy the unique_ptr and delete the mock objects.
+        Piece::Core::ServiceLocator::Get().SetWindowFactory(nullptr);
+        Piece::Core::ServiceLocator::Get().SetGraphicsDeviceFactory(nullptr);
+        Piece::Core::ServiceLocator::Get().SetPhysicsWorldFactory(nullptr);
+
+        // Do NOT delete raw pointers here, as ownership was transferred to ServiceLocator's unique_ptrs.
+        // Google Mock will verify expectations before ServiceLocator destroys the mocks.
+    }
 };
 
 TEST_F(EngineCoreTest, InitializationCreatesBackends)
 {
-    // Set expectations: the factories should be called to create the backends
+    // Create mocks locally within the test for objects created by factories
+    auto test_window_mock = std::make_unique<MockWindow>();
+    auto test_graphics_mock = std::make_unique<MockGraphicsDevice>();
+    auto test_physics_mock = std::make_unique<MockPhysicsWorld>();
+    auto test_render_context_mock = std::make_unique<MockRenderContext>();
+
+    // Get raw pointers for setting EXPECT_CALLs
+    MockWindow* window_ptr = test_window_mock.get();
+    MockGraphicsDevice* graphics_ptr = test_graphics_mock.get();
+    MockPhysicsWorld* physics_ptr = test_physics_mock.get();
+    MockRenderContext* render_context_ptr = test_render_context_mock.get();
+
+    // Set expectations for factory calls during initialization
     EXPECT_CALL(*window_factory_mock, CreateGlfwWindow(::testing::_))
-        .WillOnce(::testing::Return(std::unique_ptr<MockWindow>(window_mock)));
+        .WillOnce(::testing::Return(std::move(test_window_mock)));
 
     EXPECT_CALL(*graphics_factory_mock, CreateGraphicsDevice(::testing::_, ::testing::_))
-        .WillOnce(::testing::Return(std::unique_ptr<MockGraphicsDevice>(graphics_mock)));
+        .WillOnce(::testing::Return(std::move(test_graphics_mock)));
 
     EXPECT_CALL(*physics_factory_mock, CreatePhysicsWorld(::testing::_))
-        .WillOnce(::testing::Return(std::unique_ptr<MockPhysicsWorld>(physics_mock)));
+        .WillOnce(::testing::Return(std::move(test_physics_mock)));
+
+    EXPECT_CALL(*graphics_ptr, GetImmediateContext())
+        .WillOnce(::testing::Return(render_context_ptr));
+    EXPECT_CALL(*graphics_ptr, Init(::testing::_, ::testing::_))
+        .WillOnce(::testing::Return(true)); // Graphics device init should succeed
 
     Piece::Core::EngineCore engine_core;
+    bool success = engine_core.Initialize();
+    ASSERT_TRUE(success);
 }
 
-TEST_F(EngineCoreTest, EngineCore_Constructor_FailsIfWindowFactoryMissing)
+TEST_F(EngineCoreTest, EngineCore_Initialize_FailsIfWindowFactoryMissing)
 {
     // Do NOT set the WindowFactory in ServiceLocator
     Piece::Core::ServiceLocator::Get().SetWindowFactory(nullptr); // Ensure it's explicitly not set
 
-    // Expect that creating EngineCore will throw an exception
-    EXPECT_THROW(
-        {
-            try {
-                Piece::Core::EngineCore engine_core;
-            } catch (const std::runtime_error& e) {
-                EXPECT_STREQ("WindowFactory is not set in ServiceLocator.", e.what());
-                throw;
-            }
-        },
-        std::runtime_error
-    );
+    // Create EngineCore object
+    Piece::Core::EngineCore engine_core;
+    // Call Initialize and expect it to fail
+    bool success = engine_core.Initialize();
+    ASSERT_FALSE(success);
+}
+
+TEST_F(EngineCoreTest, EngineCore_Initialize_FailsIfGraphicsDeviceFactoryMissing)
+{
+    // Do NOT set the GraphicsDeviceFactory in ServiceLocator
+    Piece::Core::ServiceLocator::Get().SetGraphicsDeviceFactory(nullptr); // Ensure it's explicitly not set
+
+    // Create EngineCore object
+    Piece::Core::EngineCore engine_core;
+    // Call Initialize and expect it to fail
+    bool success = engine_core.Initialize();
+    ASSERT_FALSE(success);
+}
+
+TEST_F(EngineCoreTest, EngineCore_Initialize_FailsIfPhysicsWorldFactoryMissing)
+{
+    // Do NOT set the PhysicsWorldFactory in ServiceLocator
+    Piece::Core::ServiceLocator::Get().SetPhysicsWorldFactory(nullptr); // Ensure it's explicitly not set
+
+    // Create EngineCore object
+    Piece::Core::EngineCore engine_core;
+    // Call Initialize and expect it to fail
+    bool success = engine_core.Initialize();
+    ASSERT_FALSE(success);
+}
+
+TEST_F(EngineCoreTest, EngineCore_Initialize_FailsIfWindowCreationFails)
+{
+    // Set expectations: the window factory should be called to create the backend, but return nullptr
+    EXPECT_CALL(*window_factory_mock, CreateGlfwWindow(::testing::_))
+        .WillOnce(::testing::Return(std::unique_ptr<MockWindow>(nullptr))); // Simulate creation failure
+
+    // Create EngineCore object
+    Piece::Core::EngineCore engine_core;
+    // Call Initialize and expect it to fail
+    bool success = engine_core.Initialize();
+    ASSERT_FALSE(success);
+}
+
+TEST_F(EngineCoreTest, EngineCore_Initialize_FailsIfPhysicsWorldCreationFails)
+{
+    // Mock the necessary dependencies for a successful initialization up to the point of failure
+    auto test_window_mock = std::make_unique<MockWindow>();
+    auto test_graphics_mock = std::make_unique<MockGraphicsDevice>();
+    MockGraphicsDevice* graphics_ptr = test_graphics_mock.get();
+
+    EXPECT_CALL(*window_factory_mock, CreateGlfwWindow(::testing::_))
+        .WillOnce(::testing::Return(std::move(test_window_mock)));
+
+    EXPECT_CALL(*graphics_factory_mock, CreateGraphicsDevice(::testing::_, ::testing::_))
+        .WillOnce(::testing::Return(std::move(test_graphics_mock)));
+        
+    EXPECT_CALL(*graphics_ptr, Init(::testing::_, ::testing::_))
+        .WillOnce(::testing::Return(true));
+
+    // Set expectation: the physics factory should be called, but return nullptr
+    EXPECT_CALL(*physics_factory_mock, CreatePhysicsWorld(::testing::_))
+        .WillOnce(::testing::Return(std::unique_ptr<MockPhysicsWorld>(nullptr))); // Simulate creation failure
+
+    // Create EngineCore object
+    Piece::Core::EngineCore engine_core;
+    // Call Initialize and expect it to fail
+    bool success = engine_core.Initialize();
+    ASSERT_FALSE(success);
 }
 
 TEST_F(EngineCoreTest, UpdateAndRenderCallsBackendMethods)
 {
+    // Create mocks locally within the test for objects created by factories
+    auto test_window_mock = std::make_unique<MockWindow>();
+    auto test_graphics_mock = std::make_unique<MockGraphicsDevice>();
+    auto test_physics_mock = std::make_unique<MockPhysicsWorld>();
+    auto test_render_context_mock = std::make_unique<MockRenderContext>();
+
+    // Get raw pointers for setting EXPECT_CALLs
+    MockWindow* window_ptr = test_window_mock.get();
+    MockGraphicsDevice* graphics_ptr = test_graphics_mock.get();
+    MockPhysicsWorld* physics_ptr = test_physics_mock.get();
+    MockRenderContext* render_context_ptr = test_render_context_mock.get();
+
     // Set expectations for factory calls during initialization
     EXPECT_CALL(*window_factory_mock, CreateGlfwWindow(::testing::_))
-        .WillOnce(::testing::Return(std::unique_ptr<MockWindow>(window_mock)));
+        .WillOnce(::testing::Return(std::move(test_window_mock)));
     EXPECT_CALL(*graphics_factory_mock, CreateGraphicsDevice(::testing::_, ::testing::_))
-        .WillOnce(::testing::Return(std::unique_ptr<MockGraphicsDevice>(graphics_mock)));
+        .WillOnce(::testing::Return(std::move(test_graphics_mock)));
     EXPECT_CALL(*physics_factory_mock, CreatePhysicsWorld(::testing::_))
-        .WillOnce(::testing::Return(std::unique_ptr<MockPhysicsWorld>(physics_mock)));
+        .WillOnce(::testing::Return(std::move(test_physics_mock)));
+
+    EXPECT_CALL(*graphics_ptr, GetImmediateContext())
+        .WillOnce(::testing::Return(render_context_ptr));
+    EXPECT_CALL(*graphics_ptr, Init(::testing::_, ::testing::_))
+        .WillOnce(::testing::Return(true)); // Graphics device init should succeed
 
     // Set expectations for update and render calls
-    EXPECT_CALL(*physics_mock, Step(::testing::_)).Times(1);
+    EXPECT_CALL(*physics_ptr, Step(::testing::_)).Times(1);
+    EXPECT_CALL(*graphics_ptr, BeginFrame()).Times(1);
+    EXPECT_CALL(*graphics_ptr, EndFrame()).Times(1);
+    EXPECT_CALL(*render_context_ptr, Clear(::testing::_, ::testing::_, ::testing::_, ::testing::_)).Times(1); // Assuming some clear color
 
     // Create EngineCore
     Piece::Core::EngineCore engine_core;
+    bool success = engine_core.Initialize();
+    ASSERT_TRUE(success);
 
     // Call Update and Render
     engine_core.Update(0.016f);
     engine_core.Render();
 }
+
+TEST_F(EngineCoreTest, EngineCore_Update_CallsPhysicsSystemStep)
+{
+    // Create mocks for backends
+    auto test_window_mock = std::make_unique<MockWindow>();
+    auto test_graphics_mock = std::make_unique<MockGraphicsDevice>();
+    auto test_physics_mock = std::make_unique<MockPhysicsWorld>();
+    auto test_render_context_mock = std::make_unique<MockRenderContext>();
+
+    // Get raw pointers for setting expectations
+    MockPhysicsWorld* physics_ptr = test_physics_mock.get();
+    MockGraphicsDevice* graphics_ptr = test_graphics_mock.get();
+
+    // Setup expectations for initialization
+    EXPECT_CALL(*window_factory_mock, CreateGlfwWindow(::testing::_))
+        .WillOnce(::testing::Return(std::move(test_window_mock)));
+    EXPECT_CALL(*graphics_factory_mock, CreateGraphicsDevice(::testing::_, ::testing::_))
+        .WillOnce(::testing::Return(std::move(test_graphics_mock)));
+    EXPECT_CALL(*physics_factory_mock, CreatePhysicsWorld(::testing::_))
+        .WillOnce(::testing::Return(std::move(test_physics_mock)));
+    EXPECT_CALL(*graphics_ptr, Init(::testing::_, ::testing::_))
+        .WillOnce(::testing::Return(true));
+    EXPECT_CALL(*graphics_ptr, GetImmediateContext())
+        .WillRepeatedly(::testing::Return(test_render_context_mock.get()));
+
+    // Expect the physics world's Step method to be called once
+    EXPECT_CALL(*physics_ptr, Step(::testing::_)).Times(1);
+
+    // Initialize engine
+    Piece::Core::EngineCore engine_core;
+    ASSERT_TRUE(engine_core.Initialize());
+
+    // Call update
+    engine_core.Update(0.016f); // Pass some delta time
+}
+
+TEST_F(EngineCoreTest, EngineCore_Render_CallsGraphicsDeviceBeginEndFrame)
+{
+    // Create mocks for backends
+    auto test_window_mock = std::make_unique<MockWindow>();
+    auto test_graphics_mock = std::make_unique<MockGraphicsDevice>();
+    auto test_physics_mock = std::make_unique<MockPhysicsWorld>();
+    auto test_render_context_mock = std::make_unique<MockRenderContext>();
+
+    // Get raw pointers for setting expectations
+    MockGraphicsDevice* graphics_ptr = test_graphics_mock.get();
+    MockRenderContext* render_context_ptr = test_render_context_mock.get();
+
+    // Setup expectations for initialization
+    EXPECT_CALL(*window_factory_mock, CreateGlfwWindow(::testing::_))
+        .WillOnce(::testing::Return(std::move(test_window_mock)));
+    EXPECT_CALL(*graphics_factory_mock, CreateGraphicsDevice(::testing::_, ::testing::_))
+        .WillOnce(::testing::Return(std::move(test_graphics_mock)));
+    EXPECT_CALL(*physics_factory_mock, CreatePhysicsWorld(::testing::_))
+        .WillOnce(::testing::Return(std::move(test_physics_mock)));
+    EXPECT_CALL(*graphics_ptr, Init(::testing::_, ::testing::_))
+        .WillOnce(::testing::Return(true));
+    EXPECT_CALL(*graphics_ptr, GetImmediateContext())
+        .WillRepeatedly(::testing::Return(render_context_ptr));
+
+    // Expect the graphics device's BeginFrame and EndFrame methods to be called once
+    EXPECT_CALL(*graphics_ptr, BeginFrame()).Times(1);
+    EXPECT_CALL(*graphics_ptr, EndFrame()).Times(1);
+
+    // Initialize engine
+    Piece::Core::EngineCore engine_core;
+    ASSERT_TRUE(engine_core.Initialize());
+
+    // Call render
+    engine_core.Render();
+}
+
+TEST_F(EngineCoreTest, EngineCore_Render_HandlesNullDependencies)
+{
+    // Create an EngineCore object but do NOT initialize it.
+    // This leaves its internal pointers (window, graphics, physics) as nullptr.
+    Piece::Core::EngineCore engine_core;
+
+    // Calling Render on a non-initialized engine should not crash.
+    // The internal checks for null dependencies should prevent any work from being done.
+    ASSERT_NO_THROW(engine_core.Render());
+}
+
+
+// New test case: EngineCore_Destructor_CleansUpResources
+TEST_F(EngineCoreTest, EngineCore_Destructor_CleansUpResources)
+{
+    // These mocks will be owned by EngineCore.
+    // We create them as unique_ptrs here and will move them into the factories.
+    auto owned_window_mock = std::make_unique<MockWindow>();
+    auto owned_graphics_mock = std::make_unique<MockGraphicsDevice>();
+    auto owned_physics_mock = std::make_unique<MockPhysicsWorld>();
+    auto owned_render_context_mock = std::make_unique<MockRenderContext>();
+
+    // Get raw pointers for setting expectations
+    MockGraphicsDevice* raw_graphics_mock = owned_graphics_mock.get();
+    MockRenderContext* raw_render_context_mock = owned_render_context_mock.get();
+
+    // Set expectations for factory calls during initialization, moving the unique_ptrs
+    EXPECT_CALL(*window_factory_mock, CreateGlfwWindow(::testing::_))
+        .WillOnce(::testing::Return(std::move(owned_window_mock)));
+
+    EXPECT_CALL(*graphics_factory_mock, CreateGraphicsDevice(::testing::_, ::testing::_))
+        .WillOnce(::testing::Return(std::move(owned_graphics_mock)));
+
+    EXPECT_CALL(*physics_factory_mock, CreatePhysicsWorld(::testing::_))
+        .WillOnce(::testing::Return(std::move(owned_physics_mock)));
+
+    // Set expectations on the created mocks
+    EXPECT_CALL(*raw_graphics_mock, Init(::testing::_, ::testing::_))
+        .WillOnce(::testing::Return(true));
+    EXPECT_CALL(*raw_graphics_mock, GetImmediateContext())
+        .WillOnce(::testing::Return(raw_render_context_mock)); 
+
+    // Create EngineCore in a scope to ensure its destructor is called implicitly when it goes out of scope
+    {
+        Piece::Core::EngineCore engine_core;
+        bool success = engine_core.Initialize();
+        ASSERT_TRUE(success);
+        // EngineCore goes out of scope here, triggering its destructor.
+        // The unique_ptrs holding the mocks will be destroyed.
+    }
+    // Google Mock automatically verifies that the mock objects (which were moved into the engine)
+    // are destroyed. If they were not, it would be a memory leak and gmock would report it.
+    // The test passing without a crash is the success condition.
+}
+
