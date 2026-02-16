@@ -5,4 +5,4 @@ include(runtime)
 
 add_subdirectory(piece_core)
 add_subdirectory(wal)
-# add_subdirectory(pal)
+add_subdirectory(pal)
