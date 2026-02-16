@@ -32,11 +32,11 @@ public class PieceProjectTests : IDisposable
         Assert.NotNull(project.Name);
         Assert.NotNull(project.Path);
         Assert.NotNull(project.DefaultScene);
-        Assert.NotNull(project.EngineConfig);
+        Assert.NotNull(project.Rendering);
+        Assert.NotNull(project.Window);
         Assert.Empty(project.Name);
         Assert.Empty(project.Path);
         Assert.Empty(project.DefaultScene);
-        Assert.Empty(project.EngineConfig.Keys); // TomlTable starts empty
     }
 
     [Fact]
@@ -63,7 +63,9 @@ public class PieceProjectTests : IDisposable
             Path = _testProjectPath,
             DefaultScene = "Scene01.toml"
         };
-        project.EngineConfig.Add("rendering", new Tomlyn.Model.TomlTable { { "vsync", true } });
+        project.Rendering.VSync = true;
+        project.Window.Width = 1920;
+        project.Window.Height = 1080;
 
         project.Save();
 
@@ -74,8 +76,11 @@ public class PieceProjectTests : IDisposable
         Assert.Contains("Name = \"TestProject\"", content);
         Assert.Contains("Path = \"", content); // Path will be system-dependent temp path
         Assert.Contains("DefaultScene = \"Scene01.toml\"", content);
-        Assert.Contains("[rendering]", content);
-        Assert.Contains("vsync = true", content);
+        Assert.Contains("[Rendering]", content);
+        Assert.Contains("VSync = true", content);
+        Assert.Contains("[Window]", content);
+        Assert.Contains("Width = 1920", content);
+        Assert.Contains("Height = 1080", content);
     }
 
     [Fact]
@@ -86,8 +91,12 @@ public class PieceProjectTests : IDisposable
                           "Path = \"/fake/path\"\n" +
                           "DefaultScene = \"StartScene.toml\"\n" +
                           "\n" +
-                          "[rendering]\n" +
-                          "fullscreen = true\n";
+                          "[Rendering]\n" +
+                          "VSync = true\n" +
+                          "\n" +
+                          "[Window]\n" +
+                          "Width = 800\n" +
+                          "Height = 600\n";
         await File.WriteAllTextAsync(filePath, tomlContent);
 
         var loadedProject = PieceProject.Load(_testProjectPath);
@@ -96,10 +105,9 @@ public class PieceProjectTests : IDisposable
         Assert.Equal("LoadedProject", loadedProject!.Name);
         Assert.Equal(_testProjectPath, loadedProject.Path); // Path should be overwritten by Load method
         Assert.Equal("StartScene.toml", loadedProject.DefaultScene);
-        Assert.True(loadedProject.EngineConfig.ContainsKey("rendering"));
-        var renderingTable = loadedProject.EngineConfig["rendering"] as Tomlyn.Model.TomlTable;
-        Assert.NotNull(renderingTable); // Ensure it's not null before accessing
-        Assert.Equal(true, renderingTable!["fullscreen"]); // Use null-forgiving operator as it's asserted not null
+        Assert.True(loadedProject.Rendering.VSync);
+        Assert.Equal(800, loadedProject.Window.Width);
+        Assert.Equal(600, loadedProject.Window.Height);
     }
 
     [Fact]
