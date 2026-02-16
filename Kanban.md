@@ -192,13 +192,14 @@
   - priority: high
   - steps:
       - [ ] Create `Piece.Cli` console application project.
-      - [ ] Set up `System.CommandLine` for command parsing.
-      - [ ] Register `Piece.ProjectManagement` services via DI.
-      - [ ] Implement `piece project new` command using `IProjectManager`.
-      - [ ] Implement `piece build` command (uses `IProjectManager` and triggers build process).
-      - [ ] Implement `piece asset import` command using `IProjectAssetService`.
-      - [ ] Implement `piece asset list` command using `IProjectAssetService`.
-      - [ ] Implement Logging for Minimal CLI Editor.
+      - [ ] Implement `Program.cs` to configure HostBuilder, register services, and setup `System.CommandLine`.
+      - [ ] Create `CliServiceCollectionExtensions.cs` for CLI-specific service registrations.
+      - [ ] Define base command structure in `Commands/` directory.
+      - [ ] Implement `piece project new` command (`NewProjectCommand.cs`) using `IProjectManager`.
+      - [ ] Implement `piece build` command (`BuildProjectCommand.cs`) using `IProjectManager` and `IProjectBuildService`.
+      - [ ] Implement `piece asset import` command (`ImportAssetCommand.cs`) using `IProjectAssetService`.
+      - [ ] Implement `piece asset list` command (`ListAssetsCommand.cs`) using `IProjectAssetService`.
+      - [ ] Implement general Logging for Minimal CLI Editor (using `ILogger`).
       - [ ] Implement Tests for Minimal CLI Editor.
     ```md
     Develop a minimal but functional CLI editor for the Piece Engine, providing stateless commands for project creation, building, and basic asset management. It will use `System.CommandLine` and interact with the `Piece.ProjectManagement` layer.
