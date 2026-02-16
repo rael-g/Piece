@@ -5,7 +5,7 @@
 #ifndef PIECE_WAL_GLFW_WINDOW_H_
 #define PIECE_WAL_GLFW_WINDOW_H_
 
-#include "wal_glfw_exports.h" // Added for WAL_GLFW_API
+#include <wal_glfw_export.h> // Include the generated export header
 #include <GLFW/glfw3.h>
 #include <wal/iwindow.h>
 
@@ -14,7 +14,7 @@
 namespace Piece::WAL
 {
 
-class WAL_GLFW_API GlfwWindow : public IWindow
+class WAL_GLFW_EXPORT GlfwWindow : public IWindow
 {
   public:
     /**

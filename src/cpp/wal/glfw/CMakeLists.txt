@@ -6,11 +6,21 @@ add_library(wal_glfw SHARED
     glfw_exports.cpp
 )
 
-target_compile_definitions(wal_glfw PRIVATE WAL_GLFW_BUILD_DLL)
+# Generate a public API header for DLL export/import
+include(GenerateExportHeader)
+generate_export_header(wal_glfw
+    BASE_NAME WAL_GLFW
+    EXPORT_MACRO_NAME WAL_GLFW_EXPORT
+    NO_EXPORT_MACRO_NAME WAL_GLFW_NO_EXPORT
+    DEPRECATED_MACRO_NAME WAL_GLFW_DEPRECATED
+)
 
+# The generated header will define WAL_GLFW_EXPORT for export/import
+# We also need to add the generated header to the include path
 target_include_directories(wal_glfw PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../> # For the original wal/ interfaces
+    ${CMAKE_CURRENT_BINARY_DIR} # For the generated export header
 )
 
 find_package(glfw3 CONFIG REQUIRED)
@@ -25,10 +35,18 @@ install(TARGETS wal_glfw
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/wal/glfw
 )
 
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
+# Install the generated export header
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/wal_glfw_export.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/wal/glfw
-    FILES_MATCHING PATTERN "*.h"
+)
+
+# Install specific headers (glfw_window.h, glfw_window_factory.h) that are part of the public API
+install(FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/glfw_window.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/glfw_window_factory.h
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/wal/glfw
 )
 

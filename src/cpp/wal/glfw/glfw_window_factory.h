@@ -9,7 +9,7 @@
 #include <wal/native_window_options.h>
 
 #include "glfw_window.h" // For GlfwWindow concrete implementation
-#include "wal_glfw_exports.h"
+#include <wal_glfw_export.h> // Include the generated export header
 
 namespace Piece::WAL
 {
@@ -17,20 +17,24 @@ namespace Piece::WAL
 /**
  * @brief A factory for creating GlfwWindow instances.
  * @details This class implements the IWindowFactory interface to provide a concrete
- *          factory for creating GLFW-based windows.
+ *          factory for creating GLFW-based windows. It manages the global GLFW context
+ *          initialization and termination via a reference counter.
  */
-class WAL_GLFW_API GlfwWindowFactory : public Piece::WAL::IWindowFactory
+class WAL_GLFW_EXPORT GlfwWindowFactory : public Piece::WAL::IWindowFactory
 {
   public:
     /**
      * @brief Constructs a GlfwWindowFactory instance.
-     * @param options The native window options to be used for window creation.
+     * @details Increments an internal reference counter for GLFW. Initializes GLFW if
+     *          this is the first factory instance.
      */
-    explicit GlfwWindowFactory(Piece::WAL::NativeWindowOptions options); // Changed to const&
+    GlfwWindowFactory();
     /**
      * @brief Virtual destructor.
+     * @details Decrements an internal reference counter for GLFW. Terminates GLFW if
+     *          this is the last active factory instance.
      */
-    ~GlfwWindowFactory() override = default;
+    ~GlfwWindowFactory();
 
     /**
      * @brief Creates a new GlfwWindow instance.
@@ -40,8 +44,8 @@ class WAL_GLFW_API GlfwWindowFactory : public Piece::WAL::IWindowFactory
     std::unique_ptr<WAL::IWindow> CreateGlfwWindow(const Piece::WAL::NativeWindowOptions *options) override;
 
   private:
-    /** @brief Stores the native window options for later use. */
-    Piece::WAL::NativeWindowOptions options_;
+    /** @brief Static reference counter for GLFW initialization/termination. */
+    static int s_glfw_ref_count_;
 };
 
 } // namespace Piece::WAL
