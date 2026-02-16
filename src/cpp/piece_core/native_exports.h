@@ -43,6 +43,60 @@ extern "C"
     PIECE_CORE_API void EngineRender(Piece::Core::EngineCore *core_ptr);
 
     /**
+     * @brief Checks if a specific key is currently pressed.
+     * @param core_ptr A pointer to the EngineCore instance.
+     * @param keycode The key to check.
+     * @return True if the key is pressed, false otherwise.
+     */
+    PIECE_CORE_API bool EngineIsKeyPressed(Piece::Core::EngineCore *core_ptr, Piece::WAL::KeyCode keycode);
+
+    /**
+     * @brief Checks if a specific mouse button is currently pressed.
+     * @param core_ptr A pointer to the EngineCore instance.
+     * @param button The mouse button to check.
+     * @return True if the button is pressed, false otherwise.
+     */
+    PIECE_CORE_API bool EngineIsMouseButtonPressed(Piece::Core::EngineCore *core_ptr, Piece::WAL::KeyCode button);
+
+    /**
+     * @brief Gets the current x-coordinate of the mouse cursor.
+     * @param core_ptr A pointer to the EngineCore instance.
+     * @return The x-coordinate of the mouse.
+     */
+    PIECE_CORE_API float EngineGetMouseX(Piece::Core::EngineCore *core_ptr);
+
+    /**
+     * @brief Gets the current y-coordinate of the mouse cursor.
+     * @param core_ptr A pointer to the EngineCore instance.
+     * @return The y-coordinate of the mouse.
+     */
+    PIECE_CORE_API float EngineGetMouseY(Piece::Core::EngineCore *core_ptr);
+
+    /**
+     * @brief Loads a mesh asset.
+     * @param core_ptr A pointer to the EngineCore instance.
+     * @param path The path to the mesh asset.
+     * @return A pointer to the loaded C++ Mesh object, or nullptr if loading fails.
+     */
+    PIECE_CORE_API void *EngineLoadMesh(Piece::Core::EngineCore *core_ptr, const char *path);
+
+    /**
+     * @brief Loads a material asset.
+     * @param core_ptr A pointer to the EngineCore instance.
+     * @param path The path to the material asset.
+     * @return A pointer to the loaded C++ Material object, or nullptr if loading fails.
+     */
+    PIECE_CORE_API void *EngineLoadMaterial(Piece::Core::EngineCore *core_ptr, const char *path);
+
+    /**
+     * @brief Loads a texture asset.
+     * @param core_ptr A pointer to the EngineCore instance.
+     * @param path The path to the texture asset.
+     * @return A pointer to the loaded C++ Texture object, or nullptr if loading fails.
+     */
+    PIECE_CORE_API void *EngineLoadTexture(Piece::Core::EngineCore *core_ptr, const char *path);
+
+    /**
      * @brief Function pointer type for log callbacks.
      * @param level The log level.
      * @param message The log message.

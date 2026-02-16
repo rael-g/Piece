@@ -3,6 +3,14 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_library(piece_core SHARED
     engine_core.cpp
     core/service_locator.cpp
+    core/resource_manager.cpp
+    core/render_system.cpp
+    core/physics_system_cpp.cpp
+    core/camera.cpp
+    core/light.cpp
+    core/model.cpp
+    core/material.cpp
+    core/mesh.cpp
 )
 
 target_compile_definitions(piece_core PRIVATE PIECE_CORE_BUILD_DLL)
