@@ -199,7 +199,7 @@
       - [x] Implement `piece build` command (`BuildProjectCommand.cs`) using `IProjectManager` and `IProjectBuildService`.
       - [x] Implement `piece asset import` command (`ImportAssetCommand.cs`) using `IProjectAssetService`.
       - [x] Implement `piece asset list` command (`ListAssetsCommand.cs`) using `IProjectAssetService`.
-      - [ ] Implement general Logging for Minimal CLI Editor (using `ILogger`).
+      - [x] Implement general Logging for Minimal CLI Editor (using `ILogger`).
       - [ ] Implement Tests for Minimal CLI Editor.
     ```md
     Develop a minimal but functional CLI editor for the Piece Engine, providing stateless commands for project creation, building, and basic asset management. It will use `System.CommandLine` and interact with the `Piece.ProjectManagement` layer.
