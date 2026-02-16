@@ -1,15 +1,12 @@
-/**
- * @file iphysics_body.h
- * @brief Defines the IPhysicsBody interface, which provides an abstraction for a rigid body in the physics simulation.
- */
 #ifndef PIECE_PAL_IPHYSICS_BODY_H_
 #define PIECE_PAL_IPHYSICS_BODY_H_
 
-#include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
-
 namespace Piece::PAL
 {
+
+// Forward declarations for other PAL interfaces
+class IColliderShape;
+class IPhysicsMaterial;
 
 /**
  * @brief Interface for a physics body.
@@ -25,64 +22,78 @@ class IPhysicsBody
     virtual ~IPhysicsBody() = default;
 
     /**
-     * @brief Sets the position of the physics body.
-     * @param position The new position of the body in world space.
+     * @brief Sets the collider shape of the physics body.
+     * @param shape A pointer to the collider shape.
      */
-    virtual void SetPosition(const glm::vec3 &position) = 0;
+    virtual void SetShape(IColliderShape *shape) = 0;
+    /**
+     * @brief Sets the physics material of the physics body.
+     * @param material A pointer to the physics material.
+     */
+    virtual void SetMaterial(IPhysicsMaterial *material) = 0;
+    /**
+     * @brief Sets the mass of the physics body.
+     * @param mass The mass in kilograms.
+     */
+    virtual void SetMass(float mass) = 0;
+
+    /**
+     * @brief Sets the position of the physics body.
+     * @param x X-component of the position.
+     * @param y Y-component of the position.
+     * @param z Z-component of the position.
+     */
+    virtual void SetPosition(float x, float y, float z) = 0;
 
     /**
      * @brief Gets the position of the physics body.
-     * @return The current position of the body in world space.
+     * @param x Reference to store the X-component of the position.
+     * @param y Reference to store the Y-component of the position.
+     * @param z Reference to store the Z-component of the position.
      */
-    [[nodiscard]] virtual glm::vec3 GetPosition() const = 0;
+    virtual void GetPosition(float &x, float &y, float &z) const = 0;
 
     /**
      * @brief Sets the rotation of the physics body.
-     * @param rotation The new rotation of the body as a quaternion.
+     * @param x X-component of the quaternion.
+     * @param y Y-component of the quaternion.
+     * @param z Z-component of the quaternion.
+     * @param w W-component of the quaternion.
      */
-    virtual void SetRotation(const glm::quat &rotation) = 0;
+    virtual void SetRotation(float x, float y, float z, float w) = 0; // Quaternion
 
     /**
      * @brief Gets the rotation of the physics body.
-     * @return The current rotation of the body as a quaternion.
+     * @param x Reference to store the X-component of the quaternion.
+     * @param y Reference to store the Y-component of the quaternion.
+     * @param z Reference to store the Z-component of the quaternion.
+     * @param w Reference to store the W-component of the quaternion.
      */
-    [[nodiscard]] virtual glm::quat GetRotation() const = 0;
-
-    /**
-     * @brief Applies a continuous force to the center of mass of the physics body.
-     * @param force The force vector to apply.
-     */
-    virtual void ApplyForce(const glm::vec3 &force) = 0;
-
-    /**
-     * @brief Applies an instantaneous impulse to the center of mass of the physics body.
-     * @param impulse The impulse vector to apply.
-     */
-    virtual void ApplyImpulse(const glm::vec3 &impulse) = 0;
+    virtual void GetRotation(float &x, float &y, float &z, float &w) const = 0;
 
     /**
      * @brief Sets the linear velocity of the physics body.
-     * @param velocity The new linear velocity of the body.
+     * @param x X-component of the linear velocity.
+     * @param y Y-component of the linear velocity.
+     * @param z Z-component of the linear velocity.
      */
-    virtual void SetLinearVelocity(const glm::vec3 &velocity) = 0;
-
-    /**
-     * @brief Gets the linear velocity of the physics body.
-     * @return The current linear velocity of the body.
-     */
-    [[nodiscard]] virtual glm::vec3 GetLinearVelocity() const = 0;
+    virtual void SetLinearVelocity(float x, float y, float z) = 0;
 
     /**
      * @brief Sets the angular velocity of the physics body.
-     * @param velocity The new angular velocity of the body.
+     * @param x X-component of the angular velocity.
+     * @param y Y-component of the angular velocity.
+     * @param z Z-component of the angular velocity.
      */
-    virtual void SetAngularVelocity(const glm::vec3 &velocity) = 0;
+    virtual void SetAngularVelocity(float x, float y, float z) = 0;
 
     /**
-     * @brief Gets the angular velocity of the physics body.
-     * @return The current angular velocity of the body.
+     * @brief Applies a force to the physics body.
+     * @param x X-component of the force.
+     * @param y Y-component of the force.
+     * @param z Z-component of the force.
      */
-    [[nodiscard]] virtual glm::vec3 GetAngularVelocity() const = 0;
+    virtual void ApplyForce(float x, float y, float z) = 0;
 };
 
 } // namespace Piece::PAL

@@ -15,6 +15,7 @@ target_include_directories(pal_box2d PUBLIC
 
 target_link_libraries(pal_box2d PRIVATE
     pal
+    piece_core
 )
 
 # Install rules
