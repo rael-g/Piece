@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <spdlog/spdlog.h>
 
-namespace piece
+namespace Piece
 {
 /**
  * @brief Defines the severity levels for log messages.
