@@ -30,7 +30,7 @@ public class ProjectBuildService : IProjectBuildService
             return false;
         }
 
-        var startInfo = new ProcessStartInfo("dotnet", $"build "{projectFile}" -c {configuration}")
+        var startInfo = new ProcessStartInfo("dotnet", $"build \"{projectFile}\" -c {configuration}")
         {
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -88,7 +88,7 @@ public class ProjectBuildService : IProjectBuildService
             return false;
         }
 
-        var startInfo = new ProcessStartInfo("dotnet", $"clean "{projectFile}" -c {configuration}")
+        var startInfo = new ProcessStartInfo("dotnet", $"clean \"{projectFile}\" -c {configuration}")
         {
             RedirectStandardOutput = true,
             RedirectStandardError = true,
