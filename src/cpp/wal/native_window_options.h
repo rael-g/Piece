@@ -12,6 +12,16 @@ namespace Piece::WAL
 {
 
 /**
+ * @brief Flags for configuring native window properties.
+ */
+enum class WindowFlag : uint32_t
+{
+    /** @brief Window is resizable. */
+    kResizable = 1 << 0,
+    // Add other flags as needed
+};
+
+/**
  * @brief Options for creating a native window.
  */
 struct NativeWindowOptions
@@ -20,7 +30,7 @@ struct NativeWindowOptions
     int initial_window_width;
     /** @brief The initial height of the window. */
     int initial_window_height;
-    /** @brief Flags for window properties (e.g., resizable, fullscreen). */
+    /** @brief Flags for window properties (e.g., resizable, fullscreen) using WindowFlag enum. */
     uint32_t window_flags;
     /** @brief The title of the window. */
     std::string window_title; // Changed to std::string
