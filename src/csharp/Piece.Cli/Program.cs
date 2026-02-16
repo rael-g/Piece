@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Piece.ProjectManagement;
 using Serilog; // For Serilog configuration
 using Piece.Cli; // Added for CliServiceCollectionExtensions
+using Piece.Cli.Commands; // Added for NewProjectCommand
 
 namespace Piece.Cli;
 
@@ -16,6 +17,13 @@ public class Program
     public static async Task<int> Main(string[] args)
     {
         var rootCommand = new RootCommand("Piece Engine CLI");
+
+        // Define main commands
+        var projectCommand = new Command("project", "Commands for managing Piece Engine projects.");
+        rootCommand.AddCommand(projectCommand);
+
+        var newProjectCommand = new NewProjectCommand();
+        projectCommand.AddCommand(newProjectCommand);
 
         var parser = new CommandLineBuilder(rootCommand)
             .UseHost(CreateHostBuilder)
@@ -40,5 +48,8 @@ public class Program
 
                 // Register CLI-specific services
                 services.AddCliServices();
+
+                // Register command handlers
+                services.AddTransient<NewProjectCommand.Handler>();
             });
 }
