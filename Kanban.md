@@ -197,7 +197,7 @@
       - [x] Define base command structure in `Commands/` directory.
       - [x] Implement `piece project new` command (`NewProjectCommand.cs`) using `IProjectManager`.
       - [x] Implement `piece build` command (`BuildProjectCommand.cs`) using `IProjectManager` and `IProjectBuildService`.
-      - [ ] Implement `piece asset import` command (`ImportAssetCommand.cs`) using `IProjectAssetService`.
+      - [x] Implement `piece asset import` command (`ImportAssetCommand.cs`) using `IProjectAssetService`.
       - [ ] Implement `piece asset list` command (`ListAssetsCommand.cs`) using `IProjectAssetService`.
       - [ ] Implement general Logging for Minimal CLI Editor (using `ILogger`).
       - [ ] Implement Tests for Minimal CLI Editor.
