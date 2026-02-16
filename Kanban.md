@@ -178,8 +178,8 @@
       - [x] Implement `IProjectBuildService` (or integrate build logic into `IProjectManager`).
       - [x] Implement `ProjectAssetService` (wraps `Piece.Framework.AssetManager`, handles file system operations and metadata).
       - [x] Implement `ProjectSceneService` (wraps `Piece.Framework.SceneManager`, handles scene file I/O).c
-      - [ ] Establish project references to `Piece.Framework.Abstractions` for AssetManager and SceneManager integration.
-      - [ ] Implement `ProjectServiceCollectionExtensions` for DI setup.
+      - [x] Establish project references to `Piece.Framework.Abstractions` for AssetManager and SceneManager integration.
+      - [x] Implement `ProjectServiceCollectionExtensions` for DI setup.
       - [x] Implement Tests for Piece.ProjectManagement Layer.
       - [x] Ensure robust logging and error handling across all implementations.
     ```md
