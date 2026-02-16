@@ -109,10 +109,10 @@ public class ProjectManager : IProjectManager
             Name = name,
             Path = projectRootPath,
             DefaultScene = "MainScene.toml", // Default scene name
-            EngineConfig = new Toml.TomlTable // Initialize with an empty TomlTable
+            EngineConfig = new Tomlyn.Model.TomlTable // Initialize with an empty TomlTable
             {
-                { "window", new Toml.TomlTable { { "width", 1280 }, { "height", 720 } } },
-                { "rendering", new Toml.TomlTable { { "vsync", true } } }
+                { "window", new Tomlyn.Model.TomlTable { { "width", 1280 }, { "height", 720 } } },
+                { "rendering", new Tomlyn.Model.TomlTable { { "vsync", true } } }
             }
         };
         project.Save(); // Save piece_project.toml
