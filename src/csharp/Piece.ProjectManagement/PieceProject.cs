@@ -40,7 +40,7 @@ public class PieceProject
         try
         {
             var tomlString = File.ReadAllText(filePath);
-            var model = Toml.ToModel<PieceProject>(tomlString, TomlOptions); // Use custom options
+            var model = Toml.ToModel<PieceProject>(tomlString, options: TomlOptions); // Use custom options
             model.Path = projectPath; // Set the project path
             return model;
         }
@@ -66,7 +66,7 @@ public class PieceProject
         var filePath = System.IO.Path.Combine(Path, FILENAME);
         try
         {
-            var tomlString = Toml.FromModel(this, TomlOptions); // Use custom options
+            var tomlString = Toml.FromModel(this, options: TomlOptions); // Use custom options
             File.WriteAllText(filePath, tomlString);
         }
         catch (Exception ex)
