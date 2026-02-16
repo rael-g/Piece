@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Piece.ProjectManagement;
 using Serilog; // For Serilog configuration
+using Piece.Cli; // Added for CliServiceCollectionExtensions
 
 namespace Piece.Cli;
 
@@ -37,7 +38,7 @@ public class Program
                 // Register ProjectManagement services
                 services.AddProjectManagement(hostContext.Configuration);
 
-                // Register other CLI-specific services here if any
-                // For now, we'll just have the basic setup
+                // Register CLI-specific services
+                services.AddCliServices();
             });
 }
