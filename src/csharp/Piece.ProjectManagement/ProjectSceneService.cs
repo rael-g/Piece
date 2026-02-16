@@ -1,20 +1,18 @@
 using System.Threading.Tasks;
 using System;
 using System.IO;
+using Piece.Framework.Abstractions; // Added for ISceneManager
 
 namespace Piece.ProjectManagement;
 
 public class ProjectSceneService : IProjectSceneService
 {
-    // Placeholder for Piece.Framework.ISceneManager
-    // This would ideally be an interface (e.g., ISceneManager) from Piece.Framework.Abstractions
-    // For now, we simulate scene management logic.
-    // private readonly Piece.Framework.ISceneManager _frameworkSceneManager;
+    private readonly ISceneManager _frameworkSceneManager;
 
-    // public ProjectSceneService(Piece.Framework.ISceneManager frameworkSceneManager)
-    // {
-    //     _frameworkSceneManager = frameworkSceneManager;
-    // }
+    public ProjectSceneService(ISceneManager frameworkSceneManager)
+    {
+        _frameworkSceneManager = frameworkSceneManager;
+    }
 
     public async Task<bool> OpenScene(PieceProject project, string scenePath)
     {
@@ -32,7 +30,7 @@ public class ProjectSceneService : IProjectSceneService
 
         try
         {
-            // Here, _frameworkSceneManager.LoadScene(fullScenePath) would be called
+            // await _frameworkSceneManager.LoadScene(fullScenePath); // Example call
             Console.WriteLine($"Scene '{scenePath}' opened successfully from '{fullScenePath}'.");
             return true;
         }
@@ -53,7 +51,7 @@ public class ProjectSceneService : IProjectSceneService
 
         try
         {
-            // Here, _frameworkSceneManager.SaveScene(fullScenePath) would be called
+            // await _frameworkSceneManager.SaveScene(fullScenePath); // Example call
             // For now, we just ensure the directory exists.
             Directory.CreateDirectory(Path.GetDirectoryName(fullScenePath)!); // Ensure directory for scene file exists
             await File.WriteAllTextAsync(fullScenePath, $"# Dummy Scene Content for {scenePath}"); // Create a dummy file
@@ -77,7 +75,7 @@ public class ProjectSceneService : IProjectSceneService
 
         try
         {
-            // _frameworkSceneManager.AddEntity(scenePath, entityType)
+            // await _frameworkSceneManager.AddEntity(scenePath, entityType); // Example call
             Console.WriteLine($"Entity of type '{entityType}' added to scene '{scenePath}'. (Simulation)");
             return true;
         }
@@ -98,7 +96,7 @@ public class ProjectSceneService : IProjectSceneService
 
         try
         {
-            // _frameworkSceneManager.RemoveEntity(scenePath, entityId)
+            // await _frameworkSceneManager.RemoveEntity(scenePath, entityId); // Example call
             Console.WriteLine($"Entity with ID '{entityId}' removed from scene '{scenePath}'. (Simulation)");
             return true;
         }
