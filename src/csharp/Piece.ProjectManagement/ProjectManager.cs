@@ -4,6 +4,7 @@ using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq; // Added for LINQ operations
+using Tomlyn; // Added for Tomlyn.TomlTable
 
 namespace Piece.ProjectManagement;
 
