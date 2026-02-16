@@ -195,7 +195,7 @@
       - [x] Implement `Program.cs` to configure HostBuilder, register services, and setup `System.CommandLine`.
       - [x] Create `CliServiceCollectionExtensions.cs` for CLI-specific service registrations.
       - [x] Define base command structure in `Commands/` directory.
-      - [ ] Implement `piece project new` command (`NewProjectCommand.cs`) using `IProjectManager`.
+      - [x] Implement `piece project new` command (`NewProjectCommand.cs`) using `IProjectManager`.
       - [ ] Implement `piece build` command (`BuildProjectCommand.cs`) using `IProjectManager` and `IProjectBuildService`.
       - [ ] Implement `piece asset import` command (`ImportAssetCommand.cs`) using `IProjectAssetService`.
       - [ ] Implement `piece asset list` command (`ListAssetsCommand.cs`) using `IProjectAssetService`.
