@@ -4,14 +4,43 @@
  */
 #include "glfw_window.h"
 
-#include <piece_core/logging_api.h>    // For PIECE_ERROR, PIECE_INFO
-#include <wal/native_window_options.h> // Ensure NativeWindowOptions is available
+#include <piece_core/logging_api.h> // For PIECE_ERROR, PIECE_INFO
+#include <wal/native_window_options.h>
 
 namespace Piece::WAL
 {
 
+// Helper function to convert KeyCode enum to string for logging
+std::string KeyCodeToString(KeyCode keycode)
+{
+    // This is a simplified mapping. A more comprehensive one would be large.
+    // For tracing, this provides more context than just the integer value.
+    switch (keycode)
+    {
+    case KeyCode::kSpace:
+        return "kSpace";
+    case KeyCode::kA:
+        return "kA";
+    case KeyCode::kB:
+        return "kB";
+    case KeyCode::kC:
+        return "kC";
+    case KeyCode::kLeftShift:
+        return "kLeftShift";
+    case KeyCode::kLeftControl:
+        return "kLeftControl";
+    case KeyCode::kMouse1:
+        return "kMouse1";
+    case KeyCode::kMouse2:
+        return "kMouse2";
+    // Add more cases as needed for common keys being traced
+    default:
+        return fmt::format("Unknown KeyCode ({})", static_cast<int>(keycode));
+    }
+}
+
 /**
- * @brief Constructs a GlfwWindow instance and initializes GLFW.
+ * @brief Constructs a GlfwWindow instance.
  */
 GlfwWindow::GlfwWindow() : window_(nullptr)
 {
@@ -19,6 +48,7 @@ GlfwWindow::GlfwWindow() : window_(nullptr)
     if (!glfwInit())
     {
         PIECE_ERROR("Failed to initialize GLFW");
+        // This will now cause subsequent window creations to fail in the test if glfwInit() returns false
     }
     else
     {
@@ -27,7 +57,7 @@ GlfwWindow::GlfwWindow() : window_(nullptr)
 }
 
 /**
- * @brief Destroys the GlfwWindow instance, destroys the window, and terminates GLFW.
+ * @brief Destroys the GlfwWindow instance, cleaning up the GLFW window.
  */
 GlfwWindow::~GlfwWindow()
 {
@@ -60,7 +90,7 @@ void GlfwWindow::Init(const NativeWindowOptions &options)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    if (options.window_flags & 1) // Assuming bit 0 indicates resizable
+    if ((options.window_flags & static_cast<uint32_t>(Piece::WAL::WindowFlag::kResizable)) != 0)
     {
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
         PIECE_DEBUG("GLFW window hint: Resizable set to TRUE.");
@@ -77,8 +107,7 @@ void GlfwWindow::Init(const NativeWindowOptions &options)
     {
         PIECE_ERROR("Failed to create GLFW window with Title: '{0}', Width: {1}, Height: {2}", options.window_title,
                     options.initial_window_width, options.initial_window_height);
-        glfwTerminate();
-        return;
+        return; // Return without terminating GLFW; factory will handle error
     }
 
     glfwMakeContextCurrent(window_);
@@ -137,7 +166,7 @@ void *GlfwWindow::GetNativeWindow() const
  */
 bool GlfwWindow::IsKeyPressed(KeyCode keycode) const
 {
-    PIECE_TRACE("GlfwWindow::IsKeyPressed(keycode: {0})", static_cast<int>(keycode));
+    PIECE_TRACE("GlfwWindow::IsKeyPressed(keycode: {0})", KeyCodeToString(keycode));
     if (window_)
     {
         return glfwGetKey(window_, static_cast<int>(keycode)) == GLFW_PRESS;
@@ -152,7 +181,7 @@ bool GlfwWindow::IsKeyPressed(KeyCode keycode) const
  */
 bool GlfwWindow::IsMouseButtonPressed(KeyCode button) const
 {
-    PIECE_TRACE("GlfwWindow::IsMouseButtonPressed(button: {0})", static_cast<int>(button));
+    PIECE_TRACE("GlfwWindow::IsMouseButtonPressed(button: {0})", KeyCodeToString(button));
     if (window_)
     {
         return glfwGetMouseButton(window_, static_cast<int>(button)) == GLFW_PRESS;
@@ -182,7 +211,8 @@ std::pair<float, float> GlfwWindow::GetMousePosition() const
  */
 float GlfwWindow::GetMouseX() const
 {
-    float x = GetMousePosition().first;
+    std::pair<float, float> pos = GetMousePosition();
+    float x = pos.first;
     PIECE_TRACE("GlfwWindow::GetMouseX -> {0}", x);
     return x;
 }
@@ -193,7 +223,8 @@ float GlfwWindow::GetMouseX() const
  */
 float GlfwWindow::GetMouseY() const
 {
-    float y = GetMousePosition().second;
+    std::pair<float, float> pos = GetMousePosition();
+    float y = pos.second;
     PIECE_TRACE("GlfwWindow::GetMouseY -> {0}", y);
     return y;
 }
