@@ -109,64 +109,81 @@
     Execute the defined Multi-Platform Strategy to expand the Piece Engine's support to a broad range of platforms including desktop, mobile, web, and consoles. This involves developing platform-specific low-level backends, adapting the build system, and integrating appropriate C# runtimes.
     ```
 
-## To Do (Goals for v1.0.0 - Minimal Viable Engine)
+### Refactor C++ Error Handling to New Policy
 
-### Phase 3: High-Level C# Framework
-
-  - tags: [v1.0.0, c#, high-level]
+  - tags: [v1.0.0, c++, error-handling, refactor]
   - priority: high
   - steps:
-      - [ ] Implement `GameEngine` lifecycle (Initialization, Update, Draw loops).
-      - [ ] Implement `Scene`, `Node`, `Component` base classes for the scene graph.
-      - [ ] Implement `TransformComponent` (position, rotation, scale).
-      - [ ] Implement `MeshRendererComponent` for rendering.
-      - [ ] Implement `CameraComponent` and `LightComponent`.
-      - [ ] Implement `InputManager` using C# WAL wrapper.
-      - [ ] Implement `AssetManager` (C# wrapper for C++ `ResourceManager`).
-      - [ ] Implement `RenderManager` (C# wrapper for C++ `RenderSystem`).
-      - [ ] Implement C# wrappers (`IntPtr` + `IDisposable`) for all core C++ classes (Camera, Light, Material, Mesh, Model, etc.).
-      - [ ] Develop C# wrapper NuGet packages for core C++ backends (GLFW, OpenGL, Minimal PAL), integrating with .NET DI.
-      - [ ] Configure `Piece.Engine` to use .NET DI to resolve and configure these C# factory wrappers, populating the C++ `ServiceLocator`.
-      - [ ] Implement Logging for High-Level C# Framework.
-      - [ ] Implement Tests for High-Level C# Framework.
+      - [ ] Implement `Result<T>` or equivalent type for recoverable errors.
+      - [ ] Replace exceptions for recoverable failures with `Result<T>`.
+      - [ ] Ensure exceptions do not cross module or ABI boundaries.
+      - [ ] Replace programming error checks with assertions.
+      - [ ] Identify and implement `fail` for fatal errors.
+      - [ ] Update function signatures to reflect `Result<T>` return types where applicable.
+      - [ ] Review and update existing C++ codebase (PAL, RAL, WAL, Piece.Core) to conform to the new policy.
+      - [ ] Verify that all error types (recoverable, programming, fatal) are handled according to the guidelines.
     ```md
-    Develop the High-Level C# Framework, providing a user-friendly API for game developers. This includes the core game loop, scene graph components, input and asset management, rendering orchestration, and robust C# wrappers for all underlying C++ engine functionalities, orchestrated via .NET Dependency Injection.
+    Review and refactor the entire C++ codebase to strictly adhere to the newly defined error handling strategy. This includes implementing Result-based error handling for recoverable errors, using assertions for programming errors, and employing a 'fail' mechanism for fatal errors, ensuring deterministic and zero-overhead error management.
+    ```
+
+### Implement RAL OpenGL Backend (Real)
+
+  - tags: [v1.0.0, c++, ral, opengl]
+  - priority: high
+  - steps:
+      - [ ] Implement `OpenGLGraphicsDevice` and `OpenGLRenderContext` methods with actual OpenGL API calls.
+      - [ ] Implement all `OpenGLXxx` resource classes (`OpenGLVertexBuffer`, `OpenGLTexture`, etc.) with actual OpenGL API calls.
+    ```md
+    Replace the stubbed OpenGL backend implementations with functional, OpenGL-API-driven code for rendering.
+    ```
+
+### Implement PAL Minimal Backend (Real)
+
+  - tags: [v1.0.0, c++, pal, minimal]
+  - priority: high
+  - steps:
+      - [ ] Implement `MinimalPhysicsWorld` methods with basic simulation logic (e.g., AABB collision, simple integration).
+      - [ ] Implement `MinimalPhysicsBody` methods with actual state changes and interactions.
+      - [ ] Implement `MinimalColliderShape` and `MinimalPhysicsMaterial` with basic properties.
+    ```md
+    Replace the stubbed Minimal PAL backend implementations with basic but functional physics simulation logic.
+    ```
+
+### Implement full ResourceManager for loading assets
+
+  - tags: [v1.0.0, c++, resources]
+  - priority: high
+  - steps:
+      - [ ] Implement `ResourceManager::LoadMaterial` to parse material files and create RAL materials.
+      - [ ] Implement `ResourceManager::LoadMesh` to load 3D models (e.g., OBJ, glTF) and create RAL vertex/index buffers.
+      - [ ] Implement `ResourceManager::LoadTexture` to load image files (e.g., PNG, JPG) and create RAL textures.
+      - [ ] Implement `ResourceManager::LoadShaderProgram` to load shader source from files and create RAL shader programs.
+      - [ ] Add caching mechanisms to avoid redundant loading.
+    ```md
+    Develop a robust ResourceManager that can load various asset types from files, convert them into RAL resources, and manage their lifecycle efficiently.
     ```
 
 ### Phase 3.5: Piece.ProjectManagement Layer
-
   - tags: [v1.0.0, c#, project-management, core]
   - priority: high
   - steps:
-      - [ ] Define `PieceProject` data model (name, path, default scene, engine config).
-      - [ ] Implement `IProjectManager` interface (Create, Load, Save project).
-      - [ ] Implement `ProjectManager` (handles `.pieceproject` file I/O, default structure).
-      - [ ] Define `IProjectAssetService` (ImportAsset, ListAssets).
-      - [ ] Implement `ProjectAssetService` (wraps `Piece.Framework.AssetManager`).
-      - [ ] Define `IProjectSceneService` (OpenScene, SaveScene, AddEntity, RemoveEntity).
-      - [ ] Implement `ProjectSceneService` (wraps `Piece.Framework.SceneManager`).
+      - [x] Define `PieceProject` data model (name, path, default scene, engine config).
+      - [x] Implement `IProjectManager` interface (Create, Load, Save project, GetAssetService, GetSceneService).
+      - [x] Define `IProjectAssetService` (ImportAsset, ListAssets, DeleteAsset).
+      - [x] Define `IProjectSceneService` (OpenScene, SaveScene, AddEntity, RemoveEntity).
+      - [x] Define 'piece_project.toml' file format and implement serialization/deserialization.
+      - [x] Implement `ProjectManager` (handles `.pieceproject` file I/O, leverages `dotnet` CLI for scaffolding).
+      - [x] Implement Project Template Management (discovery, application of templates).
+      - [x] Implement `dotnet CLI` integration for project scaffolding and template application.
+      - [x] Implement `IProjectBuildService` (or integrate build logic into `IProjectManager`).
+      - [x] Implement `ProjectAssetService` (wraps `Piece.Framework.AssetManager`, handles file system operations and metadata).
+      - [x] Implement `ProjectSceneService` (wraps `Piece.Framework.SceneManager`, handles scene file I/O).c
+      - [ ] Establish project references to `Piece.Framework.Abstractions` for AssetManager and SceneManager integration.
       - [ ] Implement `ProjectServiceCollectionExtensions` for DI setup.
-      - [ ] Implement Tests for Piece.ProjectManagement Layer.
+      - [x] Implement Tests for Piece.ProjectManagement Layer.
+      - [x] Ensure robust logging and error handling across all implementations.
     ```md
-    Develop the Piece.ProjectManagement layer to provide a high-level, editor-agnostic abstraction for managing engine projects. This layer will handle project creation, loading, saving, and provide services for asset and scene management, consuming the Piece.Framework APIs.
-    ```
-
-### Phase 4: Minimal Visual Editor
-
-  - tags: [v1.0.0, editor, c#]
-  - priority: high
-  - steps:
-      - [ ] Implement `EditorApplication` to host the `GameEngine` and use `IProjectManager`.
-      - [ ] Implement `EditorState` to manage global editor state, including the `PieceProject` object.
-      - [ ] Implement a basic `ViewportPanel` to display the game scene rendered by `GameEngine`.
-      - [ ] Implement a basic `HierarchyPanel` to list `Node`s in the `ActiveScene`.
-      - [ ] Implement a basic `InspectorPanel` to display and allow editing of simple properties of selected `Node`s/`Component`s.
-      - [ ] Implement basic project/scene persistence using `IProjectManager` and `IProjectSceneService`.
-      - [ ] Implement a basic `AssetBrowserPanel` utilizing `IProjectAssetService`.
-      - [ ] Implement Logging for the Minimal Visual Editor
-      - [ ] Implement Tests for the Minimal Visual Editor
-    ```md
-    Develop a minimal but functional Visual Editor in C# that uses the Piece.ProjectManagement layer to manage projects, host the engine's game loop, display the scene in a viewport, and allow basic inspection and manipulation of scene elements.
+    Develop the Piece.ProjectManagement layer to provide a high-level, editor-agnostic abstraction for managing engine projects. This layer will handle project creation, loading, saving, and provide services for asset and scene management, consuming the Piece.Framework APIs. It will leverage the 'dotnet' CLI for project scaffolding.
     ```
 
 ### Phase 4.5: Minimal CLI Editor
@@ -178,75 +195,379 @@
       - [ ] Set up `System.CommandLine` for command parsing.
       - [ ] Register `Piece.ProjectManagement` services via DI.
       - [ ] Implement `piece project new` command using `IProjectManager`.
-      - [ ] Implement `piece build` command using `IProjectManager`.
+      - [ ] Implement `piece build` command (uses `IProjectManager` and triggers build process).
       - [ ] Implement `piece asset import` command using `IProjectAssetService`.
       - [ ] Implement `piece asset list` command using `IProjectAssetService`.
       - [ ] Implement Logging for Minimal CLI Editor.
       - [ ] Implement Tests for Minimal CLI Editor.
     ```md
-    Develop a minimal but functional CLI editor for the Piece Engine, providing stateless commands for project creation, building, and basic asset management, all interacting with the Piece.ProjectManagement layer.
+    Develop a minimal but functional CLI editor for the Piece Engine, providing stateless commands for project creation, building, and basic asset management. It will use `System.CommandLine` and interact with the `Piece.ProjectManagement` layer.
     ```
 
-### Phase 5: Core Examples & Testing
+### Automatic Dependency Registration (Source Generator)
 
-  - tags: [v1.0.0, edd, testing, quality]
+  - tags: [v1.0.0, infrastructure, c#, source-generator]
   - priority: high
   - steps:
-      - [ ] Create a "Getting Started" guide in `README.md` for the v1.0.0 engine.
-      - [ ] Implement "Example: Basic Window Creation" following EDD.
-      - [ ] Implement "Example: Clear Screen" following EDD.
-      - [ ] Implement "Example: Draw a Basic Triangle" following EDD.
-      - [ ] Write comprehensive unit tests for all implemented core C++ and C# components.
-      - [ ] Write integration tests to verify interactions between C++ and C# layers and backend plugins.
-      - [ ] Ensure all project code adheres to Conventional Commits and passes CI checks.
-      - [ ] Create a dedicated integration test to verify the full native build process and native library copying to C# output directories.
-      - [ ] Implement Logging for Core Examples & Testing.
-      - [ ] Implement Tests for Core Examples & Testing.
+      - [ ] Define `IEngineModule` interface (in `Piece.Core.Abstractions`).
+      - [ ] Create `Piece.EngineModuleGenerator` Source Generator to scan for `IEngineModule` implementations.
+      - [ ] Implement source generation logic to create extension method for `IServiceCollection` to register discovered modules.
+      - [ ] Update project templates to include reference to `Piece.EngineModuleGenerator`.
+      - [ ] Implement Tests for Source Generator.
     ```md
-    Validate the core engine functionality through Example-Driven Development (EDD) examples, ensuring comprehensive unit and integration test coverage across all layers and adherence to development best practices.
+    Implement an automatic dependency registration mechanism using C# Source Generators. This will scan for `IEngineModule` implementations across various engine NuGet packages and automatically generate DI registration code, removing the need for manual setup and ensuring AOT compatibility.
     ```
-
 
 ## In Progress
 
-### Phase 2: Core C++ Layer Implementations
+### Unit Test Coverage - src/cpp
 
-  - tags: [v1.0.0, c++, low-level, intermediate, wal, ral, pal]
+  - tags: [v1.0.0, c++, testing, unit-tests, coverage]
   - priority: high
+  - defaultExpanded: true
   - steps:
-      - [x] Implement C++ `ServiceLocator` (singleton) for backend factory injection.
-      - [x] Write unit tests for `ServiceLocator`.
-      - [x] Define C-compatible API in `NativeExports.h` for core engine functions to be consumed by C#.
-      - [x] Implement `EngineCore` C++ class, relying on `ServiceLocator` for backend instantiation.
-      - [x] Write integration tests for `EngineCore` and `ServiceLocator`.
-      - [x] **WAL (GLFW Backend):**
-      - [x] Fully implement `IWindow` interface.
-      - [x] Implement `GlfwWindow` class.
-      - [x] Write integration tests for `GlfwWindow`.
-      - [x] Implement `IWindowFactory` and `GlfwWindowFactory`.
-      - [x] Write unit tests for `GlfwWindowFactory`.
-      - [x] Export `CreateGlfwWindowFactory()` C-style function from `gfx_glfw` DLL.
-      - [x] Write integration tests for `CreateGlfwWindowFactory` export.
-      - [ ] **RAL (OpenGL Backend):**
-      - [ ] Fully implement `IGraphicsDevice`, `IRenderContext` interfaces.
-      - [ ] Implement `OpenGLGraphicsDevice` and `OpenGLRenderContext` classes.
-      - [ ] Implement core RAL resource interfaces: `IVertexBuffer`, `IIndexBuffer`, `IShader`, `IShaderProgram`.
-      - [ ] Implement OpenGL-specific resource classes.
-      - [ ] Implement `IGraphicsDeviceFactory` and `OpenGLGraphicsDeviceFactory`.
-      - [ ] Export `CreateOpenGLGraphicsDeviceFactory()` C-style function from `gfx_opengl` DLL.
-      - [ ] **PAL (Minimal Backend):**
-      - [x] Define `IPhysicsWorld` and `IPhysicsBody` interfaces.
-      - [ ] Write tests for PAL interfaces through a minimal backend implementation.
-      - [ ] Implement a minimal physics backend (e.g., a basic collision detection placeholder or simple AABB physics).
-      - [ ] Implement `IPhysicsWorldFactory` and its minimal backend implementation.
-      - [ ] Export C-style factory function for the minimal PAL backend.
-      - [ ] Implement a basic `JobSystem` (thread pool) for future asynchronous tasks.
-      - [ ] Implement a minimal `ResourceManager` for loading basic mesh, texture, and shader assets.
-      - [ ] Implement core `Material`, `Mesh`, `Model`, `Camera`, `Light` C++ classes that utilize RAL resources.
-      - [ ] Implement a functional `RenderSystem` to draw simple `Model`s with a basic camera and light.
-      - [ ] Implement `PhysicsSystemCpp` to manage the minimal PAL backend.
-      - [ ] Implement Logging for Core C++ Layer Implementations.
-      - [ ] Implement Tests for Core C++ Layer Implementations.
+      - [x] EngineCore_Constructor_InitializesSuccessfully
+      - [x] EngineCore_Initialize_FailsIfWindowFactoryMissing
+      - [x] EngineCore_Initialize_FailsIfGraphicsDeviceFactoryMissing
+      - [x] EngineCore_Initialize_FailsIfPhysicsWorldFactoryMissing
+      - [x] EngineCore_Constructor_FailsIfWindowCreationFails
+      - [ ] EngineCore_Constructor_FailsIfGraphicsDeviceCreationFails
+      - [x] EngineCore_Constructor_FailsIfPhysicsWorldCreationFails
+      - [x] EngineCore_Destructor_CleansUpResources
+      - [x] EngineCore_Update_CallsPhysicsSystemStep
+      - [ ] EngineCore_Update_HandlesNullPhysicsSystem
+      - [x] EngineCore_Render_CallsGraphicsDeviceBeginEndFrame
+      - [ ] EngineCore_Render_CallsRenderContextClear
+      - [ ] EngineCore_Render_CallsRenderSystemRenderFrame
+      - [x] EngineCore_Render_HandlesNullDependencies
+      - [ ] EngineCore_Render_SkipsIncompleteModels
+      - [ ] NativeExports_SetGraphicsDeviceFactory_SetsFactoryCorrectly
+      - [ ] NativeExports_SetGraphicsDeviceFactory_HandlesNullPtr
+      - [ ] NativeExports_SetWindowFactory_SetsFactoryCorrectly
+      - [ ] NativeExports_SetWindowFactory_HandlesNullPtr
+      - [ ] NativeExports_SetPhysicsWorldFactory_SetsFactoryCorrectly
+      - [ ] NativeExports_SetPhysicsWorldFactory_HandlesNullPtr
+      - [ ] NativeExports_EngineInitialize_InitializesLoggerOnce
+      - [ ] NativeExports_EngineInitialize_CreatesEngineCore
+      - [ ] NativeExports_EngineInitialize_ReturnsNullOnCoreAllocationFailure
+      - [ ] NativeExports_EngineInitialize_LogsInitializationInfo
+      - [ ] NativeExports_EngineDestroy_DeletesEngineCore
+      - [ ] NativeExports_EngineDestroy_HandlesNullCorePtr
+      - [ ] NativeExports_EngineUpdate_CallsCoreUpdate
+      - [ ] NativeExports_EngineUpdate_HandlesNullCorePtr
+      - [ ] NativeExports_EngineRender_CallsCoreRender
+      - [ ] NativeExports_EngineRender_HandlesNullCorePtr
+      - [ ] NativeExports_EngineIsKeyPressed_CallsWindowIsKeyPressed
+      - [ ] NativeExports_EngineIsKeyPressed_HandlesNullCoreOrWindow
+      - [ ] NativeExports_EngineIsMouseButtonPressed_CallsWindowIsMouseButtonPressed
+      - [ ] NativeExports_EngineIsMouseButtonPressed_HandlesNullCoreOrWindow
+      - [ ] NativeExports_EngineGetMouseX_CallsWindowGetMouseX
+      - [ ] NativeExports_EngineGetMouseX_HandlesNullCoreOrWindow
+      - [ ] NativeExports_EngineGetMouseY_CallsWindowGetMouseY
+      - [ ] NativeExports_EngineGetMouseY_HandlesNullCoreOrWindow
+      - [ ] NativeExports_EngineLoadMesh_CallsResourceManagerLoadMesh
+      - [ ] NativeExports_EngineLoadMesh_ReturnsMeshOnSuccess
+      - [ ] NativeExports_EngineLoadMesh_ReturnsNullOnFailure
+      - [ ] NativeExports_EngineLoadMesh_HandlesNullCoreOrResourceManager
+      - [ ] NativeExports_EngineLoadMaterial_CallsResourceManagerLoadMaterial
+      - [ ] NativeExports_EngineLoadMaterial_ReturnsMaterialOnSuccess
+      - [ ] NativeExports_EngineLoadMaterial_ReturnsNullOnFailure
+      - [ ] NativeExports_EngineLoadMaterial_HandlesNullCoreOrResourceManager
+      - [ ] NativeExports_EngineLoadTexture_CallsResourceManagerLoadTexture
+      - [ ] NativeExports_EngineLoadTexture_ReturnsTextureOnSuccess
+      - [ ] NativeExports_EngineLoadTexture_ReturnsNullOnFailure
+      - [ ] NativeExports_EngineLoadTexture_HandlesNullCoreOrResourceManager
+      - [ ] NativeExports_RegisterLogCallback_SetsCallback
+      - [ ] NativeExports_RegisterLogCallback_HandlesNullCallback
+      - [ ] NativeExports_RegisterLogCallback_LogsRegistrationStatus
+      - [ ] NativeExports_PieceCoreLog_InvokesCallbackWhenRegistered
+      - [ ] NativeExports_PieceCoreLog_FallsBackToStdOutWhenNoCallback
+      - [ ] NativeExports_PieceCoreLog_HandlesNullMessage
+      - [ ] ResourceManager_Constructor_InitializesCorrectly
+      - [ ] ResourceManager_Destructor_CleansUpResources
+      - [ ] ResourceManager_LoadMaterial_ReturnsValidMaterial
+      - [ ] ResourceManager_LoadMaterial_ReturnsDifferentMaterialForDifferentPaths
+      - [ ] ResourceManager_LoadMaterial_ReturnsSameMaterialForSamePath
+      - [ ] ResourceManager_LoadMaterial_HandlesInvalidPath
+      - [ ] ResourceManager_LoadMesh_ReturnsValidMesh
+      - [ ] ResourceManager_LoadMesh_ReturnsDifferentMeshForDifferentPaths
+      - [ ] ResourceManager_LoadMesh_HandlesInvalidPath
+      - [ ] ResourceManager_LoadTexture_ReturnsValidTexture
+      - [ ] ResourceManager_LoadTexture_HandlesInvalidPath
+      - [ ] ResourceManager_LoadShaderProgram_ReturnsValidShaderProgram
+      - [ ] ResourceManager_LoadShaderProgram_HandlesInvalidPaths
+      - [ ] ResourceManager_LoadFunctions_LogAppropriateMessages
+      - [ ] RenderSystem_Constructor_InitializesCorrectly
+      - [ ] RenderSystem_Constructor_HandlesNullGraphicsDevice
+      - [ ] RenderSystem_Destructor_CompletesWithoutErrors
+      - [ ] RenderSystem_RenderFrame_CallsGraphicsDeviceBeginEndFrame
+      - [ ] RenderSystem_RenderFrame_CallsRenderContextClear
+      - [ ] RenderSystem_RenderFrame_BindsShaderPrograms
+      - [ ] RenderSystem_RenderFrame_SetsShaderUniforms
+      - [ ] RenderSystem_RenderFrame_BindsVertexIndexBuffers
+      - [ ] RenderSystem_RenderFrame_CallsRenderContextDrawIndexed
+      - [ ] RenderSystem_RenderFrame_SkipsIncompleteModels
+      - [ ] RenderSystem_RenderFrame_HandlesEmptyModelList
+      - [ ] RenderSystem_RenderFrame_HandlesNullGraphicsDeviceGracefully
+      - [ ] RenderSystem_Logging_GeneratesAppropriateMessages
+      - [ ] PhysicsSystemCpp_Constructor_InitializesCorrectly
+      - [ ] PhysicsSystemCpp_Destructor_CompletesWithoutErrors
+      - [ ] PhysicsSystemCpp_Step_CallsPhysicsWorldStep
+      - [ ] PhysicsSystemCpp_Step_HandlesNullPhysicsWorld
+      - [ ] PhysicsSystemCpp_CreateBody_CallsPhysicsWorldCreateRigidBody
+      - [ ] PhysicsSystemCpp_CreateBody_ReturnsValidBodyOnSuccess
+      - [ ] PhysicsSystemCpp_CreateBody_StoresCreatedBody
+      - [ ] PhysicsSystemCpp_CreateBody_ReturnsNullOnPhysicsWorldFailure
+      - [ ] PhysicsSystemCpp_CreateBody_ReturnsNullOnNullPhysicsWorld
+      - [ ] PhysicsSystemCpp_Logging_GeneratesAppropriateMessages
+      - [ ] JobSystem_Constructor_CreatesCorrectNumberOfThreads
+      - [ ] JobSystem_Destructor_JoinsAllThreads
+      - [ ] JobSystem_EnqueueJob_AddsJobToQueue
+      - [ ] JobSystem_EnqueueJob_ExecutesSingleJob
+      - [ ] JobSystem_EnqueueJob_ExecutesMultipleJobs
+      - [ ] JobSystem_EnqueueJob_HandlesJobsFromMultipleThreads
+      - [ ] JobSystem_WaitUntilAllDone_BlocksUntilAllJobsComplete
+      - [ ] JobSystem_WaitUntilAllDone_DoesNotBlockIfNoJobs
+      - [ ] JobSystem_Concurrency_NoRaceConditionsOnSharedState
+      - [ ] JobSystem_Logging_GeneratesAppropriateMessages
+      - [ ] ServiceLocator_Get_ReturnsSingletonInstance
+      - [ ] ServiceLocator_SetGraphicsDeviceFactory_SetsFactory
+      - [ ] ServiceLocator_GetGraphicsDeviceFactory_ReturnsSetFactory
+      - [ ] ServiceLocator_SetWindowFactory_SetsFactory
+      - [ ] ServiceLocator_GetWindowFactory_ReturnsSetFactory
+      - [ ] ServiceLocator_SetPhysicsWorldFactory_SetsFactory
+      - [ ] ServiceLocator_GetPhysicsWorldFactory_ReturnsSetFactory
+      - [ ] ServiceLocator_GetFactory_ReturnsNullWhenNotSet
+      - [ ] ServiceLocator_Logging_GeneratesAppropriateMessages
+      - [ ] MinimalPhysicsWorldFactory_Constructor_StoresOptions
+      - [ ] MinimalPhysicsWorldFactory_CreatePhysicsWorld_UsesFactoryOptionsWhenNoneProvided
+      - [ ] MinimalPhysicsWorldFactory_CreatePhysicsWorld_UsesProvidedOptions
+      - [ ] MinimalPhysicsWorldFactory_CreatePhysicsWorld_ReturnsValidWorld
+      - [ ] MinimalPhysicsWorldFactory_CreatePhysicsWorld_ReturnsNullOnWorldInitFailure
+      - [ ] MinimalPhysicsWorldFactory_Logging_GeneratesAppropriateMessages
+      - [ ] MinimalPhysicsWorld_Constructor_InitializesCorrectly
+      - [ ] MinimalPhysicsWorld_Destructor_CompletesWithoutErrors
+      - [ ] MinimalPhysicsWorld_Init_SetsOptions
+      - [ ] MinimalPhysicsWorld_Step_NoOpButDoesNotCrash
+      - [ ] MinimalPhysicsWorld_SetGravity_SetsInternalState
+      - [ ] MinimalPhysicsWorld_CreateRigidBody_ReturnsValidBody
+      - [ ] MinimalPhysicsWorld_CreateBoxShape_ReturnsValidShape
+      - [ ] MinimalPhysicsWorld_CreateSphereShape_ReturnsValidShape
+      - [ ] MinimalPhysicsWorld_CreatePhysicsMaterial_ReturnsValidMaterial
+      - [ ] MinimalPhysicsWorld_Logging_GeneratesAppropriateMessages
+      - [ ] MinimalPhysicsBody_Constructor_InitializesCorrectly
+      - [ ] MinimalPhysicsBody_Destructor_CompletesWithoutErrors
+      - [ ] MinimalPhysicsBody_SetShape_StoresShape
+      - [ ] MinimalPhysicsBody_SetMaterial_StoresMaterial
+      - [ ] MinimalPhysicsBody_SetMass_UpdatesMass
+      - [ ] MinimalPhysicsBody_SetPosition_UpdatesPosition
+      - [ ] MinimalPhysicsBody_GetPosition_ReturnsCurrentPosition
+      - [ ] MinimalPhysicsBody_SetRotation_UpdatesRotation
+      - [ ] MinimalPhysicsBody_GetRotation_ReturnsCurrentRotation
+      - [ ] MinimalPhysicsBody_SetLinearVelocity_UpdatesVelocity
+      - [ ] MinimalPhysicsBody_SetAngularVelocity_UpdatesVelocity
+      - [ ] MinimalPhysicsBody_ApplyForce_NoOpButDoesNotCrash
+      - [ ] MinimalPhysicsBody_Logging_GeneratesAppropriateMessages
+      - [ ] MinimalColliderShape_Constructor_InitializesCorrectly
+      - [ ] MinimalColliderShape_Destructor_CompletesWithoutErrors
+      - [ ] MinimalColliderShape_Logging_GeneratesAppropriateMessages
+      - [ ] MinimalJoint_Constructor_InitializesCorrectly
+      - [ ] MinimalJoint_Destructor_CompletesWithoutErrors
+      - [ ] MinimalJoint_SetBodies_StoresBodies
+      - [ ] MinimalJoint_Logging_GeneratesAppropriateMessages
+      - [ ] MinimalPhysicsMaterial_Constructor_InitializesCorrectly
+      - [ ] MinimalPhysicsMaterial_Destructor_CompletesWithoutErrors
+      - [ ] MinimalPhysicsMaterial_GetFriction_ReturnsCorrectValue
+      - [ ] MinimalPhysicsMaterial_GetRestitution_ReturnsCorrectValue
+      - [ ] MinimalPhysicsMaterial_Logging_GeneratesAppropriateMessages
+      - [ ] CreateBox2DPhysicsWorldFactory_ReturnsValidFactory
+      - [ ] CreateBox2DPhysicsWorldFactory_Logging_GeneratesAppropriateMessages
+      - [ ] DestroyBox2DPhysicsWorldFactory_DeletesFactory
+      - [ ] DestroyBox2DPhysicsWorldFactory_Logging_GeneratesAppropriateMessages
+      - [ ] Box2DPhysicsWorldFactory_Constructor_InitializesCorrectly
+      - [ ] Box2DPhysicsWorldFactory_Destructor_CompletesWithoutErrors
+      - [ ] Box2DPhysicsWorldFactory_CreatePhysicsWorld_ReturnsValidWorld
+      - [ ] Box2DPhysicsWorldFactory_CreatePhysicsWorld_PassesOptionsToWorldInit
+      - [ ] Box2DPhysicsWorldFactory_Logging_GeneratesAppropriateMessages
+      - [ ] Box2DWorld_Constructor_InitializesCorrectly
+      - [ ] Box2DWorld_Destructor_CompletesWithoutErrors
+      - [ ] Box2DWorld_Init_StoresOptionsAndLogs
+      - [ ] Box2DWorld_Step_NoOpButDoesNotCrash
+      - [ ] Box2DWorld_CreateRigidBody_ReturnsValidBody
+      - [ ] Box2DWorld_SetGravity_SetsInternalStateAndLogs
+      - [ ] Box2DWorld_CreateBoxShape_ReturnsNullAndLogsWarning
+      - [ ] Box2DWorld_CreateSphereShape_ReturnsNullAndLogsWarning
+      - [ ] Box2DWorld_CreatePhysicsMaterial_ReturnsNullAndLogsWarning
+      - [ ] Box2DWorld_Logging_GeneratesAppropriateMessages
+      - [ ] Box2DBody_Constructor_InitializesCorrectly
+      - [ ] Box2DBody_Destructor_CompletesWithoutErrors
+      - [ ] Box2DBody_SetShape_NoOpAndLogs
+      - [ ] Box2DBody_SetMaterial_NoOpAndLogs
+      - [ ] Box2DBody_SetMass_NoOpAndLogs
+      - [ ] Box2DBody_SetPosition_NoOpAndLogs
+      - [ ] Box2DBody_GetPosition_ReturnsZeroVectorAndLogs
+      - [ ] Box2DBody_SetRotation_NoOpAndLogs
+      - [ ] Box2DBody_GetRotation_ReturnsIdentityQuaternionAndLogs
+      - [ ] Box2DBody_SetLinearVelocity_NoOpAndLogs
+      - [ ] Box2DBody_SetAngularVelocity_NoOpAndLogs
+      - [ ] Box2DBody_ApplyForce_NoOpAndLogs
+      - [ ] Box2DBody_ApplyImpulse_NoOpAndLogs
+      - [ ] Box2DBody_Logging_GeneratesAppropriateMessages
+      - [ ] OpenGLGraphicsDeviceFactory_Constructor_StoresOptions
+      - [ ] OpenGLGraphicsDeviceFactory_CreateGraphicsDevice_UsesFactoryOptionsWhenNoneProvided
+      - [ ] OpenGLGraphicsDeviceFactory_CreateGraphicsDevice_UsesProvidedOptions
+      - [ ] OpenGLGraphicsDeviceFactory_CreateGraphicsDevice_ReturnsValidDevice
+      - [ ] OpenGLGraphicsDeviceFactory_CreateGraphicsDevice_ReturnsNullOnDeviceInitFailure
+      - [ ] OpenGLGraphicsDeviceFactory_Logging_GeneratesAppropriateMessages
+      - [ ] OpenGLGraphicsDevice_Constructor_InitializesCorrectly
+      - [ ] OpenGLGraphicsDevice_Destructor_CompletesWithoutErrors
+      - [ ] OpenGLGraphicsDevice_Init_ReturnsTrueForStub
+      - [ ] OpenGLGraphicsDevice_BeginFrame_NoOpDoesNotCrash
+      - [ ] OpenGLGraphicsDevice_EndFrame_NoOpDoesNotCrash
+      - [ ] OpenGLGraphicsDevice_GetImmediateContext_ReturnsNull
+      - [ ] OpenGLGraphicsDevice_CreateVertexBuffer_ReturnsNull
+      - [ ] OpenGLGraphicsDevice_CreateIndexBuffer_ReturnsNull
+      - [ ] OpenGLGraphicsDevice_CreateShader_ReturnsNull
+      - [ ] OpenGLGraphicsDevice_CreateShaderProgram_ReturnsNull
+      - [ ] OpenGLGraphicsDevice_CreateTexture_ReturnsNull
+      - [ ] OpenGLGraphicsDevice_CreateSampler_ReturnsNull
+      - [ ] OpenGLGraphicsDevice_CreateComputeBuffer_ReturnsNull
+      - [ ] OpenGLGraphicsDevice_CreateIndirectDrawBuffer_ReturnsNull
+      - [ ] OpenGLGraphicsDevice_CreateAccelerationStructure_ReturnsNull
+      - [ ] OpenGLGraphicsDevice_CreateFrameBuffer_ReturnsNull
+      - [ ] OpenGLGraphicsDevice_CreateUniformBuffer_ReturnsNull
+      - [ ] OpenGLGraphicsDevice_Logging_GeneratesAppropriateMessages
+      - [ ] OpenGLRenderContext_Constructor_InitializesCorrectly
+      - [ ] OpenGLRenderContext_Destructor_CompletesWithoutErrors
+      - [ ] OpenGLRenderContext_Clear_NoOpDoesNotCrash
+      - [ ] OpenGLRenderContext_SetViewport_NoOpDoesNotCrash
+      - [ ] OpenGLRenderContext_BindFrameBuffer_NoOpDoesNotCrash
+      - [ ] OpenGLRenderContext_SetVertexBuffer_NoOpDoesNotCrash
+      - [ ] OpenGLRenderContext_SetIndexBuffer_NoOpDoesNotCrash
+      - [ ] OpenGLRenderContext_SetShaderProgram_NoOpDoesNotCrash
+      - [ ] OpenGLRenderContext_SetTexture_NoOpDoesNotCrash
+      - [ ] OpenGLRenderContext_SetSampler_NoOpDoesNotCrash
+      - [ ] OpenGLRenderContext_SetUniformBuffer_NoOpDoesNotCrash
+      - [ ] OpenGLRenderContext_SetStorageBuffer_NoOpDoesNotCrash
+      - [ ] OpenGLRenderContext_SetAccelerationStructure_NoOpDoesNotCrash
+      - [ ] OpenGLRenderContext_SetDepthTest_NoOpDoesNotCrash
+      - [ ] OpenGLRenderContext_SetDepthFunc_NoOpDoesNotCrash
+      - [ ] OpenGLRenderContext_SetDepthMask_NoOpDoesNotCrash
+      - [ ] OpenGLRenderContext_SetBlendMode_NoOpDoesNotCrash
+      - [ ] OpenGLRenderContext_SetCullMode_NoOpDoesNotCrash
+      - [ ] OpenGLRenderContext_DrawIndexed_NoOpDoesNotCrash
+      - [ ] OpenGLRenderContext_DrawArrays_NoOpDoesNotCrash
+      - [ ] OpenGLRenderContext_DrawIndexedInstanced_NoOpDoesNotCrash
+      - [ ] OpenGLRenderContext_DrawArraysInstanced_NoOpDoesNotCrash
+      - [ ] OpenGLRenderContext_DispatchCompute_NoOpDoesNotCrash
+      - [ ] OpenGLRenderContext_DispatchMesh_NoOpDoesNotCrash
+      - [ ] OpenGLRenderContext_TraceRays_NoOpDoesNotCrash
+      - [ ] OpenGLRenderContext_SetVariableRateShading_NoOpDoesNotCrash
+      - [ ] OpenGLRenderContext_SwapBuffers_NoOpDoesNotCrash
+      - [ ] OpenGLRenderContext_Logging_GeneratesAppropriateMessages
+      - [ ] OpenGLShaderProgram_Constructor_InitializesCorrectly
+      - [ ] OpenGLShaderProgram_Destructor_CompletesWithoutErrors
+      - [ ] OpenGLShaderProgram_Bind_NoOpDoesNotCrash
+      - [ ] OpenGLShaderProgram_Unbind_NoOpDoesNotCrash
+      - [ ] OpenGLShaderProgram_SetUniformInt_NoOpDoesNotCrash
+      - [ ] OpenGLShaderProgram_SetUniformFloat_NoOpDoesNotCrash
+      - [ ] OpenGLShaderProgram_SetUniformFloat2_NoOpDoesNotCrash
+      - [ ] OpenGLShaderProgram_SetUniformFloat3_NoOpDoesNotCrash
+      - [ ] OpenGLShaderProgram_SetUniformFloat4_NoOpDoesNotCrash
+      - [ ] OpenGLShaderProgram_SetUniformMat4_NoOpDoesNotCrash
+      - [ ] OpenGLShaderProgram_Logging_GeneratesAppropriateMessages
+      - [ ] OpenGLTexture_Constructor_InitializesCorrectly
+      - [ ] OpenGLTexture_Destructor_CompletesWithoutErrors
+      - [ ] OpenGLTexture_Bind_NoOpDoesNotCrash
+      - [ ] OpenGLTexture_Unbind_NoOpDoesNotCrash
+      - [ ] OpenGLTexture_GetWidth_ReturnsCorrectWidth
+      - [ ] OpenGLTexture_GetHeight_ReturnsCorrectHeight
+      - [ ] OpenGLTexture_GetNativeID_ReturnsZero
+      - [ ] OpenGLTexture_Logging_GeneratesAppropriateMessages
+      - [ ] OpenGLVertexBuffer_Constructor_InitializesCorrectly
+      - [ ] OpenGLVertexBuffer_Destructor_CompletesWithoutErrors
+      - [ ] OpenGLVertexBuffer_Bind_NoOpDoesNotCrash
+      - [ ] OpenGLVertexBuffer_Unbind_NoOpDoesNotCrash
+      - [ ] OpenGLVertexBuffer_SetData_UpdatesSizeAndNoCrash
+      - [ ] OpenGLVertexBuffer_GetSize_ReturnsCorrectSize
+      - [ ] OpenGLVertexBuffer_GetLayout_ReturnsCorrectLayout
+      - [ ] OpenGLVertexBuffer_Logging_GeneratesAppropriateMessages
+      - [ ] OpenGLIndexBuffer_Constructor_InitializesCorrectly
+      - [ ] OpenGLIndexBuffer_Destructor_CompletesWithoutErrors
+      - [ ] OpenGLIndexBuffer_Bind_NoOpDoesNotCrash
+      - [ ] OpenGLIndexBuffer_Unbind_NoOpDoesNotCrash
+      - [ ] OpenGLIndexBuffer_SetData_UpdatesCountAndNoCrash
+      - [ ] OpenGLIndexBuffer_GetCount_ReturnsCorrectCount
+      - [ ] OpenGLIndexBuffer_Logging_GeneratesAppropriateMessages
+      - [ ] OpenGLFrameBuffer_Constructor_InitializesCorrectly
+      - [ ] OpenGLFrameBuffer_Destructor_CompletesWithoutErrors
+      - [ ] OpenGLFrameBuffer_Bind_NoOpDoesNotCrash
+      - [ ] OpenGLFrameBuffer_Unbind_NoOpDoesNotCrash
+      - [ ] OpenGLFrameBuffer_GetColorAttachment_ReturnsNull
+      - [ ] OpenGLFrameBuffer_GetDepthAttachment_ReturnsNull
+      - [ ] OpenGLFrameBuffer_Resize_UpdatesDimensionsAndNoCrash
+      - [ ] OpenGLFrameBuffer_Logging_GeneratesAppropriateMessages
+      - [ ] OpenGLShader_Constructor_InitializesCorrectly
+      - [ ] OpenGLShader_Destructor_CompletesWithoutErrors
+      - [ ] OpenGLShader_Logging_GeneratesAppropriateMessages
+      - [ ] OpenGLUniformBuffer_Constructor_InitializesCorrectly
+      - [ ] OpenGLUniformBuffer_Destructor_CompletesWithoutErrors
+      - [ ] OpenGLUniformBuffer_SetData_NoOpDoesNotCrash
+      - [ ] OpenGLUniformBuffer_GetSize_ReturnsCorrectSize
+      - [ ] OpenGLUniformBuffer_Logging_GeneratesAppropriateMessages
+      - [ ] OpenGLSampler_Constructor_InitializesCorrectly
+      - [ ] OpenGLSampler_Destructor_CompletesWithoutErrors
+      - [ ] OpenGLSampler_Bind_NoOpDoesNotCrash
+      - [ ] OpenGLSampler_Unbind_NoOpDoesNotCrash
+      - [ ] OpenGLSampler_Logging_GeneratesAppropriateMessages
+      - [ ] OpenGLIndirectDrawBuffer_Constructor_InitializesCorrectly
+      - [ ] OpenGLIndirectDrawBuffer_Destructor_CompletesWithoutErrors
+      - [ ] OpenGLIndirectDrawBuffer_SetData_NoOpDoesNotCrash
+      - [ ] OpenGLIndirectDrawBuffer_GetSize_ReturnsCorrectSize
+      - [ ] OpenGLIndirectDrawBuffer_Logging_GeneratesAppropriateMessages
+      - [ ] OpenGLComputeBuffer_Constructor_InitializesCorrectly
+      - [ ] OpenGLComputeBuffer_Destructor_CompletesWithoutErrors
+      - [ ] OpenGLComputeBuffer_SetData_NoOpDoesNotCrash
+      - [ ] OpenGLComputeBuffer_GetSize_ReturnsCorrectSize
+      - [ ] OpenGLComputeBuffer_Logging_GeneratesAppropriateMessages
+      - [ ] OpenGLAccelerationStructure_Constructor_LogsWarning
+      - [ ] OpenGLAccelerationStructure_Destructor_CompletesWithoutErrors
+      - [ ] OpenGLAccelerationStructure_Build_LogsWarning
+      - [ ] OpenGLAccelerationStructure_Update_LogsWarning
+      - [ ] OpenGLAccelerationStructure_Logging_GeneratesAppropriateMessages
+      - [ ] CreateOpenGLGraphicsDeviceFactory_ReturnsValidFactory
+      - [ ] CreateOpenGLGraphicsDeviceFactory_Logging_GeneratesAppropriateMessages
+      - [ ] DestroyOpenGLGraphicsDeviceFactory_DeletesFactory
+      - [ ] DestroyOpenGLGraphicsDeviceFactory_Logging_GeneratesAppropriateMessages
+      - [ ] GlfwWindowFactory_Constructor_StoresOptions
+      - [ ] GlfwWindowFactory_CreateGlfwWindow_UsesFactoryOptionsWhenNoneProvided
+      - [ ] GlfwWindowFactory_CreateGlfwWindow_UsesProvidedOptions
+      - [ ] GlfwWindowFactory_CreateGlfwWindow_ReturnsValidWindow
+      - [ ] GlfwWindowFactory_CreateGlfwWindow_ReturnsNullOnWindowInitFailure
+      - [ ] GlfwWindowFactory_Logging_GeneratesAppropriateMessages
+      - [ ] GlfwWindow_Constructor_InitializesGLFWAndLogs
+      - [ ] GlfwWindow_Constructor_HandlesGLFWInitFailure
+      - [ ] GlfwWindow_Destructor_TerminatesGLFWAndDestroysWindow
+      - [ ] GlfwWindow_Init_CreatesGLFWWindowSuccessfully
+      - [ ] GlfwWindow_Init_HandlesGLFWWindowCreationFailure
+      - [ ] GlfwWindow_Init_SetsWindowHintsCorrectly
+      - [ ] GlfwWindow_Init_MakesContextCurrentAndEnablesVSync
+      - [ ] GlfwWindow_Init_WarnsIfAlreadyInitialized
+      - [ ] GlfwWindow_PollEvents_CallsGlfwPollEvents
+      - [ ] GlfwWindow_SwapBuffers_CallsGlfwSwapBuffers
+      - [ ] GlfwWindow_ShouldClose_ReturnsCorrectState
+      - [ ] GlfwWindow_GetNativeWindow_ReturnsCorrectHandle
+      - [ ] GlfwWindow_IsKeyPressed_CallsGlfwGetKey
+      - [ ] GlfwWindow_IsMouseButtonPressed_CallsGlfwGetMouseButton
+      - [ ] GlfwWindow_GetMousePosition_CallsGlfwGetCursorPos
+      - [ ] GlfwWindow_GetMouseX_ReturnsCorrectCoordinate
+      - [ ] GlfwWindow_GetMouseY_ReturnsCorrectCoordinate
+      - [ ] GlfwWindow_InputMethods_HandleNullWindowGracefully
+      - [ ] GlfwWindow_Logging_GeneratesAppropriateMessages
+      - [ ] CreateGlfwWindowFactory_ReturnsValidFactory
+      - [ ] CreateGlfwWindowFactory_Logging_GeneratesAppropriateMessages
+      - [ ] DestroyGlfwWindowFactory_DeletesFactory
+      - [ ] DestroyGlfwWindowFactory_Logging_GeneratesAppropriateMessages
     ```md
     Develop the core C++ engine components, including minimal but functional implementations of the Window, Render, and Physics Abstraction Layers (WAL/RAL/PAL) with at least one backend each. Establish the Intermediate C++ layer with its Service Locator, P/Invoke interface, and managers for resources, rendering, and physics.
     ```
@@ -264,4 +585,26 @@
       - [x] Set up initial `src/csharp/Piece.sln` with `Piece.Engine` and `Piece.Editor` projects.
       - [x] Establish `Piece.Intermediate.Abstractions` C# project for P/Invoke interfaces and factory definitions.
       - [x] Implement robust cross-language logging setup for C++ (`spdlog`) and C# (`Serilog`).
+
+### Phase 3: High-Level C# Framework
+
+  - tags: [v1.0.0, c#, high-level]
+  - priority: high
+  - steps:
+      - [x] Implement `GameEngine` lifecycle (Initialization, Update, Draw loops).
+      - [x] Implement `Scene`, `Node`, `Component` base classes for the scene graph.
+      - [x] Implement `TransformComponent` (position, rotation, scale).
+      - [x] Implement `MeshRendererComponent` for rendering.
+      - [x] Implement `CameraComponent` and `LightComponent`.
+      - [x] Implement `InputManager` using C# WAL wrapper.
+      - [x] Implement `AssetManager` (C# wrapper for C++ `ResourceManager`).
+      - [x] Implement `RenderManager` (C# wrapper for C++ `RenderSystem`).
+      - [x] Implement C# wrappers (`IntPtr` + `IDisposable`) for all core C++ classes (Camera, Light, Material, Mesh, Model, etc.).
+      - [x] Develop C# wrapper NuGet packages for core C++ backends (GLFW, OpenGL, Minimal PAL), integrating with .NET DI.
+      - [x] Configure `Piece.Engine` to use .NET DI to resolve and configure these C# factory wrappers, populating the C++ `ServiceLocator`.
+      - [x] Implement Logging for High-Level C# Framework.
+      - [x] Implement Tests for High-Level C# Framework.
+    ```md
+    Develop the High-Level C# Framework, providing a user-friendly API for game developers. This includes the core game loop, scene graph components, input and asset management, rendering orchestration, and robust C# wrappers for all underlying C++ engine functionalities, orchestrated via .NET Dependency Injection.
+    ```
 
