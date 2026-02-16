@@ -137,58 +137,58 @@ extern "C"
     PIECE_CORE_API bool EngineIsKeyPressed(Piece::Core::EngineCore *core_ptr, Piece::WAL::KeyCode keycode)
     {
         PIECE_TRACE("EngineIsKeyPressed(core_ptr: {0}, keycode: {1})", fmt::ptr(core_ptr), static_cast<int>(keycode));
-        if (!core_ptr || !core_ptr->window_)
+        if (!core_ptr || !core_ptr->GetWindow())
         {
             PIECE_WARN("EngineIsKeyPressed called with null core_ptr or window_.");
             return false;
         }
-        return core_ptr->window_->IsKeyPressed(keycode);
+        return core_ptr->GetWindow()->IsKeyPressed(keycode);
     }
 
     PIECE_CORE_API bool EngineIsMouseButtonPressed(Piece::Core::EngineCore *core_ptr, Piece::WAL::KeyCode button)
     {
         PIECE_TRACE("EngineIsMouseButtonPressed(core_ptr: {0}, button: {1})", fmt::ptr(core_ptr),
                     static_cast<int>(button));
-        if (!core_ptr || !core_ptr->window_)
+        if (!core_ptr || !core_ptr->GetWindow())
         {
             PIECE_WARN("EngineIsMouseButtonPressed called with null core_ptr or window_.");
             return false;
         }
-        return core_ptr->window_->IsMouseButtonPressed(button);
+        return core_ptr->GetWindow()->IsMouseButtonPressed(button);
     }
 
     PIECE_CORE_API float EngineGetMouseX(Piece::Core::EngineCore *core_ptr)
     {
         PIECE_TRACE("EngineGetMouseX(core_ptr: {0})", fmt::ptr(core_ptr));
-        if (!core_ptr || !core_ptr->window_)
+        if (!core_ptr || !core_ptr->GetWindow())
         {
             PIECE_WARN("EngineGetMouseX called with null core_ptr or window_.");
             return 0.0f;
         }
-        return core_ptr->window_->GetMouseX();
+        return core_ptr->GetWindow()->GetMouseX();
     }
 
     PIECE_CORE_API float EngineGetMouseY(Piece::Core::EngineCore *core_ptr)
     {
         PIECE_TRACE("EngineGetMouseY(core_ptr: {0})", fmt::ptr(core_ptr));
-        if (!core_ptr || !core_ptr->window_)
+        if (!core_ptr || !core_ptr->GetWindow())
         {
             PIECE_WARN("EngineGetMouseY called with null core_ptr or window_.");
             return 0.0f;
         }
-        return core_ptr->window_->GetMouseY();
+        return core_ptr->GetWindow()->GetMouseY();
     }
 
     PIECE_CORE_API void *EngineLoadMesh(Piece::Core::EngineCore *core_ptr, const char *path)
     {
         PIECE_TRACE("EngineLoadMesh(core_ptr: {0}, path: \"{1}\")", fmt::ptr(core_ptr), path);
-        if (!core_ptr || !core_ptr->resource_manager_)
+        if (!core_ptr || !core_ptr->GetResourceManager())
         {
             PIECE_WARN("EngineLoadMesh called with null core_ptr or resource_manager_.");
             return nullptr;
         }
         std::string s_path(path);
-        auto mesh_ptr = core_ptr->resource_manager_->LoadMesh(s_path);
+        auto mesh_ptr = core_ptr->GetResourceManager()->LoadMesh(s_path);
         if (!mesh_ptr)
         {
             PIECE_ERROR("Failed to load mesh: {}.", s_path);
@@ -201,13 +201,13 @@ extern "C"
     PIECE_CORE_API void *EngineLoadMaterial(Piece::Core::EngineCore *core_ptr, const char *path)
     {
         PIECE_TRACE("EngineLoadMaterial(core_ptr: {0}, path: \"{1}\")", fmt::ptr(core_ptr), path);
-        if (!core_ptr || !core_ptr->resource_manager_)
+        if (!core_ptr || !core_ptr->GetResourceManager())
         {
             PIECE_WARN("EngineLoadMaterial called with null core_ptr or resource_manager_.");
             return nullptr;
         }
         std::string s_path(path);
-        auto material_ptr = core_ptr->resource_manager_->LoadMaterial(s_path);
+        auto material_ptr = core_ptr->GetResourceManager()->LoadMaterial(s_path);
         if (!material_ptr)
         {
             PIECE_ERROR("Failed to load material: {}.", s_path);
@@ -220,13 +220,13 @@ extern "C"
     PIECE_CORE_API void *EngineLoadTexture(Piece::Core::EngineCore *core_ptr, const char *path)
     {
         PIECE_TRACE("EngineLoadTexture(core_ptr: {0}, path: \"{1}\")", fmt::ptr(core_ptr), path);
-        if (!core_ptr || !core_ptr->resource_manager_)
+        if (!core_ptr || !core_ptr->GetResourceManager())
         {
             PIECE_WARN("EngineLoadTexture called with null core_ptr or resource_manager_.");
             return nullptr;
         }
         std::string s_path(path);
-        auto texture_ptr = core_ptr->resource_manager_->LoadTexture(s_path);
+        auto texture_ptr = core_ptr->GetResourceManager()->LoadTexture(s_path);
         if (!texture_ptr)
         {
             PIECE_ERROR("Failed to load texture: {}.", s_path);
