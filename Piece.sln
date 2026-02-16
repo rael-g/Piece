@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Piece.Glfw", "src\csharp\Pi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Piece.OpenGL", "src\csharp\Piece.OpenGL\Piece.OpenGL.csproj", "{A96713D4-D7CE-4051-A5CC-9D13EA4389DB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Piece.ProjectManagement", "src\csharp\Piece.ProjectManagement\Piece.ProjectManagement.csproj", "{7C9520BC-4A35-417C-A163-C8A253DB0056}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -129,6 +131,18 @@ Global
 		{A96713D4-D7CE-4051-A5CC-9D13EA4389DB}.Release|x64.Build.0 = Release|Any CPU
 		{A96713D4-D7CE-4051-A5CC-9D13EA4389DB}.Release|x86.ActiveCfg = Release|Any CPU
 		{A96713D4-D7CE-4051-A5CC-9D13EA4389DB}.Release|x86.Build.0 = Release|Any CPU
+		{7C9520BC-4A35-417C-A163-C8A253DB0056}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C9520BC-4A35-417C-A163-C8A253DB0056}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C9520BC-4A35-417C-A163-C8A253DB0056}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7C9520BC-4A35-417C-A163-C8A253DB0056}.Debug|x64.Build.0 = Debug|Any CPU
+		{7C9520BC-4A35-417C-A163-C8A253DB0056}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7C9520BC-4A35-417C-A163-C8A253DB0056}.Debug|x86.Build.0 = Debug|Any CPU
+		{7C9520BC-4A35-417C-A163-C8A253DB0056}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C9520BC-4A35-417C-A163-C8A253DB0056}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C9520BC-4A35-417C-A163-C8A253DB0056}.Release|x64.ActiveCfg = Release|Any CPU
+		{7C9520BC-4A35-417C-A163-C8A253DB0056}.Release|x64.Build.0 = Release|Any CPU
+		{7C9520BC-4A35-417C-A163-C8A253DB0056}.Release|x86.ActiveCfg = Release|Any CPU
+		{7C9520BC-4A35-417C-A163-C8A253DB0056}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -139,5 +153,6 @@ Global
 		{F3A7F117-41EA-4F69-BF22-3241FE57FCAA} = {EE222B14-4095-D8D2-8B9B-4218DD5B4CA2}
 		{7B980363-BAD6-4A97-AA7C-443C737494DF} = {EE222B14-4095-D8D2-8B9B-4218DD5B4CA2}
 		{A96713D4-D7CE-4051-A5CC-9D13EA4389DB} = {EE222B14-4095-D8D2-8B9B-4218DD5B4CA2}
+		{7C9520BC-4A35-417C-A163-C8A253DB0056} = {EE222B14-4095-D8D2-8B9B-4218DD5B4CA2}
 	EndGlobalSection
 EndGlobal
