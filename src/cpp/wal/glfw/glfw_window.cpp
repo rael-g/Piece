@@ -4,7 +4,8 @@
  */
 #include "glfw_window.h"
 
-#include <iostream>
+#include <piece_core/logging_api.h>    // For PIECE_ERROR, PIECE_INFO
+#include <wal/native_window_options.h> // Ensure NativeWindowOptions is available
 
 namespace Piece::WAL
 {
@@ -14,10 +15,14 @@ namespace Piece::WAL
  */
 GlfwWindow::GlfwWindow() : window_(nullptr)
 {
+    PIECE_INFO("GlfwWindow constructed. Initializing GLFW...");
     if (!glfwInit())
     {
-        // It's better to use a proper logger here, but for now, this is fine.
-        std::cerr << "Failed to initialize GLFW" << std::endl;
+        PIECE_ERROR("Failed to initialize GLFW");
+    }
+    else
+    {
+        PIECE_INFO("GLFW initialized successfully.");
     }
 }
 
@@ -26,44 +31,62 @@ GlfwWindow::GlfwWindow() : window_(nullptr)
  */
 GlfwWindow::~GlfwWindow()
 {
+    PIECE_INFO("GlfwWindow destructor called.");
     if (window_)
     {
         glfwDestroyWindow(window_);
         window_ = nullptr;
+        PIECE_INFO("GLFW window destroyed.");
     }
     glfwTerminate();
+    PIECE_INFO("GLFW terminated.");
 }
 
 /**
  * @brief Initializes the GLFW window with the given parameters.
- * @param width The width of the window.
- * @param height The height of the window.
- * @param title The title of the window.
- * @return True if initialization is successful, false otherwise.
+ * @param options Configuration options for the window.
  */
-bool GlfwWindow::Init(int width, int height, const std::string &title)
+void GlfwWindow::Init(const NativeWindowOptions &options)
 {
+    PIECE_TRACE("GlfwWindow::Init(Width: {0}, Height: {1}, Title: '{2}')", options.initial_window_width,
+                options.initial_window_height, options.window_title);
+
     if (window_)
     {
-        std::cerr << "Window already initialized." << std::endl;
-        return false;
+        PIECE_WARN("Window already initialized. Re-initializing is not supported.");
+        return;
     }
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window_ = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
+    if (options.window_flags & 1) // Assuming bit 0 indicates resizable
+    {
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+        PIECE_DEBUG("GLFW window hint: Resizable set to TRUE.");
+    }
+    else
+    {
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+        PIECE_DEBUG("GLFW window hint: Resizable set to FALSE.");
+    }
+
+    window_ = glfwCreateWindow(options.initial_window_width, options.initial_window_height,
+                               options.window_title.c_str(), nullptr, nullptr);
     if (!window_)
     {
-        std::cerr << "Failed to create GLFW window" << std::endl;
+        PIECE_ERROR("Failed to create GLFW window with Title: '{0}', Width: {1}, Height: {2}", options.window_title,
+                    options.initial_window_width, options.initial_window_height);
         glfwTerminate();
-        return false;
+        return;
     }
 
     glfwMakeContextCurrent(window_);
     glfwSwapInterval(1); // Enable V-Sync
+    PIECE_DEBUG("V-Sync enabled.");
 
-    return true;
+    PIECE_INFO("GLFW window '{0}' initialized successfully: Width={1}, Height={2}", options.window_title,
+               options.initial_window_width, options.initial_window_height);
 }
 
 /**
@@ -71,6 +94,7 @@ bool GlfwWindow::Init(int width, int height, const std::string &title)
  */
 void GlfwWindow::PollEvents()
 {
+    PIECE_TRACE("GlfwWindow::PollEvents");
     glfwPollEvents();
 }
 
@@ -79,6 +103,7 @@ void GlfwWindow::PollEvents()
  */
 void GlfwWindow::SwapBuffers()
 {
+    PIECE_TRACE("GlfwWindow::SwapBuffers");
     if (window_)
     {
         glfwSwapBuffers(window_);
@@ -91,15 +116,17 @@ void GlfwWindow::SwapBuffers()
  */
 bool GlfwWindow::ShouldClose() const
 {
+    PIECE_TRACE("GlfwWindow::ShouldClose");
     return window_ ? glfwWindowShouldClose(window_) : true;
 }
 
 /**
- * @brief Gets the native GLFW window handle.
+ * @brief Gets a pointer to the native GLFW window handle.
  * @return A void pointer to the native GLFWwindow.
  */
 void *GlfwWindow::GetNativeWindow() const
 {
+    PIECE_TRACE("GlfwWindow::GetNativeWindow -> {0}", fmt::ptr(window_));
     return static_cast<void *>(window_);
 }
 
@@ -110,6 +137,7 @@ void *GlfwWindow::GetNativeWindow() const
  */
 bool GlfwWindow::IsKeyPressed(KeyCode keycode) const
 {
+    PIECE_TRACE("GlfwWindow::IsKeyPressed(keycode: {0})", static_cast<int>(keycode));
     if (window_)
     {
         return glfwGetKey(window_, static_cast<int>(keycode)) == GLFW_PRESS;
@@ -124,6 +152,7 @@ bool GlfwWindow::IsKeyPressed(KeyCode keycode) const
  */
 bool GlfwWindow::IsMouseButtonPressed(KeyCode button) const
 {
+    PIECE_TRACE("GlfwWindow::IsMouseButtonPressed(button: {0})", static_cast<int>(button));
     if (window_)
     {
         return glfwGetMouseButton(window_, static_cast<int>(button)) == GLFW_PRESS;
@@ -137,6 +166,7 @@ bool GlfwWindow::IsMouseButtonPressed(KeyCode button) const
  */
 std::pair<float, float> GlfwWindow::GetMousePosition() const
 {
+    PIECE_TRACE("GlfwWindow::GetMousePosition");
     double xpos, ypos;
     if (window_)
     {
@@ -152,7 +182,9 @@ std::pair<float, float> GlfwWindow::GetMousePosition() const
  */
 float GlfwWindow::GetMouseX() const
 {
-    return GetMousePosition().first;
+    float x = GetMousePosition().first;
+    PIECE_TRACE("GlfwWindow::GetMouseX -> {0}", x);
+    return x;
 }
 
 /**
@@ -161,7 +193,9 @@ float GlfwWindow::GetMouseX() const
  */
 float GlfwWindow::GetMouseY() const
 {
-    return GetMousePosition().second;
+    float y = GetMousePosition().second;
+    PIECE_TRACE("GlfwWindow::GetMouseY -> {0}", y);
+    return y;
 }
 
 } // namespace Piece::WAL

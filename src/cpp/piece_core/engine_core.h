@@ -7,9 +7,12 @@
 #ifndef PIECE_CORE_ENGINE_CORE_H_
 #define PIECE_CORE_ENGINE_CORE_H_
 
-#include <pal/iphysics_world.h>   // Assuming PAL interfaces are in WAL/RAL namespace or global
-#include <ral/igraphics_device.h> // Assuming RAL interfaces are in WAL/RAL namespace or global
-#include <wal/iwindow.h>          // Assuming WAL interfaces are in WAL/RAL namespace or global
+#include "core/physics_system_cpp.h"
+#include "core/render_system.h"
+#include "core/resource_manager.h"
+#include <pal/iphysics_world.h>
+#include <ral/igraphics_device.h>
+#include <wal/iwindow.h>
 
 #include <memory>
 
@@ -22,12 +25,6 @@
 
 namespace Piece::Core
 {
-
-/**
- * @brief Initializes the logging system for the engine.
- *        This function is typically called once at the start of the engine's lifecycle.
- */
-void InitializeLogger(); // Declaration for the function defined in engine_core.cpp
 
 /**
  * @brief The main class representing the core of the Piece engine.
@@ -67,17 +64,21 @@ class PIECE_CORE_API EngineCore
      * @brief Unique pointer to the main window interface.
      *        Manages window-related operations, such as creation, input, and events.
      */
-    std::unique_ptr<WAL::IWindow> window_; // Assuming WAL and RAL types are in Piece::WAL, Piece::RAL or global
+    std::unique_ptr<Piece::WAL::IWindow> window_; // Assuming WAL and RAL types are in Piece::WAL, Piece::RAL or global
     /**
      * @brief Unique pointer to the graphics device interface.
      *        Provides an abstraction for rendering functionalities.
      */
-    std::unique_ptr<RAL::IGraphicsDevice> graphics_device_;
+    std::unique_ptr<Piece::RAL::IGraphicsDevice> graphics_device_;
     /**
      * @brief Unique pointer to the physics world interface.
      *        Manages the physics simulation and interactions within the engine.
      */
-    std::unique_ptr<PAL::IPhysicsWorld> physics_world_;
+    std::unique_ptr<Piece::PAL::IPhysicsWorld> physics_world_;
+
+    std::unique_ptr<ResourceManager> resource_manager_;
+    std::unique_ptr<RenderSystem> render_system_;
+    std::unique_ptr<PhysicsSystemCpp> physics_system_;
 };
 
 } // namespace Piece::Core

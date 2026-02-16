@@ -10,6 +10,7 @@
 #include <wal/iwindow_factory.h>
 
 #include <memory>
+#include <piece_core/logging_api.h>
 
 namespace Piece::Core
 {
@@ -28,6 +29,7 @@ class ServiceLocator
      */
     static ServiceLocator &Get()
     {
+        PIECE_TRACE("ServiceLocator::Get()");
         static ServiceLocator instance;
         return instance;
     }
@@ -39,24 +41,27 @@ class ServiceLocator
      * @brief Sets the graphics device factory.
      * @param factory A unique pointer to the graphics device factory.
      */
-    void SetGraphicsDeviceFactory(std::unique_ptr<RAL::IGraphicsDeviceFactory> factory)
+    void SetGraphicsDeviceFactory(std::unique_ptr<Piece::RAL::IGraphicsDeviceFactory> factory)
     {
+        PIECE_INFO("ServiceLocator::SetGraphicsDeviceFactory(factory: {0})", fmt::ptr(factory.get()));
         graphics_device_factory_ = std::move(factory);
     }
     /**
      * @brief Sets the window factory.
      * @param factory A unique pointer to the window factory.
      */
-    void SetWindowFactory(std::unique_ptr<WAL::IWindowFactory> factory)
+    void SetWindowFactory(std::unique_ptr<Piece::WAL::IWindowFactory> factory)
     {
+        PIECE_INFO("ServiceLocator::SetWindowFactory(factory: {0})", fmt::ptr(factory.get()));
         window_factory_ = std::move(factory);
     }
     /**
      * @brief Sets the physics world factory.
      * @param factory A unique pointer to the physics world factory.
      */
-    void SetPhysicsWorldFactory(std::unique_ptr<PAL::IPhysicsWorldFactory> factory)
+    void SetPhysicsWorldFactory(std::unique_ptr<Piece::PAL::IPhysicsWorldFactory> factory)
     {
+        PIECE_INFO("ServiceLocator::SetPhysicsWorldFactory(factory: {0})", fmt::ptr(factory.get()));
         physics_world_factory_ = std::move(factory);
     }
 
@@ -64,24 +69,27 @@ class ServiceLocator
      * @brief Gets the graphics device factory.
      * @return A pointer to the graphics device factory.
      */
-    [[nodiscard]] RAL::IGraphicsDeviceFactory *GetGraphicsDeviceFactory() const
+    [[nodiscard]] Piece::RAL::IGraphicsDeviceFactory *GetGraphicsDeviceFactory() const
     {
+        PIECE_TRACE("ServiceLocator::GetGraphicsDeviceFactory() -> {0}", fmt::ptr(graphics_device_factory_.get()));
         return graphics_device_factory_.get();
     }
     /**
      * @brief Gets the window factory.
      * @return A pointer to the window factory.
      */
-    [[nodiscard]] WAL::IWindowFactory *GetWindowFactory() const
+    [[nodiscard]] Piece::WAL::IWindowFactory *GetWindowFactory() const
     {
+        PIECE_TRACE("ServiceLocator::GetWindowFactory() -> {0}", fmt::ptr(window_factory_.get()));
         return window_factory_.get();
     }
     /**
      * @brief Gets the physics world factory.
      * @return A pointer to the physics world factory.
      */
-    [[nodiscard]] PAL::IPhysicsWorldFactory *GetPhysicsWorldFactory() const
+    [[nodiscard]] Piece::PAL::IPhysicsWorldFactory *GetPhysicsWorldFactory() const
     {
+        PIECE_TRACE("ServiceLocator::GetPhysicsWorldFactory() -> {0}", fmt::ptr(physics_world_factory_.get()));
         return physics_world_factory_.get();
     }
 
@@ -89,14 +97,17 @@ class ServiceLocator
     /**
      * @brief Private constructor to enforce singleton pattern.
      */
-    ServiceLocator() = default;
+    ServiceLocator()
+    {
+        PIECE_INFO("ServiceLocator instance created.");
+    }
 
     /** @brief The graphics device factory instance. */
-    std::unique_ptr<RAL::IGraphicsDeviceFactory> graphics_device_factory_;
+    std::unique_ptr<Piece::RAL::IGraphicsDeviceFactory> graphics_device_factory_;
     /** @brief The window factory instance. */
-    std::unique_ptr<WAL::IWindowFactory> window_factory_;
+    std::unique_ptr<Piece::WAL::IWindowFactory> window_factory_;
     /** @brief The physics world factory instance. */
-    std::unique_ptr<PAL::IPhysicsWorldFactory> physics_world_factory_;
+    std::unique_ptr<Piece::PAL::IPhysicsWorldFactory> physics_world_factory_;
 };
 
 } // namespace Piece::Core

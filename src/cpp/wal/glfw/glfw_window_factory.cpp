@@ -3,8 +3,12 @@
  * @brief Implements the GlfwWindowFactory class.
  */
 #include "glfw_window_factory.h"
+#include "glfw_window.h" // Include the concrete GlfwWindow implementation
 
-#include <iostream>
+#include <piece_core/logging_api.h>    // For PIECE_ERROR
+#include <wal/native_window_options.h> // Ensure NativeWindowOptions is available
+
+#include <utility>
 
 namespace Piece::WAL
 {
@@ -13,20 +17,10 @@ namespace Piece::WAL
  * @brief Constructs a GlfwWindowFactory instance, caching the provided options.
  * @param options The native window options.
  */
-GlfwWindowFactory::GlfwWindowFactory(const Piece::WAL::NativeWindowOptions *options)
+GlfwWindowFactory::GlfwWindowFactory(Piece::WAL::NativeWindowOptions options) : options_(std::move(options))
 {
-    if (options)
-    {
-        options_ = *options;
-    }
-    else
-    {
-        // Fallback to default options if none are provided.
-        options_.initial_window_width = 800;
-        options_.initial_window_height = 600;
-        options_.window_flags = 0;
-        options_.window_title = "Default Piece Engine Window";
-    }
+    PIECE_INFO("GlfwWindowFactory created with options: Width={}, Height={}, Title='{}'", options_.initial_window_width,
+               options_.initial_window_height, options_.window_title);
 }
 
 /**
@@ -34,17 +28,26 @@ GlfwWindowFactory::GlfwWindowFactory(const Piece::WAL::NativeWindowOptions *opti
  * @param options The configuration options for the window. If null, cached options are used.
  * @return A unique_ptr to the newly created IWindow instance, or nullptr on failure.
  */
-std::unique_ptr<WAL::IWindow> GlfwWindowFactory::CreateWindow(const Piece::WAL::NativeWindowOptions *options)
+std::unique_ptr<WAL::IWindow> GlfwWindowFactory::CreateGlfwWindow(const Piece::WAL::NativeWindowOptions *options)
 {
+    PIECE_TRACE("GlfwWindowFactory::CreateGlfwWindow");
     auto window = std::make_unique<WAL::GlfwWindow>();
-    const Piece::WAL::NativeWindowOptions *actualOptions = options ? options : &options_;
+    const Piece::WAL::NativeWindowOptions &actual_options = options ? *options : options_;
 
-    if (!window->Init(actualOptions->initial_window_width, actualOptions->initial_window_height,
-                      std::string(actualOptions->window_title)))
+    PIECE_INFO("Attempting to create GlfwWindow with options: Width={0}, Height={1}, Title='{2}'",
+               actual_options.initial_window_width, actual_options.initial_window_height, actual_options.window_title);
+
+    // Initialize the window with the provided or cached options.
+    window->Init(actual_options);
+
+    // Check if the window was successfully created and initialized
+    if (!window->GetNativeWindow()) // Assuming GetNativeWindow returns nullptr if Init failed
     {
-        std::cerr << "Error: Failed to initialize GlfwWindow." << std::endl;
+        PIECE_ERROR("Error: Failed to initialize GlfwWindow with options: Width={0}, Height={1}, Title='{2}'",
+                    actual_options.initial_window_width, actual_options.initial_window_height, actual_options.window_title);
         return nullptr;
     }
+    PIECE_INFO("GlfwWindow created successfully (Title='{0}').", actual_options.window_title);
     return window;
 }
 

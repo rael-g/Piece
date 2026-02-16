@@ -1,99 +1,80 @@
 /**
  * @file engine_core.cpp
- * @brief Implements the EngineCore class and the native C-style exported functions.
+ * @brief Implements the EngineCore class, which manages the lifecycle and core functionalities of the Piece engine.
  */
 #include "engine_core.h"
-
+#include "core/physics_system_cpp.h"
+#include "core/render_system.h"
+#include "core/resource_manager.h"
+#include "core/service_locator.h"
+#include "piece_core/logging_api.h"
 #include <pal/iphysics_world.h>
 #include <ral/igraphics_device.h>
-#include <spdlog/sinks/rotating_file_sink.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/spdlog.h>
 #include <wal/iwindow.h>
-
-#include "core/service_locator.h"
-#include "logging_api.h"
-#include "native_exports.h"
-#include "spdlog_interop_sink.h"
 
 namespace Piece::Core
 {
-/**
- * @brief Global logger instance.
- */
-static std::shared_ptr<spdlog::logger> g_logger;
-
-/**
- * @brief Initializes the spdlog logger with multiple sinks.
- */
-void InitializeLogger()
-{
-    std::vector<spdlog::sink_ptr> sinks;
-    sinks.push_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
-    sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_mt>("PieceEngine.log", 1024 * 1024 * 5, 3));
-    sinks.push_back(std::make_shared<Piece::Core::InteropSink_mt>());
-
-    g_logger = std::make_shared<spdlog::logger>("PieceEngine", begin(sinks), end(sinks));
-    spdlog::set_default_logger(g_logger);
-    spdlog::set_level(spdlog::level::trace);
-    spdlog::flush_on(spdlog::level::info);
-    g_logger->info("spdlog initialized.");
-}
-
 /**
  * @brief Constructs the EngineCore, initializing all major systems.
  */
 EngineCore::EngineCore()
 {
-    WAL::IWindowFactory *windowFactory = ServiceLocator::Get().GetWindowFactory();
-    RAL::IGraphicsDeviceFactory *graphicsFactory = ServiceLocator::Get().GetGraphicsDeviceFactory();
-    PAL::IPhysicsWorldFactory *physicsFactory = ServiceLocator::Get().GetPhysicsWorldFactory();
+    PIECE_INFO("EngineCore: Initializing...");
+    WAL::IWindowFactory *window_factory = ServiceLocator::Get().GetWindowFactory();
+    RAL::IGraphicsDeviceFactory *graphics_factory = ServiceLocator::Get().GetGraphicsDeviceFactory();
+    PAL::IPhysicsWorldFactory *physics_factory = ServiceLocator::Get().GetPhysicsWorldFactory();
 
-    if (!windowFactory)
+    if (!window_factory)
     {
-        spdlog::error("IWindowFactory not set in ServiceLocator. Engine cannot initialize.");
+        PIECE_ERROR("IWindowFactory not set in ServiceLocator. Engine cannot initialize.");
         return;
     }
-    if (!graphicsFactory)
+    if (!graphics_factory)
     {
-        spdlog::error("IGraphicsDeviceFactory not set in ServiceLocator. Engine cannot "
+        PIECE_ERROR("IGraphicsDeviceFactory not set in ServiceLocator. Engine cannot "
                       "initialize.");
         return;
     }
-    if (!physicsFactory)
+    if (!physics_factory)
     {
-        spdlog::error("IPhysicsWorldFactory not set in ServiceLocator. Engine cannot "
+        PIECE_ERROR("IPhysicsWorldFactory not set in ServiceLocator. Engine cannot "
                       "initialize.");
         return;
     }
 
-    Piece::WAL::NativeWindowOptions defaultWindowOptions = {800, 600, 0, "Piece Engine Window"};
-    window_ = windowFactory->CreateWindow(&defaultWindowOptions);
+    Piece::WAL::NativeWindowOptions default_window_options = {800, 600, 0, "Piece Engine Window"};
+    window_ = window_factory->CreateGlfwWindow(&default_window_options);
     if (!window_)
     {
-        spdlog::error("Failed to create IWindow instance.");
+        PIECE_ERROR("Failed to create IWindow instance.");
         return;
     }
-    spdlog::info("IWindow created.");
+    PIECE_INFO("IWindow created.");
 
-    Piece::RAL::NativeGraphicsOptions defaultGraphicsOptions = {0, 2};
-    graphics_device_ = graphicsFactory->CreateGraphicsDevice(window_.get(), &defaultGraphicsOptions);
+    Piece::RAL::NativeGraphicsOptions default_graphics_options = {0, 2};
+    graphics_device_ = graphics_factory->CreateGraphicsDevice(window_.get(), &default_graphics_options);
     if (!graphics_device_)
     {
-        spdlog::error("Failed to create IGraphicsDevice instance.");
+        PIECE_ERROR("Failed to create IGraphicsDevice instance.");
         return;
     }
-    spdlog::info("IGraphicsDevice created.");
+    PIECE_INFO("IGraphicsDevice created.");
 
-    Piece::PAL::NativePhysicsOptions defaultPhysicsOptions = {1.0f / 60.0f, 4};
-    physics_world_ = physicsFactory->CreatePhysicsWorld(&defaultPhysicsOptions);
+    Piece::PAL::NativePhysicsOptions default_physics_options = {1.0f / 60.0f, 4};
+    physics_world_ = physics_factory->CreatePhysicsWorld(&default_physics_options);
     if (!physics_world_)
     {
-        spdlog::error("Failed to create IPhysicsWorld instance.");
+        PIECE_ERROR("Failed to create IPhysicsWorld instance.");
         return;
     }
-    spdlog::info("IPhysicsWorld created.");
-    spdlog::info("EngineCore: Initialized successfully.");
+    PIECE_INFO("IPhysicsWorld created.");
+
+    // Initialize core systems
+    resource_manager_ = std::make_unique<ResourceManager>(graphics_device_.get());
+    render_system_ = std::make_unique<RenderSystem>(graphics_device_.get());
+    physics_system_ = std::make_unique<PhysicsSystemCpp>(physics_world_.get());
+
+    PIECE_INFO("EngineCore: Initialized successfully.");
 }
 
 /**
@@ -101,18 +82,19 @@ EngineCore::EngineCore()
  */
 EngineCore::~EngineCore()
 {
-    spdlog::info("EngineCore: Destroyed.");
+    PIECE_INFO("EngineCore: Destroyed.");
 }
 
 /**
- * @brief Updates the physics world.
+ * @brief Updates the engine's state.
  * @param deltaTime The time since the last update.
  */
 void EngineCore::Update(float deltaTime)
 {
-    if (physics_world_)
+    PIECE_TRACE("EngineCore::Update(deltaTime: {0})", deltaTime);
+    if (physics_system_)
     {
-        physics_world_->Step(deltaTime);
+        physics_system_->Step(deltaTime);
     }
 }
 
@@ -121,152 +103,22 @@ void EngineCore::Update(float deltaTime)
  */
 void EngineCore::Render()
 {
-    if (window_ && graphics_device_)
+    PIECE_TRACE("EngineCore::Render()");
+    if (window_ && graphics_device_ && render_system_)
     {
+        // For now, use a dummy camera and light
+        Core::Camera camera;
+        camera.SetPerspective(45.0f, 16.0f / 9.0f, 0.1f, 100.0f);
+        camera.SetPosition({0.0f, 0.0f, 5.0f});
+
+        Core::Light light; // Default directional light
+
+        // Create a dummy model for rendering
+        // This will be replaced by actual scene management
+        std::vector<std::shared_ptr<Model>> models;
+        // models.push_back(resource_manager_->LoadMesh("dummy_mesh.obj")); // Need to create a mesh for this
+        render_system_->RenderFrame(camera, light, models);
     }
 }
 
 } // namespace Piece::Core
-
-/**
- * @brief Checks if a factory pointer is valid.
- * @tparam T The type of the factory pointer.
- * @param ptr The pointer to check.
- * @return True if the pointer is not null, false otherwise.
- */
-extern "C"
-{
-    PIECE_CORE_API void SetGraphicsDeviceFactory(Piece::RAL::IGraphicsDeviceFactory *factory_ptr)
-    {
-        if (!factory_ptr)
-        {
-            spdlog::error("Received null IGraphicsDeviceFactory pointer.");
-            return;
-        }
-        Piece::Core::ServiceLocator::Get().SetGraphicsDeviceFactory(
-            std::unique_ptr<Piece::RAL::IGraphicsDeviceFactory>(factory_ptr));
-        spdlog::info("SetGraphicsDeviceFactory called.");
-    }
-
-    PIECE_CORE_API void SetWindowFactory(Piece::WAL::IWindowFactory *factory_ptr)
-    {
-        if (!factory_ptr)
-        {
-            spdlog::error("Received null IWindowFactory pointer.");
-            return;
-        }
-        Piece::Core::ServiceLocator::Get().SetWindowFactory(std::unique_ptr<Piece::WAL::IWindowFactory>(factory_ptr));
-        spdlog::info("SetWindowFactory called.");
-    }
-
-    PIECE_CORE_API void SetPhysicsWorldFactory(Piece::PAL::IPhysicsWorldFactory *factory_ptr)
-    {
-        if (!factory_ptr)
-        {
-            spdlog::error("Received null IPhysicsWorldFactory pointer.");
-            return;
-        }
-        Piece::Core::ServiceLocator::Get().SetPhysicsWorldFactory(
-            std::unique_ptr<Piece::PAL::IPhysicsWorldFactory>(factory_ptr));
-        spdlog::info("SetPhysicsWorldFactory called.");
-    }
-
-    /**
-     * @brief C-style export to initialize the engine.
-     * @return A pointer to the newly created EngineCore instance.
-     */
-    PIECE_CORE_API Piece::Core::EngineCore *EngineInitialize()
-    {
-        static bool loggerInitialized = false;
-        if (!loggerInitialized)
-        {
-            Piece::Core::InitializeLogger();
-            loggerInitialized = true;
-        }
-        spdlog::info("Engine_Initialize called. Attempting to create EngineCore...");
-        auto *core = new Piece::Core::EngineCore();
-        if (!core)
-        {
-            spdlog::error("Failed to allocate EngineCore.");
-            return nullptr;
-        }
-        return core;
-    }
-
-    /**
-     * @brief C-style export to destroy the engine.
-     * @param corePtr A pointer to the EngineCore instance to destroy.
-     */
-    void EngineDestroy(Piece::Core::EngineCore *corePtr)
-    {
-        spdlog::info("Engine_Destroy called.");
-        if (corePtr)
-        {
-            delete corePtr;
-        }
-        else
-        {
-            spdlog::warn("Engine_Destroy called with null corePtr.");
-        }
-    }
-
-    /**
-     * @brief C-style export to update the engine.
-     * @param corePtr A pointer to the EngineCore instance.
-     */
-    void EngineUpdate(Piece::Core::EngineCore *corePtr, float deltaTime)
-    {
-        if (corePtr)
-        {
-            corePtr->Update(deltaTime);
-        }
-    }
-
-    /**
-     * @brief C-style export to render a frame.
-     * @param corePtr A pointer to the EngineCore instance.
-     */
-    void EngineRender(Piece::Core::EngineCore *corePtr)
-    {
-        if (corePtr)
-        {
-            corePtr->Render();
-        }
-    }
-
-    /**
-     * @brief Static storage for the C# log callback.
-     */
-    static LogCallback s_log_callback = nullptr;
-
-    /**
-     * @brief C-style export to register a log callback function from the host application.
-     * @param callback The callback function.
-     */
-    PIECE_CORE_API void PieceCoreRegisterLogCallback(LogCallback callback)
-    {
-        s_log_callback = callback;
-        if (s_log_callback)
-        {
-            spdlog::info("C# LogCallback registered.");
-        }
-        else
-        {
-            spdlog::warn("C# LogCallback unregistered (null callback).");
-        }
-    }
-
-    /**
-     * @brief C-style export to allow the host application to receive log messages.
-     * @param level The log level.
-     * @param message The log message.
-     */
-    PIECE_CORE_API void PieceCoreLog(int level, const char *message)
-    {
-        if (s_log_callback)
-        {
-            s_log_callback(level, message);
-        }
-    }
-
-} // extern "C"

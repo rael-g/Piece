@@ -14,7 +14,9 @@ target_include_directories(wal_glfw PUBLIC
 )
 
 find_package(glfw3 CONFIG REQUIRED)
-target_link_libraries(wal_glfw PUBLIC glfw wal)
+find_package(fmt CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
+target_link_libraries(wal_glfw PUBLIC glfw wal fmt::fmt spdlog::spdlog)
 
 # Install rules
 include(GNUInstallDirs)

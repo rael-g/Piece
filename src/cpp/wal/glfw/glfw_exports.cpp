@@ -4,6 +4,7 @@
  */
 #include "glfw_window_factory.h"
 #include "wal_glfw_exports.h"
+#include <piece_core/logging_api.h>
 
 extern "C"
 {
@@ -15,7 +16,8 @@ extern "C"
      */
     WAL_GLFW_API Piece::WAL::IWindowFactory *CreateGlfwWindowFactory(const Piece::WAL::NativeWindowOptions *options)
     {
-        return new Piece::WAL::GlfwWindowFactory(options);
+        PIECE_INFO("CreateGlfwWindowFactory called.");
+        return new Piece::WAL::GlfwWindowFactory(*options); // Dereference pointer to pass by reference
     }
 
     /**
@@ -24,6 +26,7 @@ extern "C"
      */
     WAL_GLFW_API void DestroyGlfwWindowFactory(Piece::WAL::IWindowFactory *factory)
     {
+        PIECE_INFO("DestroyGlfwWindowFactory called.");
         delete factory;
     }
 
