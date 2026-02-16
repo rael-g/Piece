@@ -32,11 +32,11 @@ public class PieceProjectTests : IDisposable
         Assert.NotNull(project.Name);
         Assert.NotNull(project.Path);
         Assert.NotNull(project.DefaultScene);
+        Assert.Equal("MainScene.toml", project.DefaultScene); // Assert default value
         Assert.NotNull(project.Rendering);
         Assert.NotNull(project.Window);
         Assert.Empty(project.Name);
         Assert.Empty(project.Path);
-        Assert.Empty(project.DefaultScene);
     }
 
     [Fact]
