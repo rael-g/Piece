@@ -3,14 +3,39 @@ using System.IO;
 using System;
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.Linq; // Added for LINQ operations
 
 namespace Piece.ProjectManagement;
 
 public class ProjectManager : IProjectManager
 {
     // Placeholder for actual asset and scene services
-    private readonly IProjectAssetService _assetService = new ProjectAssetService(); // To be properly injected
-    private readonly IProjectSceneService _sceneService = new ProjectSceneService(); // To be properly injected
+    private readonly IProjectAssetService _assetService; // To be properly injected
+    private readonly IProjectSceneService _sceneService; // To be properly injected
+
+    public ProjectManager(IProjectAssetService assetService, IProjectSceneService sceneService)
+    {
+        _assetService = assetService;
+        _sceneService = sceneService;
+    }
+
+    /// <summary>
+    /// Lists available project templates.
+    /// </summary>
+    /// <returns>A collection of ProjectTemplate objects.</returns>
+    public IEnumerable<ProjectTemplate> ListTemplates()
+    {
+        // For now, return a hardcoded list. In a real scenario, this would involve
+        // parsing 'dotnet new --list' output or discovering custom templates.
+        return new List<ProjectTemplate>
+        {
+            new ProjectTemplate { Name = "Piece Engine Empty Project", ShortName = "piece-empty", Description = "An empty Piece Engine project.", IsPieceEngineTemplate = true },
+            new ProjectTemplate { Name = "Piece Engine 2D Game", ShortName = "piece-2d-game", Description = "A basic 2D game project for Piece Engine.", IsPieceEngineTemplate = true },
+            new ProjectTemplate { Name = "Piece Engine 3D Game", ShortName = "piece-3d-game", Description = "A basic 3D game project for Piece Engine.", IsPieceEngineTemplate = true },
+            new ProjectTemplate { Name = "Console Application", ShortName = "console", Description = "A project for creating a command-line application." },
+            new ProjectTemplate { Name = "Class Library", ShortName = "classlib", Description = "A project for creating a class library." }
+        };
+    }
 
     public async Task<PieceProject> CreateProject(string name, string path, string templateName)
     {
@@ -25,17 +50,56 @@ public class ProjectManager : IProjectManager
         if (Directory.Exists(projectRootPath))
             throw new InvalidOperationException($"Project directory already exists at {projectRootPath}.");
         
-        Directory.CreateDirectory(projectRootPath);
+        // Find the selected template
+        var template = ListTemplates().FirstOrDefault(t => t.ShortName.Equals(templateName, StringComparison.OrdinalIgnoreCase));
+        if (template == null)
+        {
+            throw new ArgumentException($"Template '{templateName}' not found.", nameof(templateName));
+        }
 
-        // 2. Leverage dotnet CLI for scaffolding (simplified for now)
-        // This would ideally involve discovering and applying specific project templates
-        // For now, it's a basic directory structure setup.
         Console.WriteLine($"Scaffolding project '{name}' at '{projectRootPath}' using template '{templateName}'...");
-        // Example: Create a 'Content' directory
-        Directory.CreateDirectory(System.IO.Path.Combine(projectRootPath, "Content"));
-        // Example: Create a 'Scripts' directory
-        Directory.CreateDirectory(System.IO.Path.Combine(projectRootPath, "Scripts"));
+        
+        // 2. Leverage dotnet CLI for scaffolding
+        if (template.IsPieceEngineTemplate)
+        {
+            // For custom Piece Engine templates, we create the root directory
+            // and add specific Piece Engine project structure later if needed.
+            Directory.CreateDirectory(projectRootPath);
+            // Example: Create default Assets and Scripts directories
+            Directory.CreateDirectory(System.IO.Path.Combine(projectRootPath, "Assets"));
+            Directory.CreateDirectory(System.IO.Path.Combine(projectRootPath, "Scripts"));
+            // ... more specific Piece Engine structure like default scenes, config files etc.
+            // This part can be expanded to copy files from an embedded resource template.
+        }
+        else
+        {
+            // Use dotnet new for standard templates
+            var startInfo = new ProcessStartInfo("dotnet", $"new {template.ShortName} -n {name} -o \"{projectRootPath}\"")
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            };
 
+            using (var process = Process.Start(startInfo))
+            {
+                if (process == null) throw new InvalidOperationException("Failed to start dotnet process.");
+                
+                string output = await process.StandardOutput.ReadToEndAsync();
+                string error = await process.StandardError.ReadToEndAsync();
+                await process.WaitForExitAsync();
+
+                if (process.ExitCode != 0)
+                {
+                    Console.WriteLine($"dotnet new output: {output}");
+                    Console.WriteLine($"dotnet new error: {error}");
+                    throw new InvalidOperationException($"dotnet new failed with exit code {process.ExitCode}.");
+                }
+                Console.WriteLine(output);
+            }
+        }
+        
         // 3. Create PieceProject instance and save its configuration
         var project = new PieceProject
         {
