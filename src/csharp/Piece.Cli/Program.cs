@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using Piece.ProjectManagement;
 using Serilog; // For Serilog configuration
 using Piece.Cli; // Added for CliServiceCollectionExtensions
-using Piece.Cli.Commands; // Added for NewProjectCommand and BuildProjectCommand
+using Piece.Cli.Commands; // Added for NewProjectCommand, BuildProjectCommand, and ImportAssetCommand
 
 namespace Piece.Cli;
 
@@ -27,6 +27,12 @@ public class Program
 
         var buildCommand = new BuildProjectCommand();
         rootCommand.AddCommand(buildCommand);
+
+        var assetCommand = new Command("asset", "Commands for managing project assets.");
+        rootCommand.AddCommand(assetCommand);
+
+        var importAssetCommand = new ImportAssetCommand();
+        assetCommand.AddCommand(importAssetCommand);
 
         var parser = new CommandLineBuilder(rootCommand)
             .UseHost(CreateHostBuilder)
@@ -55,5 +61,6 @@ public class Program
                 // Register command handlers
                 services.AddTransient<NewProjectCommand.Handler>();
                 services.AddTransient<BuildProjectCommand.Handler>();
+                services.AddTransient<ImportAssetCommand.Handler>();
             });
 }
