@@ -10,7 +10,6 @@ class GlfwWindowTest : public ::testing::Test
     void SetUp() override
     {
         // Since GLFW can only be initialized once, we do it here.
-        // In a real application, this would be handled by the engine's lifecycle.
         glfwInit();
     }
 
@@ -32,8 +31,8 @@ TEST_F(GlfwWindowTest, CanCreateWindow)
 TEST_F(GlfwWindowTest, FactoryCreatesWindow)
 {
     Piece::WAL::NativeWindowOptions options = {800, 600, 0, std::string("Factory Test")};
-    Piece::WAL::GlfwWindowFactory factory(options);   // Corrected constructor
-    auto window = factory.CreateGlfwWindow(&options); // Corrected method name
+    Piece::WAL::GlfwWindowFactory factory;
+    auto window = factory.CreateGlfwWindow(&options);
 
     ASSERT_NE(window, nullptr);
     ASSERT_NE(window->GetNativeWindow(), nullptr);
