@@ -47,6 +47,16 @@ class PIECE_CORE_API EngineCore
     ~EngineCore();
 
     /**
+     * @brief Initializes the engine's core components and services.
+     * @details This method performs the actual setup of factories and creation of core
+     *          interfaces (window, graphics device, physics world). It returns true on
+     *          success and false on failure, instead of throwing exceptions from the
+     *          constructor, to handle initialization errors more robustly.
+     * @return True if initialization is successful, false otherwise.
+     */
+    bool Initialize();
+
+    /**
      * @brief Updates the engine's state.
      *        This method is called once per frame to update game logic, physics, and other dynamic systems.
      * @param deltaTime The time elapsed since the last frame, in seconds.
@@ -58,6 +68,24 @@ class PIECE_CORE_API EngineCore
      *        This method is responsible for drawing all visual elements to the screen.
      */
     void Render();
+
+    /**
+     * @brief Gets the window interface.
+     * @return A pointer to the window interface.
+     */
+    Piece::WAL::IWindow *GetWindow() const
+    {
+        return window_.get();
+    }
+
+    /**
+     * @brief Gets the resource manager.
+     * @return A pointer to the resource manager.
+     */
+    ResourceManager *GetResourceManager() const
+    {
+        return resource_manager_.get();
+    }
 
   private:
     /**

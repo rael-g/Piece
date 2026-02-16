@@ -19,7 +19,21 @@ namespace Piece::Core
  */
 EngineCore::EngineCore()
 {
-    PIECE_INFO("EngineCore: Initializing...");
+    PIECE_INFO("EngineCore: Initializing (lightweight constructor)...");
+    // Members are default-initialized (smart pointers to nullptr)
+}
+
+/**
+ * @brief Initializes the engine's core components and services.
+ * @details This method performs the actual setup of factories and creation of core
+ *          interfaces (window, graphics device, physics world). It returns true on
+ *          success and false on failure, instead of throwing exceptions from the
+ *          constructor, to handle initialization errors more robustly.
+ * @return True if initialization is successful, false otherwise.
+ */
+bool EngineCore::Initialize()
+{
+    PIECE_INFO("EngineCore: Performing full initialization...");
     WAL::IWindowFactory *window_factory = ServiceLocator::Get().GetWindowFactory();
     RAL::IGraphicsDeviceFactory *graphics_factory = ServiceLocator::Get().GetGraphicsDeviceFactory();
     PAL::IPhysicsWorldFactory *physics_factory = ServiceLocator::Get().GetPhysicsWorldFactory();
@@ -27,19 +41,17 @@ EngineCore::EngineCore()
     if (!window_factory)
     {
         PIECE_ERROR("IWindowFactory not set in ServiceLocator. Engine cannot initialize.");
-        return;
+        return false;
     }
     if (!graphics_factory)
     {
-        PIECE_ERROR("IGraphicsDeviceFactory not set in ServiceLocator. Engine cannot "
-                      "initialize.");
-        return;
+        PIECE_ERROR("IGraphicsDeviceFactory not set in ServiceLocator. Engine cannot initialize.");
+        return false;
     }
     if (!physics_factory)
     {
-        PIECE_ERROR("IPhysicsWorldFactory not set in ServiceLocator. Engine cannot "
-                      "initialize.");
-        return;
+        PIECE_ERROR("IPhysicsWorldFactory not set in ServiceLocator. Engine cannot initialize.");
+        return false;
     }
 
     Piece::WAL::NativeWindowOptions default_window_options = {800, 600, 0, "Piece Engine Window"};
@@ -47,7 +59,7 @@ EngineCore::EngineCore()
     if (!window_)
     {
         PIECE_ERROR("Failed to create IWindow instance.");
-        return;
+        return false;
     }
     PIECE_INFO("IWindow created.");
 
@@ -56,16 +68,22 @@ EngineCore::EngineCore()
     if (!graphics_device_)
     {
         PIECE_ERROR("Failed to create IGraphicsDevice instance.");
-        return;
+        return false;
     }
     PIECE_INFO("IGraphicsDevice created.");
+    if (!graphics_device_->Init(window_.get(), default_graphics_options))
+    {
+        PIECE_ERROR("Failed to initialize IGraphicsDevice instance.");
+        return false;
+    }
+    PIECE_INFO("IGraphicsDevice initialized.");
 
     Piece::PAL::NativePhysicsOptions default_physics_options = {1.0f / 60.0f, 4};
     physics_world_ = physics_factory->CreatePhysicsWorld(&default_physics_options);
     if (!physics_world_)
     {
         PIECE_ERROR("Failed to create IPhysicsWorld instance.");
-        return;
+        return false;
     }
     PIECE_INFO("IPhysicsWorld created.");
 
@@ -75,6 +93,7 @@ EngineCore::EngineCore()
     physics_system_ = std::make_unique<PhysicsSystemCpp>(physics_world_.get());
 
     PIECE_INFO("EngineCore: Initialized successfully.");
+    return true;
 }
 
 /**
