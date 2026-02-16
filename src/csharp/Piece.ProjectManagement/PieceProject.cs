@@ -12,10 +12,27 @@ public class PieceProject
 
     public string Name { get; set; } = string.Empty;
     public string Path { get; set; } = string.Empty; // Path to the project root directory
-    public string DefaultScene { get; set; } = string.Empty;
+    public string DefaultScene { get; set; } = "MainScene.toml"; // Default scene name
 
-    // Use a TomlTable for flexible engine configurations
-    public TomlTable EngineConfig { get; set; } = new TomlTable();
+    // Specific configuration sections, mapping directly to TOML top-level tables
+    public RenderingConfig Rendering { get; set; } = new RenderingConfig();
+    public WindowConfig Window { get; set; } = new WindowConfig();
+
+    // Nested classes for specific configuration sections
+    public class RenderingConfig
+    {
+        public bool VSync { get; set; } = true;
+        public bool Fullscreen { get; set; } = false;
+        // Add more rendering specific configs here
+    }
+
+    public class WindowConfig
+    {
+        public int Width { get; set; } = 1280;
+        public int Height { get; set; } = 720;
+        public string Title { get; set; } = "Piece Engine";
+        // Add more window specific configs here
+    }
 
     // Custom TomlModelOptions to preserve PascalCase
     private static readonly TomlModelOptions TomlOptions = new TomlModelOptions
