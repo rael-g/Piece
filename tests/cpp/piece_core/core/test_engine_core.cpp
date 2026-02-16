@@ -9,6 +9,8 @@
 #include <ral/interfaces/ivertex_buffer.h>
 
 // New includes for moved factories and options
+#include <pal/icollider_shape.h>   // Added for incomplete type fix
+#include <pal/iphysics_material.h> // Added for incomplete type fix
 #include <pal/iphysics_world_factory.h>
 #include <pal/native_physics_options.h>
 #include <ral/igraphics_device_factory.h>
@@ -20,7 +22,7 @@
 class MockWindow : public Piece::WAL::IWindow
 {
   public:
-    MOCK_METHOD(bool, Init, (int width, int height, const std::string &title), (override));
+    MOCK_METHOD(void, Init, (const Piece::WAL::NativeWindowOptions &options), (override));
     MOCK_METHOD(void, PollEvents, (), (override));
     MOCK_METHOD(void, SwapBuffers, (), (override));
     MOCK_METHOD(bool, ShouldClose, (), (const, override));
@@ -35,38 +37,67 @@ class MockWindow : public Piece::WAL::IWindow
 class MockGraphicsDevice : public Piece::RAL::IGraphicsDevice
 {
   public:
-    MOCK_METHOD(void, Init, (), (override));
+    MOCK_METHOD(bool, Init, (Piece::WAL::IWindow * window, const Piece::RAL::NativeGraphicsOptions &options),
+               (override));
     MOCK_METHOD(void, BeginFrame, (), (override));
     MOCK_METHOD(void, EndFrame, (), (override));
     MOCK_METHOD(Piece::RAL::IRenderContext *, GetImmediateContext, (), (override));
-    MOCK_METHOD(std::unique_ptr<Piece::RAL::IVertexBuffer>, CreateVertexBuffer, (), (override));
-    MOCK_METHOD(std::unique_ptr<Piece::RAL::IIndexBuffer>, CreateIndexBuffer, (), (override));
-    MOCK_METHOD(std::unique_ptr<Piece::RAL::IShader>, CreateShader, (), (override));
-    MOCK_METHOD(std::unique_ptr<Piece::RAL::IShaderProgram>, CreateShaderProgram, (), (override));
+    MOCK_METHOD(std::unique_ptr<Piece::RAL::IVertexBuffer>, CreateVertexBuffer,
+                (const void *data, uint32_t size, const Piece::RAL::VertexLayout &layout), (override));
+    MOCK_METHOD(std::unique_ptr<Piece::RAL::IIndexBuffer>, CreateIndexBuffer, (const uint32_t *data, uint32_t count),
+                (override));
+    MOCK_METHOD(std::unique_ptr<Piece::RAL::IShader>, CreateShader,
+                (Piece::RAL::ShaderStage stage, const std::string &source), (override));
+    MOCK_METHOD(std::unique_ptr<Piece::RAL::IShaderProgram>, CreateShaderProgram,
+                (const std::vector<Piece::RAL::IShader *> &shaderModules), (override));
+    MOCK_METHOD(std::unique_ptr<Piece::RAL::ITexture>, CreateTexture,
+                (Piece::RAL::TextureType type, uint32_t width, uint32_t height, uint32_t depth,
+                 Piece::RAL::TextureFormat format, const void *data),
+                (override));
+    MOCK_METHOD(std::unique_ptr<Piece::RAL::ISampler>, CreateSampler,
+                (Piece::RAL::TextureFilter minFilter, Piece::RAL::TextureFilter magFilter,
+                 Piece::RAL::TextureWrap sWrap, Piece::RAL::TextureWrap tWrap),
+                (override));
+    MOCK_METHOD(std::unique_ptr<Piece::RAL::IComputeBuffer>, CreateComputeBuffer,
+                (uint32_t size, Piece::RAL::BufferUsage usage, const void *data), (override));
+    MOCK_METHOD(std::unique_ptr<Piece::RAL::IIndirectDrawBuffer>, CreateIndirectDrawBuffer,
+                (uint32_t size, const void *data), (override));
+    MOCK_METHOD(std::unique_ptr<Piece::RAL::IAccelerationStructure>, CreateAccelerationStructure,
+                (const Piece::RAL::AccelerationStructureBuildInfo &info), (override));
+    MOCK_METHOD(std::unique_ptr<Piece::RAL::IFrameBuffer>, CreateFrameBuffer, (uint32_t width, uint32_t height),
+                (override));
+    MOCK_METHOD(std::unique_ptr<Piece::RAL::IUniformBuffer>, CreateUniformBuffer, (uint32_t size, const void *data),
+                (override));
 };
 
 class MockPhysicsWorld : public Piece::PAL::IPhysicsWorld
 {
   public:
-    MOCK_METHOD(void, Init, (), (override));
+    MOCK_METHOD(void, Init, (const Piece::PAL::NativePhysicsOptions &options), (override));
     MOCK_METHOD(void, Step, (float delta_time), (override));
-    MOCK_METHOD(std::unique_ptr<Piece::PAL::IPhysicsBody>, CreatePhysicsBody, (), (override));
+    MOCK_METHOD(std::unique_ptr<Piece::PAL::IPhysicsBody>, CreateRigidBody,
+                (const Piece::PAL::RigidBodyCreationInfo &info), (override));
+    MOCK_METHOD(void, SetGravity, (float x, float y, float z), (override));
+    MOCK_METHOD(std::unique_ptr<Piece::PAL::IColliderShape>, CreateBoxShape,
+                (float halfExtentX, float halfExtentY, float halfExtentZ), (override));
+    MOCK_METHOD(std::unique_ptr<Piece::PAL::IColliderShape>, CreateSphereShape, (float radius), (override));
+    MOCK_METHOD(std::unique_ptr<Piece::PAL::IPhysicsMaterial>, CreatePhysicsMaterial,
+                (float friction, float restitution), (override));
 };
 
 // Mocks for factories
 class MockWindowFactory : public Piece::WAL::IWindowFactory
 {
   public:
-    MOCK_METHOD(std::unique_ptr<Piece::WAL::IWindow>, CreateWindow, (const Piece::WAL::NativeWindowOptions *options),
-                (override));
+    MOCK_METHOD(std::unique_ptr<Piece::WAL::IWindow>, CreateGlfwWindow,
+                (const Piece::WAL::NativeWindowOptions *options), (override));
 };
 
 class MockGraphicsDeviceFactory : public Piece::RAL::IGraphicsDeviceFactory
 {
   public:
     MOCK_METHOD(std::unique_ptr<Piece::RAL::IGraphicsDevice>, CreateGraphicsDevice,
-                (Piece::WAL::IWindow * window, const Piece::RAL::NativeGraphicsOptions *options),
-                (override)); // Changed here
+                (Piece::WAL::IWindow * window, const Piece::RAL::NativeGraphicsOptions *options), (override));
 };
 
 class MockPhysicsWorldFactory : public Piece::PAL::IPhysicsWorldFactory
@@ -113,7 +144,7 @@ class EngineCoreTest : public ::testing::Test
 TEST_F(EngineCoreTest, InitializationCreatesBackends)
 {
     // Set expectations: the factories should be called to create the backends
-    EXPECT_CALL(*window_factory_mock, CreateWindow(::testing::_))
+    EXPECT_CALL(*window_factory_mock, CreateGlfwWindow(::testing::_))
         .WillOnce(::testing::Return(std::unique_ptr<MockWindow>(window_mock)));
 
     EXPECT_CALL(*graphics_factory_mock, CreateGraphicsDevice(::testing::_, ::testing::_))
@@ -125,10 +156,29 @@ TEST_F(EngineCoreTest, InitializationCreatesBackends)
     Piece::Core::EngineCore engine_core;
 }
 
+TEST_F(EngineCoreTest, EngineCore_Constructor_FailsIfWindowFactoryMissing)
+{
+    // Do NOT set the WindowFactory in ServiceLocator
+    Piece::Core::ServiceLocator::Get().SetWindowFactory(nullptr); // Ensure it's explicitly not set
+
+    // Expect that creating EngineCore will throw an exception
+    EXPECT_THROW(
+        {
+            try {
+                Piece::Core::EngineCore engine_core;
+            } catch (const std::runtime_error& e) {
+                EXPECT_STREQ("WindowFactory is not set in ServiceLocator.", e.what());
+                throw;
+            }
+        },
+        std::runtime_error
+    );
+}
+
 TEST_F(EngineCoreTest, UpdateAndRenderCallsBackendMethods)
 {
     // Set expectations for factory calls during initialization
-    EXPECT_CALL(*window_factory_mock, CreateWindow(::testing::_))
+    EXPECT_CALL(*window_factory_mock, CreateGlfwWindow(::testing::_))
         .WillOnce(::testing::Return(std::unique_ptr<MockWindow>(window_mock)));
     EXPECT_CALL(*graphics_factory_mock, CreateGraphicsDevice(::testing::_, ::testing::_))
         .WillOnce(::testing::Return(std::unique_ptr<MockGraphicsDevice>(graphics_mock)));
