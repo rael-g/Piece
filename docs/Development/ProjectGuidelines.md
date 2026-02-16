@@ -233,12 +233,32 @@ Implicit ownership assumptions are forbidden.
 
 ---
 
-## Error handling
+## Error handling strategy (C++ core)
 
-* Errors MUST be explicit
-* Avoid hidden control flow
+Error handling in the C++ core MUST follow a deterministic, zero-overhead model.
 
-> **TODO:** A consistent error handling strategy for the C++ core has not been established yet. A clear strategy (e.g., using exceptions, error codes, or a result type like `std::expected`) should be defined and consistently applied.
+The engine adopts a Result-based error handling approach:
+
+*   Recoverable errors MUST be represented using a `Result<T>` (or equivalent) type.
+*   Exceptions MUST NOT be used for control flow or recoverable failures.
+*   Exceptions MUST NOT cross module or ABI boundaries.
+
+### Error classification
+
+Errors are strictly divided into three categories:
+
+1.  **Recoverable errors**
+    *   Represented via `Result<T>`.
+    *   Explicitly handled by the caller.
+    *   Typical examples: I/O failures, resource creation failures, invalid external data.
+
+2.  **Programming errors**
+    *   Represented via assertions.
+    *   Indicate contract violations or invalid internal states.
+    *   Typical examples: invalid arguments, invariant violations, impossible states.
+
+3.  **Fatal errors**
+    *   Represented via `fail` (presumably a global function or macro that terminates the application).
 
 
 ---
