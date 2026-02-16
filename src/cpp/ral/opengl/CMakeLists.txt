@@ -25,6 +25,7 @@ target_link_libraries(ral_opengl PRIVATE
     ral
     wal
     OpenGL::GL
+    piece_core
 )
 
 target_compile_definitions(ral_opengl PRIVATE

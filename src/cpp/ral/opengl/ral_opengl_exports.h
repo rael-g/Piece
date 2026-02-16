@@ -1,18 +1,24 @@
-#ifndef RAL_OPENGL_RAL_OPENGL_EXPORTS_H_
-#define RAL_OPENGL_RAL_OPENGL_EXPORTS_H_
+#ifndef PIECE_RAL_OPENGL_EXPORTS_H_
+#define PIECE_RAL_OPENGL_EXPORTS_H_
 
-#ifdef _WIN32
-#ifdef RAL_OPENGL_BUILD_DLL
-#define RAL_OPENGL_API __declspec(dllexport)
-#else
-#define RAL_OPENGL_API __declspec(dllimport)
-#endif
-#else // Non-Windows platforms
-#ifdef RAL_OPENGL_BUILD_DLL
-#define RAL_OPENGL_API __attribute__((visibility("default")))
-#else
-#define RAL_OPENGL_API
-#endif
-#endif
+#include <ral/igraphics_device_factory.h>
+#include <ral/native_graphics_options.h>
 
-#endif // RAL_OPENGL_RAL_OPENGL_EXPORTS_H_
+extern "C"
+{
+    /**
+     * @brief Creates an instance of OpenGLGraphicsDeviceFactory.
+     * @param options Optional: Configuration options for the graphics device.
+     * @return A pointer to the created IGraphicsDeviceFactory instance.
+     */
+    __declspec(dllexport) Piece::RAL::IGraphicsDeviceFactory *CreateOpenGLGraphicsDeviceFactory(
+        const Piece::RAL::NativeGraphicsOptions *options);
+
+    /**
+     * @brief Destroys an instance of IGraphicsDeviceFactory.
+     * @param factory A pointer to the IGraphicsDeviceFactory instance to destroy.
+     */
+    __declspec(dllexport) void DestroyOpenGLGraphicsDeviceFactory(Piece::RAL::IGraphicsDeviceFactory *factory);
+}
+
+#endif // PIECE_RAL_OPENGL_EXPORTS_H_

@@ -1,20 +1,23 @@
 #ifndef RAL_OPENGL_OPENGL_GRAPHICS_DEVICE_FACTORY_H_
 #define RAL_OPENGL_OPENGL_GRAPHICS_DEVICE_FACTORY_H_
 
-#include "opengl_graphics_device.h"       // Assuming this is needed here
-#include <ral/igraphics_device_factory.h> // Corrected include
+#include <ral/igraphics_device_factory.h>
+#include <ral/native_graphics_options.h>
+#include <wal/iwindow.h>
 
 namespace Piece::RAL
 {
-class OpenGLGraphicsDeviceFactory : public Piece::RAL::IGraphicsDeviceFactory
-{ // Corrected base class
+class OpenGLGraphicsDeviceFactory : public IGraphicsDeviceFactory
+{
   public:
-    OpenGLGraphicsDeviceFactory();
-    ~OpenGLGraphicsDeviceFactory() override;
+    explicit OpenGLGraphicsDeviceFactory(const NativeGraphicsOptions *options);
+    ~OpenGLGraphicsDeviceFactory() override = default;
 
-    // IGraphicsDeviceFactory interface
-    std::unique_ptr<RAL::IGraphicsDevice> CreateGraphicsDevice(WAL::IWindow *window,
-                                                               const NativeGraphicsOptions *options) override;
+    std::unique_ptr<IGraphicsDevice> CreateGraphicsDevice(WAL::IWindow *window,
+                                                          const NativeGraphicsOptions *options) override;
+
+  private:
+    NativeGraphicsOptions options_;
 };
 } // namespace Piece::RAL
 
