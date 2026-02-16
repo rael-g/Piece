@@ -5,21 +5,27 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq; // Added for LINQ operations
 using Tomlyn; // Added for Tomlyn.TomlTable
+using Microsoft.Extensions.Logging; // Added for logging
 
 namespace Piece.ProjectManagement;
 
 public class ProjectManager : IProjectManager
 {
-    // Placeholder for actual asset and scene services
-    private readonly IProjectAssetService _assetService; // To be properly injected
-    private readonly IProjectSceneService _sceneService; // To be properly injected
-    private readonly IProjectBuildService _buildService; // To be properly injected
+    private readonly IProjectAssetService _assetService;
+    private readonly IProjectSceneService _sceneService;
+    private readonly IProjectBuildService _buildService;
+    private readonly ILogger<ProjectManager> _logger;
 
-    public ProjectManager(IProjectAssetService assetService, IProjectSceneService sceneService, IProjectBuildService buildService)
+    public ProjectManager(
+        IProjectAssetService assetService,
+        IProjectSceneService sceneService,
+        IProjectBuildService buildService,
+        ILogger<ProjectManager> logger)
     {
         _assetService = assetService;
         _sceneService = sceneService;
         _buildService = buildService;
+        _logger = logger;
     }
 
     /// <summary>
@@ -28,6 +34,7 @@ public class ProjectManager : IProjectManager
     /// <returns>A collection of ProjectTemplate objects.</returns>
     public IEnumerable<ProjectTemplate> ListTemplates()
     {
+        _logger.LogInformation("Listing available project templates.");
         // For now, return a hardcoded list. In a real scenario, this would involve
         // parsing 'dotnet new --list' output or discovering custom templates.
         return new List<ProjectTemplate>
@@ -51,24 +58,26 @@ public class ProjectManager : IProjectManager
         // Ensure path is absolute and create directory if it doesn't exist
         var projectRootPath = System.IO.Path.Combine(path, name);
         if (Directory.Exists(projectRootPath))
+        {
+            _logger.LogError("Project directory already exists at {ProjectRootPath}.", projectRootPath);
             throw new InvalidOperationException($"Project directory already exists at {projectRootPath}.");
+        }
         
         // Find the selected template
         var template = ListTemplates().FirstOrDefault(t => t.ShortName.Equals(templateName, StringComparison.OrdinalIgnoreCase));
         if (template == null)
         {
+            _logger.LogError("Template '{TemplateName}' not found.", templateName);
             throw new ArgumentException($"Template '{templateName}' not found.", nameof(templateName));
         }
 
-        Console.WriteLine($"Scaffolding project '{name}' at '{projectRootPath}' using template '{templateName}'...");
+        _logger.LogInformation("Scaffolding project '{ProjectName}' at '{ProjectRootPath}' using template '{TemplateName}'...", name, projectRootPath, templateName);
         
         // 2. Leverage dotnet CLI for scaffolding
         if (template.IsPieceEngineTemplate)
         {
-            // For custom Piece Engine templates, we create the root directory
-            // and add specific Piece Engine project structure later if needed.
+            _logger.LogInformation("Applying custom Piece Engine template for '{TemplateName}'.", templateName);
             Directory.CreateDirectory(projectRootPath);
-            // Example: Create default Assets and Scripts directories
             Directory.CreateDirectory(System.IO.Path.Combine(projectRootPath, "Assets"));
             Directory.CreateDirectory(System.IO.Path.Combine(projectRootPath, "Scripts"));
             // ... more specific Piece Engine structure like default scenes, config files etc.
@@ -76,7 +85,7 @@ public class ProjectManager : IProjectManager
         }
         else
         {
-            // Use dotnet new for standard templates
+            _logger.LogInformation("Using dotnet new for standard template '{TemplateName}'.", templateName);
             var startInfo = new ProcessStartInfo("dotnet", $"new {template.ShortName} -n {name} -o \"{projectRootPath}\"")
             {
                 RedirectStandardOutput = true,
@@ -87,7 +96,11 @@ public class ProjectManager : IProjectManager
 
             using (var process = Process.Start(startInfo))
             {
-                if (process == null) throw new InvalidOperationException("Failed to start dotnet process.");
+                if (process == null)
+                {
+                    _logger.LogError("Failed to start dotnet process for template '{TemplateName}'.", templateName);
+                    throw new InvalidOperationException("Failed to start dotnet process.");
+                }
                 
                 string output = await process.StandardOutput.ReadToEndAsync();
                 string error = await process.StandardError.ReadToEndAsync();
@@ -95,11 +108,10 @@ public class ProjectManager : IProjectManager
 
                 if (process.ExitCode != 0)
                 {
-                    Console.WriteLine($"dotnet new output: {output}");
-                    Console.WriteLine($"dotnet new error: {error}");
+                    _logger.LogError("dotnet new failed with exit code {ExitCode}. Output: {Output}, Error: {Error}", process.ExitCode, output, error);
                     throw new InvalidOperationException($"dotnet new failed with exit code {process.ExitCode}.");
                 }
-                Console.WriteLine(output);
+                _logger.LogInformation("dotnet new output: {Output}", output);
             }
         }
         
@@ -115,7 +127,7 @@ public class ProjectManager : IProjectManager
         };
         project.Save(); // Save piece_project.toml
 
-        Console.WriteLine($"Project '{name}' created successfully at {projectRootPath}.");
+        _logger.LogInformation("Project '{ProjectName}' created successfully at {ProjectRootPath}.", name, projectRootPath);
         return project;
     }
 
@@ -128,17 +140,17 @@ public class ProjectManager : IProjectManager
         var projectRootPath = System.IO.Path.GetDirectoryName(projectFilePath);
         if (projectRootPath == null || !Directory.Exists(projectRootPath))
         {
-            // Log error: Invalid project path
+            _logger.LogError("Invalid project path or directory not found: {ProjectRootPath}.", projectRootPath);
             return null;
         }
 
         var project = PieceProject.Load(projectRootPath);
         if (project == null)
         {
-            // Log error: Failed to load project configuration
+            _logger.LogError("Failed to load project configuration from {ProjectRootPath}.", projectRootPath);
             return null;
         }
-        Console.WriteLine($"Project '{project.Name}' loaded successfully from {project.Path}.");
+        _logger.LogInformation("Project '{ProjectName}' loaded successfully from {ProjectRootPath}.", project.Name, project.Path);
         return project;
     }
 
@@ -147,10 +159,13 @@ public class ProjectManager : IProjectManager
         if (project == null)
             throw new ArgumentNullException(nameof(project));
         if (string.IsNullOrWhiteSpace(project.Path))
+        {
+            _logger.LogError("Project path is not set for project '{ProjectName}', cannot save.", project.Name);
             throw new InvalidOperationException("Project path is not set, cannot save.");
+        }
 
         project.Save();
-        Console.WriteLine($"Project '{project.Name}' saved successfully to {project.Path}.");
+        _logger.LogInformation("Project '{ProjectName}' saved successfully to {ProjectRootPath}.", project.Name, project.Path);
     }
 
     public IProjectAssetService GetAssetService(PieceProject project)

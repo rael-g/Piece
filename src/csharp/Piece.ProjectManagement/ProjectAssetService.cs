@@ -3,30 +3,40 @@ using System.IO;
 using System.Threading.Tasks;
 using System;
 using System.Linq; // For Path.GetFileName
+using Piece.Framework.Abstractions; // Added for IAssetManager
+using Microsoft.Extensions.Logging; // Added for logging
 
 namespace Piece.ProjectManagement;
 
 public class ProjectAssetService : IProjectAssetService
 {
-    // Placeholder for Piece.Framework.AssetManager
-    // This would ideally be an interface (e.g., IAssetManager) from Piece.Framework.Abstractions
-    // For now, we simulate asset management logic.
-    // private readonly Piece.Framework.IAssetManager _frameworkAssetManager; 
+    private readonly IAssetManager _frameworkAssetManager; 
+    private readonly ILogger<ProjectAssetService> _logger;
 
-    // public ProjectAssetService(Piece.Framework.IAssetManager frameworkAssetManager)
-    // {
-    //     _frameworkAssetManager = frameworkAssetManager;
-    // }
+    public ProjectAssetService(IAssetManager frameworkAssetManager, ILogger<ProjectAssetService> logger)
+    {
+        _frameworkAssetManager = frameworkAssetManager;
+        _logger = logger;
+    }
 
     public async Task<bool> ImportAsset(PieceProject project, string sourceFilePath, string assetType)
     {
         if (project == null) throw new ArgumentNullException(nameof(project));
         if (string.IsNullOrWhiteSpace(sourceFilePath))
+        {
+            _logger.LogError("Source file path cannot be empty for asset import.");
             throw new ArgumentException("Source file path cannot be empty.", nameof(sourceFilePath));
+        }
         if (!File.Exists(sourceFilePath))
+        {
+            _logger.LogError("Source asset file not found at '{SourceFilePath}'.", sourceFilePath);
             throw new FileNotFoundException($"Source asset file not found at '{sourceFilePath}'.");
+        }
         if (string.IsNullOrWhiteSpace(assetType))
+        {
+            _logger.LogError("Asset type cannot be empty for asset import.");
             throw new ArgumentException("Asset type cannot be empty.", nameof(assetType));
+        }
 
         var assetDirectory = Path.Combine(project.Path, "Assets"); // Default asset folder
         Directory.CreateDirectory(assetDirectory); // Ensure asset directory exists
@@ -38,13 +48,13 @@ public class ProjectAssetService : IProjectAssetService
         {
             File.Copy(sourceFilePath, destinationPath, true); // Overwrite if exists
             // Here, we would also typically register the asset with _frameworkAssetManager
-            // For now, simple file copy suffices.
-            Console.WriteLine($"Asset '{fileName}' (Type: {assetType}) imported successfully to '{destinationPath}'.");
+            // await _frameworkAssetManager.RegisterAsset(destinationPath, assetType); // Example call
+            _logger.LogInformation("Asset '{FileName}' (Type: {AssetType}) imported successfully to '{DestinationPath}'.", fileName, assetType, destinationPath);
             return true;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error importing asset '{fileName}': {ex.Message}"); // Temporary logging
+            _logger.LogError(ex, "Error importing asset '{FileName}': {ErrorMessage}", fileName, ex.Message);
             return false;
         }
     }
@@ -56,16 +66,20 @@ public class ProjectAssetService : IProjectAssetService
         var assetDirectory = Path.Combine(project.Path, "Assets");
         if (!Directory.Exists(assetDirectory))
         {
+            _logger.LogInformation("Asset directory '{AssetDirectory}' does not exist for project '{ProjectName}'. Returning empty list.", assetDirectory, project.Name);
             return Enumerable.Empty<string>();
         }
 
         try
         {
-            return await Task.Run(() => Directory.GetFiles(assetDirectory).Select(Path.GetFileName).ToList());
+            // return await _frameworkAssetManager.ListAvailableAssets(assetDirectory); // Example call
+            var assets = await Task.Run(() => Directory.GetFiles(assetDirectory).Select(Path.GetFileName).ToList());
+            _logger.LogInformation("Listed {AssetCount} assets in '{AssetDirectory}'.", assets.Count, assetDirectory);
+            return assets!; // Fix CS8619
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error listing assets in '{assetDirectory}': {ex.Message}"); // Temporary logging
+            _logger.LogError(ex, "Error listing assets in '{AssetDirectory}': {ErrorMessage}", assetDirectory, ex.Message);
             return Enumerable.Empty<string>();
         }
     }
@@ -74,24 +88,29 @@ public class ProjectAssetService : IProjectAssetService
     {
         if (project == null) throw new ArgumentNullException(nameof(project));
         if (string.IsNullOrWhiteSpace(assetPath))
+        {
+            _logger.LogError("Asset path cannot be empty for asset deletion.");
             throw new ArgumentException("Asset path cannot be empty.", nameof(assetPath));
+        }
 
         var fullAssetPath = Path.Combine(project.Path, "Assets", Path.GetFileName(assetPath));
         if (!File.Exists(fullAssetPath))
         {
-            Console.WriteLine($"Warning: Asset file not found at '{fullAssetPath}', cannot delete.");
+            _logger.LogWarning("Asset file not found at '{FullAssetPath}', cannot delete.", fullAssetPath);
             return false;
         }
 
         try
         {
             File.Delete(fullAssetPath);
-            Console.WriteLine($"Asset '{Path.GetFileName(assetPath)}' deleted successfully from '{fullAssetPath}'.");
+            // Here, we would also typically unregister the asset with _frameworkAssetManager
+            // await _frameworkAssetManager.UnregisterAsset(fullAssetPath); // Example call
+            _logger.LogInformation("Asset '{FileName}' deleted successfully from '{FullAssetPath}'.", Path.GetFileName(assetPath), fullAssetPath);
             return true;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error deleting asset '{Path.GetFileName(assetPath)}': {ex.Message}"); // Temporary logging
+            _logger.LogError(ex, "Error deleting asset '{FileName}': {ErrorMessage}", Path.GetFileName(assetPath), ex.Message);
             return false;
         }
     }

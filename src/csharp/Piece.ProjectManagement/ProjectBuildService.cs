@@ -2,22 +2,28 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System;
+using System.Linq; // For FirstOrDefault
+using Microsoft.Extensions.Logging; // Added for logging
 
 namespace Piece.ProjectManagement;
 
 public class ProjectBuildService : IProjectBuildService
 {
+    private readonly ILogger<ProjectBuildService> _logger;
+
+    public ProjectBuildService(ILogger<ProjectBuildService> logger)
+    {
+        _logger = logger;
+    }
+
     public async Task<bool> BuildProject(PieceProject project, string configuration)
     {
         if (project == null) throw new ArgumentNullException(nameof(project));
         if (string.IsNullOrWhiteSpace(configuration))
             throw new ArgumentException("Configuration cannot be empty.", nameof(configuration));
 
-        Console.WriteLine($"Building project '{project.Name}' ({configuration})...");
+        _logger.LogInformation("Building project '{ProjectName}' ({Configuration})...", project.Name, configuration);
 
-        // Assuming the main project file is directly in the project root for now,
-        // or we need a way to discover it (e.g., .sln or .csproj file).
-        // For simplicity, let's assume project.Path is the directory containing the .csproj or .sln
         var projectFile = Directory.GetFiles(project.Path, "*.csproj").FirstOrDefault();
         if (projectFile == null)
         {
@@ -26,7 +32,7 @@ public class ProjectBuildService : IProjectBuildService
 
         if (projectFile == null)
         {
-            Console.WriteLine($"Error: No .csproj or .sln file found in project path '{project.Path}'.");
+            _logger.LogError("No .csproj or .sln file found in project path '{ProjectPath}'.", project.Path);
             return false;
         }
 
@@ -43,7 +49,7 @@ public class ProjectBuildService : IProjectBuildService
         {
             if (process == null)
             {
-                Console.WriteLine("Error: Failed to start dotnet build process.");
+                _logger.LogError("Failed to start dotnet build process for project '{ProjectName}'.", project.Name);
                 return false;
             }
 
@@ -51,19 +57,19 @@ public class ProjectBuildService : IProjectBuildService
             string error = await process.StandardError.ReadToEndAsync();
             await process.WaitForExitAsync();
 
-            Console.WriteLine(output);
+            _logger.LogInformation("dotnet build output: {Output}", output);
             if (!string.IsNullOrWhiteSpace(error))
             {
-                Console.WriteLine($"dotnet build error: {error}");
+                _logger.LogError("dotnet build error: {Error}", error);
             }
 
             if (process.ExitCode != 0)
             {
-                Console.WriteLine($"dotnet build failed with exit code {process.ExitCode}.");
+                _logger.LogError("dotnet build failed with exit code {ExitCode} for project '{ProjectName}'.", process.ExitCode, project.Name);
                 return false;
             }
             
-            Console.WriteLine($"Project '{project.Name}' built successfully ({configuration}).");
+            _logger.LogInformation("Project '{ProjectName}' built successfully ({Configuration}).", project.Name, configuration);
             return true;
         }
     }
@@ -74,7 +80,7 @@ public class ProjectBuildService : IProjectBuildService
         if (string.IsNullOrWhiteSpace(configuration))
             throw new ArgumentException("Configuration cannot be empty.", nameof(configuration));
 
-        Console.WriteLine($"Cleaning project '{project.Name}' ({configuration})...");
+        _logger.LogInformation("Cleaning project '{ProjectName}' ({Configuration})...", project.Name, configuration);
 
         var projectFile = Directory.GetFiles(project.Path, "*.csproj").FirstOrDefault();
         if (projectFile == null)
@@ -84,7 +90,7 @@ public class ProjectBuildService : IProjectBuildService
 
         if (projectFile == null)
         {
-            Console.WriteLine($"Error: No .csproj or .sln file found in project path '{project.Path}'.");
+            _logger.LogError("No .csproj or .sln file found in project path '{ProjectPath}'.", project.Path);
             return false;
         }
 
@@ -101,7 +107,7 @@ public class ProjectBuildService : IProjectBuildService
         {
             if (process == null)
             {
-                Console.WriteLine("Error: Failed to start dotnet clean process.");
+                _logger.LogError("Failed to start dotnet clean process for project '{ProjectName}'.", project.Name);
                 return false;
             }
 
@@ -109,19 +115,19 @@ public class ProjectBuildService : IProjectBuildService
             string error = await process.StandardError.ReadToEndAsync();
             await process.WaitForExitAsync();
 
-            Console.WriteLine(output);
+            _logger.LogInformation("dotnet clean output: {Output}", output);
             if (!string.IsNullOrWhiteSpace(error))
             {
-                Console.WriteLine($"dotnet clean error: {error}");
+                _logger.LogError("dotnet clean error: {Error}", error);
             }
 
             if (process.ExitCode != 0)
             {
-                Console.WriteLine($"dotnet clean failed with exit code {process.ExitCode}.");
+                _logger.LogError("dotnet clean failed with exit code {ExitCode} for project '{ProjectName}'.", process.ExitCode, project.Name);
                 return false;
             }
             
-            Console.WriteLine($"Project '{project.Name}' cleaned successfully ({configuration}).");
+            _logger.LogInformation("Project '{ProjectName}' cleaned successfully ({Configuration}).", project.Name, configuration);
             return true;
         }
     }
