@@ -2,6 +2,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_library(piece_core SHARED
     engine_core.cpp
+    native_exports.cpp
     core/service_locator.cpp
     core/resource_manager.cpp
     core/render_system.cpp
