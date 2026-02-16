@@ -71,9 +71,9 @@ public class PieceProjectTests : IDisposable
         Assert.True(File.Exists(filePath));
 
         var content = await File.ReadAllTextAsync(filePath);
-        Assert.Contains("Name = "TestProject"", content);
-        Assert.Contains("Path = "", content); // Path will be system-dependent temp path
-        Assert.Contains("DefaultScene = "Scene01.toml"", content);
+        Assert.Contains("Name = \"TestProject\"", content);
+        Assert.Contains("Path = \"", content); // Path will be system-dependent temp path
+        Assert.Contains("DefaultScene = \"Scene01.toml\"", content);
         Assert.Contains("[rendering]", content);
         Assert.Contains("vsync = true", content);
     }
@@ -82,14 +82,12 @@ public class PieceProjectTests : IDisposable
     public async Task Load_ReadsTomlFileCorrectly()
     {
         var filePath = Path.Combine(_testProjectPath, "piece_project.toml");
-        var tomlContent = @"
-Name = """LoadedProject"""
-Path = """/fake/path"""
-DefaultScene = """StartScene.toml"""
-
-[rendering]
-fullscreen = true
-";
+        var tomlContent = "Name = \"LoadedProject\"\n" +
+                          "Path = \"/fake/path\"\n" +
+                          "DefaultScene = \"StartScene.toml\"\n" +
+                          "\n" +
+                          "[rendering]\n" +
+                          "fullscreen = true\n";
         await File.WriteAllTextAsync(filePath, tomlContent);
 
         var loadedProject = PieceProject.Load(_testProjectPath);
