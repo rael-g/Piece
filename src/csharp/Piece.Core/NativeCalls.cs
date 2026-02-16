@@ -78,4 +78,34 @@ public static partial class NativeCalls
     [LibraryImport("piece_core.dll", EntryPoint = "EngineRender")] // Added
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     public static partial void EngineRender(IntPtr engineCorePtr); // Added
+
+    // Input Methods
+    [LibraryImport("piece_core.dll", EntryPoint = "EngineIsKeyPressed")]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    public static partial bool EngineIsKeyPressed(IntPtr engineCorePtr, KeyCode keyCode);
+
+    [LibraryImport("piece_core.dll", EntryPoint = "EngineIsMouseButtonPressed")]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    public static partial bool EngineIsMouseButtonPressed(IntPtr engineCorePtr, KeyCode mouseButton);
+
+    [LibraryImport("piece_core.dll", EntryPoint = "EngineGetMouseX")]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    public static partial float EngineGetMouseX(IntPtr engineCorePtr);
+
+    [LibraryImport("piece_core.dll", EntryPoint = "EngineGetMouseY")]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    public static partial float EngineGetMouseY(IntPtr engineCorePtr);
+
+    // Resource Loading Methods
+    [LibraryImport("piece_core.dll", EntryPoint = "EngineLoadMesh")]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    public static partial IntPtr EngineLoadMesh(IntPtr engineCorePtr, [MarshalAs(UnmanagedType.LPUTF8Str)] string path);
+
+    [LibraryImport("piece_core.dll", EntryPoint = "EngineLoadMaterial")]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    public static partial IntPtr EngineLoadMaterial(IntPtr engineCorePtr, [MarshalAs(UnmanagedType.LPUTF8Str)] string path);
+
+    [LibraryImport("piece_core.dll", EntryPoint = "EngineLoadTexture")]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    public static partial IntPtr EngineLoadTexture(IntPtr engineCorePtr, [MarshalAs(UnmanagedType.LPUTF8Str)] string path);
 }

@@ -1,17 +1,17 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Piece.Glfw;
+namespace Piece.MinimalPal;
 
-internal static partial class GlfwPInvoke
+internal static partial class MinimalPalPInvoke
 {
-    private const string NativeLib = "wal_glfw";
+    private const string NativeLib = "pal_minimal"; // Name of the native minimal PAL DLL
 
-    [LibraryImport(NativeLib, EntryPoint = "CreateGlfwWindowFactory")]
+    [LibraryImport(NativeLib, EntryPoint = "CreateMinimalPhysicsWorldFactory")]
     [UnmanagedCallConv(CallConvs = new[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
     public static partial IntPtr CreateFactory(IntPtr optionsPtr);
 
-    [LibraryImport(NativeLib, EntryPoint = "DestroyGlfwWindowFactory")]
+    [LibraryImport(NativeLib, EntryPoint = "DestroyMinimalPhysicsWorldFactory")]
     [UnmanagedCallConv(CallConvs = new[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
     public static partial void DestroyFactory(IntPtr factoryPtr);
 }
