@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using Tomlyn;
 using Tomlyn.Model;
+using Tomlyn.Parsing; // For TomlModelOptions
 
 namespace Piece.ProjectManagement;
 
@@ -15,6 +16,12 @@ public class PieceProject
 
     // Use a TomlTable for flexible engine configurations
     public TomlTable EngineConfig { get; set; } = new TomlTable();
+
+    // Custom TomlModelOptions to preserve PascalCase
+    private static readonly TomlModelOptions TomlOptions = new TomlModelOptions
+    {
+        ConvertPropertyName = name => name // Keep property names as-is (PascalCase)
+    };
 
     /// <summary>
     /// Loads a PieceProject from a specified project path.
@@ -33,7 +40,7 @@ public class PieceProject
         try
         {
             var tomlString = File.ReadAllText(filePath);
-            var model = Toml.ToModel<PieceProject>(tomlString);
+            var model = Toml.ToModel<PieceProject>(tomlString, TomlOptions); // Use custom options
             model.Path = projectPath; // Set the project path
             return model;
         }
@@ -59,13 +66,14 @@ public class PieceProject
         var filePath = System.IO.Path.Combine(Path, FILENAME);
         try
         {
-            var tomlString = Toml.FromModel(this);
+            var tomlString = Toml.FromModel(this, TomlOptions); // Use custom options
             File.WriteAllText(filePath, tomlString);
         }
         catch (Exception ex)
         {
             // Log error: Failed to save TOML
             Console.WriteLine($"Error saving project to {filePath}: {ex.Message}"); // Temporary logging
+            return;
         }
     }
 }
