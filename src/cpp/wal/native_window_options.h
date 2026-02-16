@@ -6,6 +6,7 @@
 #define WAL_NATIVE_WINDOW_OPTIONS_H
 
 #include <cstdint>
+#include <string> // Required for std::string
 
 namespace Piece::WAL
 {
@@ -22,7 +23,7 @@ struct NativeWindowOptions
     /** @brief Flags for window properties (e.g., resizable, fullscreen). */
     uint32_t window_flags;
     /** @brief The title of the window. */
-    const char *window_title;
+    std::string window_title; // Changed to std::string
 };
 
 } // namespace Piece::WAL

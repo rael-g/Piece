@@ -5,17 +5,15 @@
 #ifndef PIECE_WAL_GLFW_WINDOW_H_
 #define PIECE_WAL_GLFW_WINDOW_H_
 
+#include "wal_glfw_exports.h" // Added for WAL_GLFW_API
 #include <GLFW/glfw3.h>
 #include <wal/iwindow.h>
+
+#include <memory>
 
 namespace Piece::WAL
 {
 
-#include "wal_glfw_exports.h"
-
-/**
- * @brief A GLFW implementation of the IWindow interface.
- */
 class WAL_GLFW_API GlfwWindow : public IWindow
 {
   public:
@@ -30,12 +28,10 @@ class WAL_GLFW_API GlfwWindow : public IWindow
 
     /**
      * @brief Initializes the GLFW window.
-     * @param width The width of the window.
-     * @param height The height of the window.
-     * @param title The title of the window.
+     * @param options Configuration options for the window.
      * @return True if initialization was successful, false otherwise.
      */
-    bool Init(int width, int height, const std::string &title) override;
+    void Init(const NativeWindowOptions &options) override;
     /**
      * @brief Polls for GLFW events.
      */

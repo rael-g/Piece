@@ -23,17 +23,17 @@ class GlfwWindowTest : public ::testing::Test
 TEST_F(GlfwWindowTest, CanCreateWindow)
 {
     Piece::WAL::GlfwWindow window;
-    bool success = window.Init(1280, 720, "Test Window");
-    ASSERT_TRUE(success);
+    Piece::WAL::NativeWindowOptions options = {1280, 720, 0, std::string("Test Window")};
+    window.Init(options);
     ASSERT_NE(window.GetNativeWindow(), nullptr);
     ASSERT_FALSE(window.ShouldClose());
 }
 
 TEST_F(GlfwWindowTest, FactoryCreatesWindow)
 {
-    Piece::WAL::NativeWindowOptions options = {800, 600, 0, "Factory Test"};
-    Piece::WAL::GlfwWindowFactory factory(&options);
-    auto window = factory.CreateWindow(&options);
+    Piece::WAL::NativeWindowOptions options = {800, 600, 0, std::string("Factory Test")};
+    Piece::WAL::GlfwWindowFactory factory(options);   // Corrected constructor
+    auto window = factory.CreateGlfwWindow(&options); // Corrected method name
 
     ASSERT_NE(window, nullptr);
     ASSERT_NE(window->GetNativeWindow(), nullptr);

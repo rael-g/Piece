@@ -5,6 +5,7 @@
 #ifndef PIECE_WAL_IWINDOW_H_
 #define PIECE_WAL_IWINDOW_H_
 
+#include "native_window_options.h" // For NativeWindowOptions
 #include <string>
 #include <utility>
 
@@ -168,12 +169,9 @@ class IWindow
 
     /**
      * @brief Initializes the window.
-     * @param width The width of the window.
-     * @param height The height of the window.
-     * @param title The title of the window.
-     * @return True if initialization was successful, false otherwise.
+     * @param options Configuration options for the window.
      */
-    virtual bool Init(int width, int height, const std::string &title) = 0;
+    virtual void Init(const Piece::WAL::NativeWindowOptions &options) = 0;
 
     /**
      * @brief Polls for window events, such as input or close requests.
@@ -199,13 +197,13 @@ class IWindow
      * @param keycode The key to check.
      * @return True if the key is pressed, false otherwise.
      */
-    [[nodiscard]] virtual bool IsKeyPressed(KeyCode keycode) const = 0;
+    [[nodiscard]] virtual bool IsKeyPressed(Piece::WAL::KeyCode keycode) const = 0;
     /**
      * @brief Checks if a specific mouse button is currently pressed.
      * @param button The mouse button to check.
      * @return True if the button is pressed, false otherwise.
      */
-    [[nodiscard]] virtual bool IsMouseButtonPressed(KeyCode button) const = 0;
+    [[nodiscard]] virtual bool IsMouseButtonPressed(Piece::WAL::KeyCode button) const = 0;
     /**
      * @brief Gets the current position of the mouse cursor.
      * @return A pair of floats representing the x and y coordinates of the mouse.

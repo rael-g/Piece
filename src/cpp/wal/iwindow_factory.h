@@ -29,7 +29,7 @@ class IWindowFactory
      * @param options Configuration options for the window.
      * @return A unique_ptr to the newly created IWindow instance.
      */
-    virtual std::unique_ptr<WAL::IWindow> CreateWindow(const NativeWindowOptions *options) = 0;
+    virtual std::unique_ptr<WAL::IWindow> CreateGlfwWindow(const NativeWindowOptions *options) = 0;
 };
 
 } // namespace Piece::WAL
