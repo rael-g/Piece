@@ -9,10 +9,7 @@ MinimalPhysicsMaterial::MinimalPhysicsMaterial(float friction, float restitution
     PIECE_INFO("MinimalPhysicsMaterial created with friction {0} and restitution {1}", friction, restitution);
 }
 
-MinimalPhysicsMaterial::~MinimalPhysicsMaterial()
-{
-    PIECE_INFO("MinimalPhysicsMaterial destroyed.");
-}
+
 
 float MinimalPhysicsMaterial::GetFriction() const
 {

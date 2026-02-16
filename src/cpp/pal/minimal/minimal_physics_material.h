@@ -2,7 +2,7 @@
 #define PAL_MINIMAL_MINIMAL_PHYSICS_MATERIAL_H_
 
 #include <iostream> // For stub logging
-#include <pal/iphysics_material.h>
+#include "../iphysics_material.h"
 
 namespace Piece::PAL
 {

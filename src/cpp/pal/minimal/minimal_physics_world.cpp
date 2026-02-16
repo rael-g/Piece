@@ -12,10 +12,7 @@ MinimalPhysicsWorld::MinimalPhysicsWorld(const NativePhysicsOptions &options)
     PIECE_INFO("MinimalPhysicsWorld created.");
 }
 
-MinimalPhysicsWorld::~MinimalPhysicsWorld()
-{
-    PIECE_INFO("MinimalPhysicsWorld destroyed.");
-}
+
 
 void MinimalPhysicsWorld::Init(const NativePhysicsOptions &options)
 {

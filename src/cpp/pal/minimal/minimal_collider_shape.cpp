@@ -8,8 +8,5 @@ MinimalColliderShape::MinimalColliderShape()
     PIECE_INFO("MinimalColliderShape created.");
 }
 
-MinimalColliderShape::~MinimalColliderShape()
-{
-    PIECE_INFO("MinimalColliderShape destroyed.");
-}
+
 } // namespace Piece::PAL

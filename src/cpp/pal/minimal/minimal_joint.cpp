@@ -8,10 +8,7 @@ MinimalJoint::MinimalJoint()
     PIECE_INFO("MinimalJoint created.");
 }
 
-MinimalJoint::~MinimalJoint()
-{
-    PIECE_INFO("MinimalJoint destroyed.");
-}
+
 
 void MinimalJoint::SetBodies(IPhysicsBody *body1, IPhysicsBody *body2)
 {

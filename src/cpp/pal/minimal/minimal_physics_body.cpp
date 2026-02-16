@@ -21,10 +21,7 @@ MinimalPhysicsBody::MinimalPhysicsBody(const RigidBodyCreationInfo &info) : info
                position_[1], position_[2]);
 }
 
-MinimalPhysicsBody::~MinimalPhysicsBody()
-{
-    PIECE_INFO("MinimalPhysicsBody destroyed.");
-}
+
 
 void MinimalPhysicsBody::SetShape(IColliderShape *shape)
 {

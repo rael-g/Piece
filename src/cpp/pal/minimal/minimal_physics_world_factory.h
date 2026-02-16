@@ -1,8 +1,8 @@
 #ifndef PAL_MINIMAL_MINIMAL_PHYSICS_WORLD_FACTORY_H_
 #define PAL_MINIMAL_MINIMAL_PHYSICS_WORLD_FACTORY_H_
 
-#include <pal/iphysics_world_factory.h>
-#include <pal/native_physics_options.h>
+#include "../iphysics_world_factory.h"
+#include "../native_physics_options.h"
 
 namespace Piece::PAL
 {

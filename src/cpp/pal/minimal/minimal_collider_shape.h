@@ -2,7 +2,7 @@
 #define PAL_MINIMAL_MINIMAL_COLLIDER_SHAPE_H_
 
 #include <iostream> // For stub logging
-#include <pal/icollider_shape.h>
+#include "../icollider_shape.h"
 
 namespace Piece::PAL
 {

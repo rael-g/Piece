@@ -1,8 +1,8 @@
 #ifndef PAL_MINIMAL_MINIMAL_PHYSICS_BODY_H_
 #define PAL_MINIMAL_MINIMAL_PHYSICS_BODY_H_
 
-#include <pal/iphysics_body.h>
-#include <pal/pal_types.h>
+#include "../iphysics_body.h"
+#include "../pal_types.h"
 
 namespace Piece::PAL
 {

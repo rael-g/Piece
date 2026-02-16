@@ -2,9 +2,9 @@
 #define PAL_MINIMAL_MINIMAL_PHYSICS_WORLD_H_
 
 #include <memory>
-#include <pal/iphysics_world.h>
-#include <pal/native_physics_options.h>
-#include <pal/pal_types.h>
+#include "../iphysics_world.h"
+#include "../native_physics_options.h"
+#include "../pal_types.h"
 
 namespace Piece::PAL
 {

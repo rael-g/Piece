@@ -2,7 +2,7 @@
 #define PAL_MINIMAL_MINIMAL_JOINT_H_
 
 #include <iostream> // For stub logging
-#include <pal/ijoint.h>
+#include "../ijoint.h"
 
 namespace Piece::PAL
 {
