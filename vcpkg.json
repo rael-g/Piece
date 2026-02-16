@@ -4,6 +4,7 @@
     "glm",
     "fmt",
     "gtest",
-    "spdlog"
+    "spdlog",
+    "glad"
   ]
 }
