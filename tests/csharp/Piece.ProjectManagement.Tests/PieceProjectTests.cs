@@ -97,8 +97,9 @@ public class PieceProjectTests : IDisposable
         Assert.Equal(_testProjectPath, loadedProject.Path); // Path should be overwritten by Load method
         Assert.Equal("StartScene.toml", loadedProject.DefaultScene);
         Assert.True(loadedProject.EngineConfig.ContainsKey("rendering"));
-        Assert.True(loadedProject.EngineConfig["rendering"] is Tomlyn.Model.TomlTable renderingTable);
-        Assert.Equal(true, renderingTable["fullscreen"]);
+        var renderingTable = loadedProject.EngineConfig["rendering"] as Tomlyn.Model.TomlTable;
+        Assert.NotNull(renderingTable); // Ensure it's not null before accessing
+        Assert.Equal(true, renderingTable!["fullscreen"]); // Use null-forgiving operator as it's asserted not null
     }
 
     [Fact]
