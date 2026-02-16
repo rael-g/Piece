@@ -33,6 +33,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "csharp", "csharp", "{15695F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Piece.ProjectManagement.Tests", "tests\csharp\Piece.ProjectManagement.Tests\Piece.ProjectManagement.Tests.csproj", "{18F9381F-1CF4-43CF-94A0-6D2AD0404878}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Piece.Cli", "src\csharp\Piece.Cli\Piece.Cli.csproj", "{22A2A09E-BC7B-4C2B-AA47-3A115DA7F014}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -175,6 +177,18 @@ Global
 		{18F9381F-1CF4-43CF-94A0-6D2AD0404878}.Release|x64.Build.0 = Release|Any CPU
 		{18F9381F-1CF4-43CF-94A0-6D2AD0404878}.Release|x86.ActiveCfg = Release|Any CPU
 		{18F9381F-1CF4-43CF-94A0-6D2AD0404878}.Release|x86.Build.0 = Release|Any CPU
+		{22A2A09E-BC7B-4C2B-AA47-3A115DA7F014}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22A2A09E-BC7B-4C2B-AA47-3A115DA7F014}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22A2A09E-BC7B-4C2B-AA47-3A115DA7F014}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{22A2A09E-BC7B-4C2B-AA47-3A115DA7F014}.Debug|x64.Build.0 = Debug|Any CPU
+		{22A2A09E-BC7B-4C2B-AA47-3A115DA7F014}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{22A2A09E-BC7B-4C2B-AA47-3A115DA7F014}.Debug|x86.Build.0 = Debug|Any CPU
+		{22A2A09E-BC7B-4C2B-AA47-3A115DA7F014}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22A2A09E-BC7B-4C2B-AA47-3A115DA7F014}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22A2A09E-BC7B-4C2B-AA47-3A115DA7F014}.Release|x64.ActiveCfg = Release|Any CPU
+		{22A2A09E-BC7B-4C2B-AA47-3A115DA7F014}.Release|x64.Build.0 = Release|Any CPU
+		{22A2A09E-BC7B-4C2B-AA47-3A115DA7F014}.Release|x86.ActiveCfg = Release|Any CPU
+		{22A2A09E-BC7B-4C2B-AA47-3A115DA7F014}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -189,5 +203,6 @@ Global
 		{0AC702CB-1C67-4382-8F82-3425E2E19E09} = {EE222B14-4095-D8D2-8B9B-4218DD5B4CA2}
 		{15695F5E-2B16-82CE-E41C-1B8759B646DE} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{18F9381F-1CF4-43CF-94A0-6D2AD0404878} = {15695F5E-2B16-82CE-E41C-1B8759B646DE}
+		{22A2A09E-BC7B-4C2B-AA47-3A115DA7F014} = {EE222B14-4095-D8D2-8B9B-4218DD5B4CA2}
 	EndGlobalSection
 EndGlobal
