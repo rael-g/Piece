@@ -6,8 +6,8 @@ find_package(GTest REQUIRED)
 add_executable(piece_core_core_tests
     test_service_locator.cpp
     test_engine_core.cpp
-    # test_resource_manager.cpp
-    # test_native_exports.cpp
+    test_resource_manager.cpp
+    test_native_exports.cpp
 )
 
 # Link against our engine libraries and GTest
