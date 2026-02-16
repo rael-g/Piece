@@ -1,7 +1,3 @@
-/**
- * @file iindex_buffer.h
- * @brief Defines the IIndexBuffer interface, which provides an abstraction for an index buffer.
- */
 #ifndef PIECE_RAL_INTERFACES_IINDEX_BUFFER_H_
 #define PIECE_RAL_INTERFACES_IINDEX_BUFFER_H_
 
@@ -30,6 +26,12 @@ class IIndexBuffer
      * @brief Unbinds the index buffer from the rendering pipeline.
      */
     virtual void Unbind() const = 0;
+    /**
+     * @brief Sets the data of the index buffer.
+     * @param data Pointer to the index data.
+     * @param count Number of indices.
+     */
+    virtual void SetData(const uint32_t *data, uint32_t count) = 0;
     /**
      * @brief Gets the number of indices in the buffer.
      * @return The number of indices.

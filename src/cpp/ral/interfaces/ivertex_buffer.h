@@ -1,11 +1,8 @@
-/**
- * @file ivertex_buffer.h
- * @brief Defines the IVertexBuffer interface, which provides an abstraction for a vertex buffer.
- */
 #ifndef PIECE_RAL_INTERFACES_IVERTEX_BUFFER_H_
 #define PIECE_RAL_INTERFACES_IVERTEX_BUFFER_H_
 
 #include <cstdint>
+#include <ral/ral_types.h>
 
 namespace Piece::RAL
 {
@@ -31,10 +28,21 @@ class IVertexBuffer
      */
     virtual void Unbind() const = 0;
     /**
-     * @brief Gets the number of vertices in the buffer.
-     * @return The number of vertices.
+     * @brief Sets the data of the vertex buffer.
+     * @param data Pointer to the vertex data.
+     * @param size Size of the vertex data in bytes.
      */
-    [[nodiscard]] virtual uint32_t GetCount() const = 0;
+    virtual void SetData(const void *data, uint32_t size) = 0;
+    /**
+     * @brief Gets the size of the vertex buffer in bytes.
+     * @return The size of the vertex buffer.
+     */
+    [[nodiscard]] virtual uint32_t GetSize() const = 0;
+    /**
+     * @brief Gets the layout of the vertices in the buffer.
+     * @return The vertex layout.
+     */
+    [[nodiscard]] virtual const Piece::RAL::VertexLayout &GetLayout() const = 0;
 };
 
 } // namespace Piece::RAL
