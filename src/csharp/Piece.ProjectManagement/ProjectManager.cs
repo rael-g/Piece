@@ -12,11 +12,13 @@ public class ProjectManager : IProjectManager
     // Placeholder for actual asset and scene services
     private readonly IProjectAssetService _assetService; // To be properly injected
     private readonly IProjectSceneService _sceneService; // To be properly injected
+    private readonly IProjectBuildService _buildService; // To be properly injected
 
-    public ProjectManager(IProjectAssetService assetService, IProjectSceneService sceneService)
+    public ProjectManager(IProjectAssetService assetService, IProjectSceneService sceneService, IProjectBuildService buildService)
     {
         _assetService = assetService;
         _sceneService = sceneService;
+        _buildService = buildService;
     }
 
     /// <summary>
