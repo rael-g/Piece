@@ -99,6 +99,15 @@ extern "C"
             return nullptr;
         }
         PIECE_INFO("EngineCore created successfully at {0}.", fmt::ptr(core));
+
+        // Perform full initialization
+        if (!core->Initialize())
+        {
+            PIECE_ERROR("EngineCore full initialization failed. Destroying partially created core.");
+            delete core;
+            return nullptr;
+        }
+        PIECE_INFO("EngineCore fully initialized.");
         return core;
     }
 
