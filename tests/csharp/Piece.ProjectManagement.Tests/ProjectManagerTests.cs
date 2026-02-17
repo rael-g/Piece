@@ -1,11 +1,16 @@
-using Xunit;
-using Moq;
-using System.IO;
-using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+
+using Microsoft.Extensions.Logging; // Added for ILogger
+
+using Moq;
+
 using Piece.Framework.Abstractions;
+
+using Xunit;
 
 namespace Piece.ProjectManagement.Tests;
 
@@ -15,6 +20,7 @@ public class ProjectManagerTests : IDisposable
     private readonly Mock<IProjectAssetService> _mockAssetService;
     private readonly Mock<IProjectSceneService> _mockSceneService;
     private readonly Mock<IProjectBuildService> _mockBuildService;
+    private readonly Mock<ILogger<ProjectManager>> _mockLogger; // Added mock logger
     private readonly ProjectManager _projectManager;
 
     public ProjectManagerTests()
@@ -25,7 +31,8 @@ public class ProjectManagerTests : IDisposable
         _mockAssetService = new Mock<IProjectAssetService>();
         _mockSceneService = new Mock<IProjectSceneService>();
         _mockBuildService = new Mock<IProjectBuildService>();
-        
+        _mockLogger = new Mock<ILogger<ProjectManager>>(); // Initialize mock logger
+
         // Mock default behavior if not explicitly set in a test
         _mockAssetService.Setup(s => s.ListAssets(It.IsAny<PieceProject>())).ReturnsAsync(Enumerable.Empty<string>());
         _mockSceneService.Setup(s => s.OpenScene(It.IsAny<PieceProject>(), It.IsAny<string>())).ReturnsAsync(true);
@@ -34,7 +41,8 @@ public class ProjectManagerTests : IDisposable
         _projectManager = new ProjectManager(
             _mockAssetService.Object,
             _mockSceneService.Object,
-            _mockBuildService.Object
+            _mockBuildService.Object,
+            _mockLogger.Object // Pass the mock logger
         );
     }
 
@@ -89,7 +97,7 @@ public class ProjectManagerTests : IDisposable
         // To test dotnet new, we cannot truly mock Process.Start directly.
         // This test will try to create a real dotnet new project.
         // We'll verify directory and project file existence.
-        
+
         var project = await _projectManager.CreateProject(projectName, projectPath, templateName);
 
         Assert.NotNull(project);
