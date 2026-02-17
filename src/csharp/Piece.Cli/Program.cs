@@ -1,10 +1,6 @@
 using System.CommandLine;
-using System.CommandLine.Builder;
-using System.CommandLine.Hosting;
-using System.CommandLine.Parsing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Piece.ProjectManagement;
 using Serilog; // For Serilog configuration
 using Piece.Cli; // Added for CliServiceCollectionExtensions
@@ -20,31 +16,34 @@ public class Program
 
         // Define main commands
         var projectCommand = new Command("project", "Commands for managing Piece Engine projects.");
-        rootCommand.AddCommand(projectCommand);
+        rootCommand.Add(projectCommand);
 
         var newProjectCommand = new NewProjectCommand();
-        projectCommand.AddCommand(newProjectCommand);
+        projectCommand.Add(newProjectCommand);
 
         var buildCommand = new BuildProjectCommand();
-        rootCommand.AddCommand(buildCommand);
+        rootCommand.Add(buildCommand);
 
         var assetCommand = new Command("asset", "Commands for managing project assets.");
-        rootCommand.AddCommand(assetCommand);
+        rootCommand.Add(assetCommand);
 
         var importAssetCommand = new ImportAssetCommand();
-        assetCommand.AddCommand(importAssetCommand);
+        assetCommand.Add(importAssetCommand);
 
         var listAssetsCommand = new ListAssetsCommand();
-        assetCommand.AddCommand(listAssetsCommand);
+        assetCommand.Add(listAssetsCommand);
+
+        var deleteAssetCommand = new DeleteAssetCommand();
+        assetCommand.Add(deleteAssetCommand);
 
         var moduleCommand = new Command("module", "Commands for managing project modules (NuGet packages).");
-        rootCommand.AddCommand(moduleCommand);
+        rootCommand.Add(moduleCommand);
 
         var addModuleCommand = new AddModuleCommand();
-        moduleCommand.AddCommand(addModuleCommand);
+        moduleCommand.Add(addModuleCommand);
 
         var removeModuleCommand = new RemoveModuleCommand();
-        moduleCommand.AddCommand(removeModuleCommand);
+        moduleCommand.Add(removeModuleCommand);
 
         var parser = new CommandLineBuilder(rootCommand)
             .UseHost(CreateHostBuilder)
@@ -77,5 +76,6 @@ public class Program
                 services.AddTransient<ListAssetsCommand.Handler>();
                 services.AddTransient<AddModuleCommand.Handler>();
                 services.AddTransient<RemoveModuleCommand.Handler>();
+                services.AddTransient<DeleteAssetCommand.Handler>();
             });
 }
