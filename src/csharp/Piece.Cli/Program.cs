@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using Piece.ProjectManagement;
 using Serilog; // For Serilog configuration
 using Piece.Cli; // Added for CliServiceCollectionExtensions
-using Piece.Cli.Commands; // Added for NewProjectCommand, BuildProjectCommand, ImportAssetCommand, and ListAssetsCommand
+using Piece.Cli.Commands; // Added for all command classes
 
 namespace Piece.Cli;
 
@@ -36,6 +36,12 @@ public class Program
 
         var listAssetsCommand = new ListAssetsCommand();
         assetCommand.AddCommand(listAssetsCommand);
+
+        var moduleCommand = new Command("module", "Commands for managing project modules (NuGet packages).");
+        rootCommand.AddCommand(moduleCommand);
+
+        var addModuleCommand = new AddModuleCommand();
+        moduleCommand.AddCommand(addModuleCommand);
 
         var parser = new CommandLineBuilder(rootCommand)
             .UseHost(CreateHostBuilder)
@@ -66,5 +72,6 @@ public class Program
                 services.AddTransient<BuildProjectCommand.Handler>();
                 services.AddTransient<ImportAssetCommand.Handler>();
                 services.AddTransient<ListAssetsCommand.Handler>();
+                services.AddTransient<AddModuleCommand.Handler>();
             });
 }
