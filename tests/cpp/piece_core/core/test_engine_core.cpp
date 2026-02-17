@@ -264,6 +264,26 @@ TEST_F(EngineCoreTest, EngineCore_Initialize_FailsIfWindowCreationFails)
     ASSERT_FALSE(success);
 }
 
+TEST_F(EngineCoreTest, EngineCore_Initialize_FailsIfGraphicsDeviceCreationFails)
+{
+    // Mock the necessary dependencies for a successful initialization up to the point of failure
+    auto test_window_mock = std::make_unique<MockWindow>();
+    auto test_physics_mock = std::make_unique<MockPhysicsWorld>();
+
+    EXPECT_CALL(*window_factory_mock, CreateGlfwWindow(::testing::_))
+        .WillOnce(::testing::Return(std::move(test_window_mock)));
+    
+    // Set expectation: the graphics device factory should be called, but return nullptr
+    EXPECT_CALL(*graphics_factory_mock, CreateGraphicsDevice(::testing::_, ::testing::_))
+        .WillOnce(::testing::Return(std::unique_ptr<MockGraphicsDevice>(nullptr))); // Simulate creation failure
+
+    // Create EngineCore object
+    Piece::Core::EngineCore engine_core;
+    // Call Initialize and expect it to fail
+    bool success = engine_core.Initialize();
+    ASSERT_FALSE(success);
+}
+
 TEST_F(EngineCoreTest, EngineCore_Initialize_FailsIfPhysicsWorldCreationFails)
 {
     // Mock the necessary dependencies for a successful initialization up to the point of failure

@@ -190,7 +190,7 @@
       - [x] EngineCore_Initialize_FailsIfGraphicsDeviceFactoryMissing
       - [x] EngineCore_Initialize_FailsIfPhysicsWorldFactoryMissing
       - [x] EngineCore_Constructor_FailsIfWindowCreationFails
-      - [ ] EngineCore_Constructor_FailsIfGraphicsDeviceCreationFails
+      - [x] EngineCore_Constructor_FailsIfGraphicsDeviceCreationFails
       - [x] EngineCore_Constructor_FailsIfPhysicsWorldCreationFails
       - [x] EngineCore_Destructor_CleansUpResources
       - [x] EngineCore_Update_CallsPhysicsSystemStep
