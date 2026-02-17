@@ -480,3 +480,38 @@ TEST_F(EngineCoreTest, EngineCore_Destructor_CleansUpResources)
     // The test passing without a crash is the success condition.
 }
 
+TEST_F(EngineCoreTest, EngineCore_Render_CallsRenderContextClear)
+{
+    // Create mocks for backends
+    auto test_window_mock = std::make_unique<MockWindow>();
+    auto test_graphics_mock = std::make_unique<MockGraphicsDevice>();
+    auto test_physics_mock = std::make_unique<MockPhysicsWorld>();
+    auto test_render_context_mock = std::make_unique<MockRenderContext>();
+
+    // Get raw pointers for setting expectations
+    MockGraphicsDevice* graphics_ptr = test_graphics_mock.get();
+    MockRenderContext* render_context_ptr = test_render_context_mock.get();
+
+    // Setup expectations for initialization
+    EXPECT_CALL(*window_factory_mock, CreateGlfwWindow(::testing::_))
+        .WillOnce(::testing::Return(std::move(test_window_mock)));
+    EXPECT_CALL(*graphics_factory_mock, CreateGraphicsDevice(::testing::_, ::testing::_))
+        .WillOnce(::testing::Return(std::move(test_graphics_mock)));
+    EXPECT_CALL(*physics_factory_mock, CreatePhysicsWorld(::testing::_))
+        .WillOnce(::testing::Return(std::move(test_physics_mock)));
+    EXPECT_CALL(*graphics_ptr, Init(::testing::_, ::testing::_))
+        .WillOnce(::testing::Return(true));
+    EXPECT_CALL(*graphics_ptr, GetImmediateContext())
+        .WillRepeatedly(::testing::Return(render_context_ptr));
+
+    // Expect RenderContext::Clear to be called once during Render
+    EXPECT_CALL(*render_context_ptr, Clear(::testing::_, ::testing::_, ::testing::_, ::testing::_)).Times(1);
+
+    // Initialize engine
+    Piece::Core::EngineCore engine_core;
+    ASSERT_TRUE(engine_core.Initialize());
+
+    // Call render
+    engine_core.Render();
+}
+

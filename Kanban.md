@@ -196,7 +196,7 @@
       - [x] EngineCore_Update_CallsPhysicsSystemStep
       - [ ] EngineCore_Update_HandlesNullPhysicsSystem
       - [x] EngineCore_Render_CallsGraphicsDeviceBeginEndFrame
-      - [ ] EngineCore_Render_CallsRenderContextClear
+      - [x] EngineCore_Render_CallsRenderContextClear
       - [ ] EngineCore_Render_CallsRenderSystemRenderFrame
       - [x] EngineCore_Render_HandlesNullDependencies
       - [ ] EngineCore_Render_SkipsIncompleteModels
