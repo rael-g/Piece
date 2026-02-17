@@ -1,14 +1,10 @@
-using System.Collections.Generic;
-using System.IO;
 using Tomlyn;
-using Tomlyn.Model;
-using Tomlyn.Parsing; // For TomlModelOptions
 
 namespace Piece.ProjectManagement;
 
 public class PieceProject
 {
-    private const string FILENAME = "piece_project.toml";
+    public const string FILENAME = "piece_project.toml";
 
     public string Name { get; set; } = string.Empty;
     public string Path { get; set; } = string.Empty; // Path to the project root directory

@@ -1,7 +1,10 @@
 using System;
-using Microsoft.Extensions.Logging;
-using Piece.Core; // For NativeCalls and KeyCode
 using System.Numerics; // For Vector2
+
+using Microsoft.Extensions.Logging;
+
+using Piece.Core; // For NativeCalls
+using Piece.Core.Abstractions; // For KeyCode
 
 namespace Piece.Framework;
 

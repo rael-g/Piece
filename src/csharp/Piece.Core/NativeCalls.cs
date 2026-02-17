@@ -1,4 +1,7 @@
 using System.Runtime.InteropServices;
+
+using Piece.Core.Abstractions;
+
 using Serilog;
 using Serilog.Events;
 
@@ -82,10 +85,12 @@ public static partial class NativeCalls
     // Input Methods
     [LibraryImport("piece_core.dll", EntryPoint = "EngineIsKeyPressed")]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool EngineIsKeyPressed(IntPtr engineCorePtr, KeyCode keyCode);
 
     [LibraryImport("piece_core.dll", EntryPoint = "EngineIsMouseButtonPressed")]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool EngineIsMouseButtonPressed(IntPtr engineCorePtr, KeyCode mouseButton);
 
     [LibraryImport("piece_core.dll", EntryPoint = "EngineGetMouseX")]
