@@ -199,6 +199,7 @@
       - [x] Implement `piece build` command (`BuildProjectCommand.cs`) using `IProjectManager` and `IProjectBuildService`.
       - [x] Implement `piece asset import` command (`ImportAssetCommand.cs`) using `IProjectAssetService`.
       - [x] Implement `piece asset list` command (`ListAssetsCommand.cs`) using `IProjectAssetService`.
+      - [x] Implement `piece asset delete` command (`DeleteAssetCommand.cs`) using `IProjectAssetService`.
       - [x] Implement `piece module add` command (`AddModuleCommand.cs`) using `IProjectManager`.
       - [x] Implement `piece module remove` command (`RemoveModuleCommand.cs`) using `IProjectManager`.
       - [x] Implement general Logging for Minimal CLI Editor (using `ILogger`).
