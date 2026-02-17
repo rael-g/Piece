@@ -8,6 +8,9 @@ Crucially, the engine employs a hybrid C++ and C# architecture where C++ low-lev
 
 This document provides a unified and organic view of the Piece Engine's architecture, encompassing everything from the low-level C++ implementation to the Piece.Framework (C#).
 
+**Future Vision - Rebranding Consideration:**
+To avoid confusion between the engine's name and its modular components, there is a future consideration to rebrand the engine from "Piece" to "Pieces". Under this rebranding, individual modules or components would then be referred to as "Piece" (e.g., "a Piece module"). This distinction aims to clarify the terminology as the engine grows.
+
 ## The Piece Engine's Modular Component Architecture Philosophy: Dynamic and Modular Extensibility
 
 The essence of the Piece Engine is to be a highly composable and customizable platform for game developers, offering a degree of modularity and extensibility that goes beyond simply replacing entire modules. Our engine allows the **exchange and extension of both fine and coarse parts of its architecture**, facilitating customization at all levels.
