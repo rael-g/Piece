@@ -236,5 +236,65 @@ public class ProjectManager : IProjectManager
             return true;
         }
     }
+
+    public async Task<bool> RemoveModule(PieceProject project, string moduleName)
+    {
+        if (project == null) throw new ArgumentNullException(nameof(project));
+        if (string.IsNullOrWhiteSpace(moduleName))
+            throw new ArgumentException("Module name (NuGet package ID) cannot be empty.", nameof(moduleName));
+        if (string.IsNullOrWhiteSpace(project.Path))
+        {
+            _logger.LogError("Project path is not set for project '{ProjectName}', cannot remove module.", project.Name);
+            throw new InvalidOperationException("Project path is not set, cannot remove module.");
+        }
+
+        _logger.LogInformation("Attempting to remove module '{ModuleName}' from project '{ProjectName}'.", moduleName, project.Name);
+
+        // Find the main .csproj file for the project
+        var projectCsprojFile = Directory.GetFiles(project.Path, "*.csproj").FirstOrDefault();
+        if (projectCsprojFile == null)
+        {
+            _logger.LogError("No .csproj file found in project path '{ProjectPath}'. Cannot remove module.", project.Path);
+            return false;
+        }
+
+        var startInfo = new ProcessStartInfo("dotnet", $"remove \"{projectCsprojFile}\" package {moduleName}")
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            WorkingDirectory = project.Path // Ensure dotnet command runs in the project's root
+        };
+
+        using (var process = Process.Start(startInfo))
+        {
+            if (process == null)
+            {
+                _logger.LogError("Failed to start dotnet process to remove module '{ModuleName}'.", moduleName);
+                return false;
+            }
+
+            string output = await process.StandardOutput.ReadToEndAsync();
+            string error = await process.StandardError.ReadToEndAsync();
+            await process.WaitForExitAsync();
+
+            _logger.LogInformation("dotnet remove package output: {Output}", output);
+            if (!string.IsNullOrWhiteSpace(error))
+            {
+                _logger.LogError("dotnet remove package error: {Error}", error);
+            }
+
+            if (process.ExitCode != 0)
+            {
+                _logger.LogError("dotnet remove package failed with exit code {ExitCode} for module '{ModuleName}'.", process.ExitCode, moduleName);
+                return false;
+            }
+            
+            _logger.LogInformation("Module '{ModuleName}' removed successfully from project '{ProjectName}'.", moduleName, project.Name);
+            return true;
+        }
+    }
 }
+
 
