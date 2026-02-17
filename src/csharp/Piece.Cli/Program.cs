@@ -21,6 +21,9 @@ public class Program
         var newProjectCommand = new NewProjectCommand();
         projectCommand.Add(newProjectCommand);
 
+        var deleteProjectCommand = new DeleteProjectCommand();
+        projectCommand.Add(deleteProjectCommand);
+
         var buildCommand = new BuildProjectCommand();
         rootCommand.Add(buildCommand);
 
@@ -71,6 +74,7 @@ public class Program
 
                 // Register command handlers
                 services.AddTransient<NewProjectCommand.Handler>();
+                services.AddTransient<DeleteProjectCommand.Handler>();
                 services.AddTransient<BuildProjectCommand.Handler>();
                 services.AddTransient<ImportAssetCommand.Handler>();
                 services.AddTransient<ListAssetsCommand.Handler>();
