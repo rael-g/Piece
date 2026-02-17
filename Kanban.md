@@ -163,51 +163,6 @@
     Develop a robust ResourceManager that can load various asset types from files, convert them into RAL resources, and manage their lifecycle efficiently.
     ```
 
-### Phase 3.5: Piece.ProjectManagement Layer
-  - tags: [v1.0.0, c#, project-management, core]
-  - priority: high
-  - steps:
-      - [x] Define `PieceProject` data model (name, path, default scene, engine config).
-      - [x] Implement `IProjectManager` interface (Create, Load, Save project, GetAssetService, GetSceneService).
-      - [x] Define `IProjectAssetService` (ImportAsset, ListAssets, DeleteAsset).
-      - [x] Define `IProjectSceneService` (OpenScene, SaveScene, AddEntity, RemoveEntity).
-      - [x] Define 'piece_project.toml' file format and implement serialization/deserialization.
-      - [x] Implement `ProjectManager` (handles `.pieceproject` file I/O, leverages `dotnet` CLI for scaffolding).
-      - [x] Implement Project Template Management (discovery, application of templates).
-      - [x] Implement `dotnet CLI` integration for project scaffolding and template application.
-      - [x] Implement `IProjectBuildService` (or integrate build logic into `IProjectManager`).
-      - [x] Implement `ProjectAssetService` (wraps `Piece.Framework.AssetManager`, handles file system operations and metadata).
-      - [x] Implement `ProjectSceneService` (wraps `Piece.Framework.SceneManager`, handles scene file I/O).c
-      - [x] Establish project references to `Piece.Framework.Abstractions` for AssetManager and SceneManager integration.
-      - [x] Implement `ProjectServiceCollectionExtensions` for DI setup.
-      - [x] Implement Tests for Piece.ProjectManagement Layer.
-      - [x] Ensure robust logging and error handling across all implementations.
-    ```md
-    Develop the Piece.ProjectManagement layer to provide a high-level, editor-agnostic abstraction for managing engine projects. This layer will handle project creation, loading, saving, and provide services for asset and scene management, consuming the Piece.Framework APIs. It will leverage the 'dotnet' CLI for project scaffolding.
-    ```
-
-### Phase 4.5: Minimal CLI Editor
-
-  - tags: [v1.0.0, cli, c#, tooling]
-  - priority: high
-  - steps:
-      - [x] Create `Piece.Cli` console application project.
-      - [x] Implement `Program.cs` to configure HostBuilder, register services, and setup `System.CommandLine`.
-      - [x] Create `CliServiceCollectionExtensions.cs` for CLI-specific service registrations.
-      - [x] Define base command structure in `Commands/` directory.
-      - [x] Implement `piece project new` command (`NewProjectCommand.cs`) using `IProjectManager`.
-      - [x] Implement `piece build` command (`BuildProjectCommand.cs`) using `IProjectManager` and `IProjectBuildService`.
-      - [x] Implement `piece asset import` command (`ImportAssetCommand.cs`) using `IProjectAssetService`.
-      - [x] Implement `piece asset list` command (`ListAssetsCommand.cs`) using `IProjectAssetService`.
-      - [x] Implement `piece asset delete` command (`DeleteAssetCommand.cs`) using `IProjectAssetService`.
-      - [x] Implement `piece module add` command (`AddModuleCommand.cs`) using `IProjectManager`.
-      - [x] Implement `piece module remove` command (`RemoveModuleCommand.cs`) using `IProjectManager`.
-      - [x] Implement general Logging for Minimal CLI Editor (using `ILogger`).
-      - [x] Implement Tests for Minimal CLI Editor.
-    ```md
-    Develop a minimal but functional CLI editor for the Piece Engine, providing stateless commands for project creation, building, and basic asset management. It will use `System.CommandLine` and interact with the `Piece.ProjectManagement` layer.
-    ```
-
 ### Automatic Dependency Registration (Source Generator)
 
   - tags: [v1.0.0, infrastructure, c#, source-generator]
@@ -334,7 +289,7 @@
       - [ ] JobSystem_WaitUntilAllDone_DoesNotBlockIfNoJobs
       - [ ] JobSystem_Concurrency_NoRaceConditionsOnSharedState
       - [ ] JobSystem_Logging_GeneratesAppropriateMessages
-      - [ ] ServiceLocator_Get_ReturnsSingletonInstance
+      - [x] ServiceLocator_Get_ReturnsSingletonInstance
       - [ ] ServiceLocator_SetGraphicsDeviceFactory_SetsFactory
       - [ ] ServiceLocator_GetGraphicsDeviceFactory_ReturnsSetFactory
       - [ ] ServiceLocator_SetWindowFactory_SetsFactory
@@ -578,6 +533,30 @@
 
 ## Done
 
+### Phase 3.5: Piece.ProjectManagement Layer
+
+  - tags: [v1.0.0, c#, project-management, core]
+  - priority: high
+  - steps:
+      - [x] Define `PieceProject` data model (name, path, default scene, engine config).
+      - [x] Implement `IProjectManager` interface (Create, Load, Save project, GetAssetService, GetSceneService).
+      - [x] Define `IProjectAssetService` (ImportAsset, ListAssets, DeleteAsset).
+      - [x] Define `IProjectSceneService` (OpenScene, SaveScene, AddEntity, RemoveEntity).
+      - [x] Define 'piece_project.toml' file format and implement serialization/deserialization.
+      - [x] Implement `ProjectManager` (handles `.pieceproject` file I/O, leverages `dotnet` CLI for scaffolding).
+      - [x] Implement Project Template Management (discovery, application of templates).
+      - [x] Implement `dotnet CLI` integration for project scaffolding and template application.
+      - [x] Implement `IProjectBuildService` (or integrate build logic into `IProjectManager`).
+      - [x] Implement `ProjectAssetService` (wraps `Piece.Framework.AssetManager`, handles file system operations and metadata).
+      - [x] Implement `ProjectSceneService` (wraps `Piece.Framework.SceneManager`, handles scene file I/O).c
+      - [x] Establish project references to `Piece.Framework.Abstractions` for AssetManager and SceneManager integration.
+      - [x] Implement `ProjectServiceCollectionExtensions` for DI setup.
+      - [x] Implement Tests for Piece.ProjectManagement Layer.
+      - [x] Ensure robust logging and error handling across all implementations.
+    ```md
+    Develop the Piece.ProjectManagement layer to provide a high-level, editor-agnostic abstraction for managing engine projects. This layer will handle project creation, loading, saving, and provide services for asset and scene management, consuming the Piece.Framework APIs. It will leverage the 'dotnet' CLI for project scaffolding.
+    ```
+
 ### Phase 1: Foundation & Build System
 
   - tags: [v1.0.0, setup, foundation, build]
@@ -610,5 +589,27 @@
       - [x] Implement Tests for High-Level C# Framework.
     ```md
     Develop the High-Level C# Framework, providing a user-friendly API for game developers. This includes the core game loop, scene graph components, input and asset management, rendering orchestration, and robust C# wrappers for all underlying C++ engine functionalities, orchestrated via .NET Dependency Injection.
+    ```
+
+### Phase 4.5: Minimal CLI Editor
+
+  - tags: [v1.0.0, cli, c#, tooling]
+  - priority: high
+  - steps:
+      - [x] Create `Piece.Cli` console application project.
+      - [x] Implement `Program.cs` to configure HostBuilder, register services, and setup `System.CommandLine`.
+      - [x] Create `CliServiceCollectionExtensions.cs` for CLI-specific service registrations.
+      - [x] Define base command structure in `Commands/` directory.
+      - [x] Implement `piece project new` command (`NewProjectCommand.cs`) using `IProjectManager`.
+      - [x] Implement `piece build` command (`BuildProjectCommand.cs`) using `IProjectManager` and `IProjectBuildService`.
+      - [x] Implement `piece asset import` command (`ImportAssetCommand.cs`) using `IProjectAssetService`.
+      - [x] Implement `piece asset list` command (`ListAssetsCommand.cs`) using `IProjectAssetService`.
+      - [x] Implement `piece asset delete` command (`DeleteAssetCommand.cs`) using `IProjectAssetService`.
+      - [x] Implement `piece module add` command (`AddModuleCommand.cs`) using `IProjectManager`.
+      - [x] Implement `piece module remove` command (`RemoveModuleCommand.cs`) using `IProjectManager`.
+      - [x] Implement general Logging for Minimal CLI Editor (using `ILogger`).
+      - [x] Implement Tests for Minimal CLI Editor.
+    ```md
+    Develop a minimal but functional CLI editor for the Piece Engine, providing stateless commands for project creation, building, and basic asset management. It will use `System.CommandLine` and interact with the `Piece.ProjectManagement` layer.
     ```
 

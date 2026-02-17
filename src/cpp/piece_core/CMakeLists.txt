@@ -19,7 +19,9 @@ target_compile_definitions(piece_core PRIVATE PIECE_CORE_BUILD_DLL)
 target_include_directories(piece_core PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/core
-    ${CMAKE_CURRENT_SOURCE_DIR}/interfaces
+    ${CMAKE_SOURCE_DIR}/src/cpp/ral/interfaces
+    ${CMAKE_SOURCE_DIR}/src/cpp/wal/interfaces
+    ${CMAKE_SOURCE_DIR}/src/cpp/pal/interfaces
     ${CMAKE_SOURCE_DIR}/src/cpp
 )
 find_package(fmt CONFIG REQUIRED)

@@ -6,13 +6,13 @@
 #include <ral/interfaces/iindex_buffer.h>
 #include <ral/interfaces/ishader.h>
 #include <ral/interfaces/ishader_program.h>
-#include <ral/interfaces/itexture.h>
-#include <ral/interfaces/isampler.h>
-#include <ral/interfaces/icompute_buffer.h>
-#include <ral/interfaces/iindirect_draw_buffer.h>
-#include <ral/interfaces/iacceleration_structure.h>
-#include <ral/interfaces/iframebuffer.h>
-#include <ral/interfaces/iuniform_buffer.h>
+#include <ral/itexture.h>
+#include <ral/isampler.h>
+#include <ral/icompute_buffer.h>
+#include <ral/iindirect_draw_buffer.h>
+#include <ral/iacceleration_structure.h>
+#include <ral/iframebuffer.h>
+#include <ral/iuniform_buffer.h>
 #include <ral/irender_context.h> // Also needed for GetImmediateContext
 #include <wal/iwindow.h> // For Init method of MockGraphicsDevice
 #include <ral/native_graphics_options.h> // For Init method of MockGraphicsDevice

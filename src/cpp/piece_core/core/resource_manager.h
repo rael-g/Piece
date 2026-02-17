@@ -5,6 +5,8 @@
 #include <string>
 #include <unordered_map>
 
+#include <piece_core/piece_core_exports.h> // Explicitly include PIECE_CORE_API
+
 #include <ral/igraphics_device.h>
 #include <ral/interfaces/iindex_buffer.h>
 #include <ral/interfaces/ishader_program.h>
@@ -24,7 +26,7 @@ class Mesh;
  * @details This class is responsible for loading assets from files and converting them into
  *          RAL resources, and maintaining a cache of these resources.
  */
-class ResourceManager
+class PIECE_CORE_API ResourceManager
 {
   public:
     explicit ResourceManager(Piece::RAL::IGraphicsDevice *graphics_device);
