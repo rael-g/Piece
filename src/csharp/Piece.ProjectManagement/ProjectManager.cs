@@ -177,4 +177,64 @@ public class ProjectManager : IProjectManager
     {
         return _sceneService; // Will be properly injected later
     }
+
+    public async Task<bool> AddModule(PieceProject project, string moduleName)
+    {
+        if (project == null) throw new ArgumentNullException(nameof(project));
+        if (string.IsNullOrWhiteSpace(moduleName))
+            throw new ArgumentException("Module name (NuGet package ID) cannot be empty.", nameof(moduleName));
+        if (string.IsNullOrWhiteSpace(project.Path))
+        {
+            _logger.LogError("Project path is not set for project '{ProjectName}', cannot add module.", project.Name);
+            throw new InvalidOperationException("Project path is not set, cannot add module.");
+        }
+
+        _logger.LogInformation("Attempting to add module '{ModuleName}' to project '{ProjectName}'.", moduleName, project.Name);
+
+        // Find the main .csproj file for the project
+        var projectCsprojFile = Directory.GetFiles(project.Path, "*.csproj").FirstOrDefault();
+        if (projectCsprojFile == null)
+        {
+            _logger.LogError("No .csproj file found in project path '{ProjectPath}'. Cannot add module.", project.Path);
+            return false;
+        }
+
+        var startInfo = new ProcessStartInfo("dotnet", $"add \"{projectCsprojFile}\" package {moduleName}")
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            WorkingDirectory = project.Path // Ensure dotnet command runs in the project's root
+        };
+
+        using (var process = Process.Start(startInfo))
+        {
+            if (process == null)
+            {
+                _logger.LogError("Failed to start dotnet process to add module '{ModuleName}'.", moduleName);
+                return false;
+            }
+
+            string output = await process.StandardOutput.ReadToEndAsync();
+            string error = await process.StandardError.ReadToEndAsync();
+            await process.WaitForExitAsync();
+
+            _logger.LogInformation("dotnet add package output: {Output}", output);
+            if (!string.IsNullOrWhiteSpace(error))
+            {
+                _logger.LogError("dotnet add package error: {Error}", error);
+            }
+
+            if (process.ExitCode != 0)
+            {
+                _logger.LogError("dotnet add package failed with exit code {ExitCode} for module '{ModuleName}'.", process.ExitCode, moduleName);
+                return false;
+            }
+            
+            _logger.LogInformation("Module '{ModuleName}' added successfully to project '{ProjectName}'.", moduleName, project.Name);
+            return true;
+        }
+    }
 }
+

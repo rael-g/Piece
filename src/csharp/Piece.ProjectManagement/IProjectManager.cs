@@ -9,4 +9,5 @@ public interface IProjectManager
     Task SaveProject(PieceProject project);
     IProjectAssetService GetAssetService(PieceProject project);
     IProjectSceneService GetSceneService(PieceProject project);
+    Task<bool> AddModule(PieceProject project, string moduleName);
 }
