@@ -43,6 +43,9 @@ public class Program
         var addModuleCommand = new AddModuleCommand();
         moduleCommand.AddCommand(addModuleCommand);
 
+        var removeModuleCommand = new RemoveModuleCommand();
+        moduleCommand.AddCommand(removeModuleCommand);
+
         var parser = new CommandLineBuilder(rootCommand)
             .UseHost(CreateHostBuilder)
             .UseDefaults()
@@ -73,5 +76,6 @@ public class Program
                 services.AddTransient<ImportAssetCommand.Handler>();
                 services.AddTransient<ListAssetsCommand.Handler>();
                 services.AddTransient<AddModuleCommand.Handler>();
+                services.AddTransient<RemoveModuleCommand.Handler>();
             });
 }
