@@ -10,4 +10,6 @@ public interface IProjectManager
     IProjectAssetService GetAssetService(PieceProject project);
     IProjectSceneService GetSceneService(PieceProject project);
     Task<bool> AddModule(PieceProject project, string moduleName);
+    Task<bool> RemoveModule(PieceProject project, string moduleName);
+    Task<bool> DeleteProject(string projectPath);
 }

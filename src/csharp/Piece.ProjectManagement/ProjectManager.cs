@@ -295,6 +295,32 @@ public class ProjectManager : IProjectManager
             return true;
         }
     }
+
+    public async Task<bool> DeleteProject(string projectPath)
+    {
+        if (string.IsNullOrWhiteSpace(projectPath))
+            throw new ArgumentException("Project path cannot be empty.", nameof(projectPath));
+
+        _logger.LogInformation("Attempting to delete project directory at '{ProjectPath}'.", projectPath);
+
+        if (!Directory.Exists(projectPath))
+        {
+            _logger.LogWarning("Project directory not found at '{ProjectPath}'. No action taken.", projectPath);
+            return false;
+        }
+
+        try
+        {
+            Directory.Delete(projectPath, true); // true for recursive delete
+            _logger.LogInformation("Project directory '{ProjectPath}' deleted successfully.", projectPath);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to delete project directory '{ProjectPath}': {ErrorMessage}", projectPath, ex.Message);
+            return false;
+        }
+    }
 }
 
 
