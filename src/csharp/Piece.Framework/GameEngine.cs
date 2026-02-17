@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+
 using Piece.Core.Abstractions;
 using Piece.Core.Abstractions.NativeCalls;
 
@@ -15,9 +16,9 @@ public class GameEngine : IDisposable
     private readonly AssetManager _assetManager; // Added for asset management
     private readonly RenderManager _renderManager; // Added for rendering management
 
-    public GameEngine(ILogger<GameEngine> logger, 
-                      IGraphicsDeviceFactory graphicsDeviceFactory, 
-                      IWindowFactory windowFactory, 
+    public GameEngine(ILogger<GameEngine> logger,
+                      IGraphicsDeviceFactory graphicsDeviceFactory,
+                      IWindowFactory windowFactory,
                       IPhysicsWorldFactory physicsWorldFactory,
                       InputManager inputManager, // InputManager injected
                       AssetManager assetManager, // AssetManager injected

@@ -16,7 +16,7 @@ public static class PieceCoreServiceCollectionExtensions
     private class EngineHostedService : IHostedService, IDisposable
     {
         private readonly Engine _engine;
-        private readonly ILogger<EngineHostedService> _logger; 
+        private readonly ILogger<EngineHostedService> _logger;
 
         public EngineHostedService(Engine engine, ILogger<EngineHostedService> logger)
         {

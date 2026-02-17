@@ -1,8 +1,10 @@
+using System;
+
 using Microsoft.Extensions.DependencyInjection;
+
 using Piece.Glfw;
 using Piece.MinimalPal;
 using Piece.OpenGL;
-using System;
 
 namespace Piece.Framework;
 
@@ -28,11 +30,11 @@ public static class EngineServiceCollectionExtensions
         services.AddGlfwWindow();
         services.AddOpenGLRenderer();
         services.AddMinimalPalPhysics();
-        
+
         services.AddSingleton<InputManager>(); // Register InputManager
         services.AddSingleton<AssetManager>(); // Register AssetManager
         services.AddSingleton<RenderManager>(); // Register RenderManager
-        
+
         return services;
     }
 }

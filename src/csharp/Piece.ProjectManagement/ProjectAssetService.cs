@@ -1,16 +1,18 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
-using System;
 using System.Linq; // For Path.GetFileName
-using Piece.Framework.Abstractions; // Added for IAssetManager
+using System.Threading.Tasks;
+
 using Microsoft.Extensions.Logging; // Added for logging
+
+using Piece.Framework.Abstractions; // Added for IAssetManager
 
 namespace Piece.ProjectManagement;
 
 public class ProjectAssetService : IProjectAssetService
 {
-    private readonly IAssetManager _frameworkAssetManager; 
+    private readonly IAssetManager _frameworkAssetManager;
     private readonly ILogger<ProjectAssetService> _logger;
 
     public ProjectAssetService(IAssetManager frameworkAssetManager, ILogger<ProjectAssetService> logger)

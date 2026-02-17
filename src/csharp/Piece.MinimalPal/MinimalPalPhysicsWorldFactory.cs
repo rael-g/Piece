@@ -1,6 +1,8 @@
 using System;
 using System.Runtime.InteropServices;
+
 using Microsoft.Extensions.Options;
+
 using Piece.Core.Abstractions;
 using Piece.Core.Abstractions.NativeCalls; // For NativePhysicsOptions
 

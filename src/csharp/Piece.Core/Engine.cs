@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+
 using Serilog;
 
 namespace Piece.Core;
@@ -29,7 +30,7 @@ public class Engine : IDisposable
             NativeCalls.ProcessCppLog(level, messagePtr);
         };
         // Ensure the delegate is not garbage collected
-        GCHandle.Alloc(_logCallbackDelegate); 
+        GCHandle.Alloc(_logCallbackDelegate);
         NativeCalls.RegisterLogCallback(_logCallbackDelegate);
 
         _nativeEngineCorePtr = NativeCalls.EngineInitialize();
@@ -88,4 +89,3 @@ public class Engine : IDisposable
         }
     }
 }
-

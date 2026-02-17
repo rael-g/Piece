@@ -1,11 +1,13 @@
-using System.Threading.Tasks;
-using System.IO;
 using System;
-using System.Diagnostics;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq; // Added for LINQ operations
-using Tomlyn; // Added for Tomlyn.TomlTable
+using System.Threading.Tasks;
+
 using Microsoft.Extensions.Logging; // Added for logging
+
+using Tomlyn; // Added for Tomlyn.TomlTable
 
 namespace Piece.ProjectManagement;
 
@@ -54,7 +56,7 @@ public class ProjectManager : IProjectManager
             throw new ArgumentException("Project name cannot be empty.", nameof(name));
         if (string.IsNullOrWhiteSpace(path))
             throw new ArgumentException("Project path cannot be empty.", nameof(path));
-        
+
         // Ensure path is absolute and create directory if it doesn't exist
         var projectRootPath = System.IO.Path.Combine(path, name);
         if (Directory.Exists(projectRootPath))
@@ -62,7 +64,7 @@ public class ProjectManager : IProjectManager
             _logger.LogError("Project directory already exists at {ProjectRootPath}.", projectRootPath);
             throw new InvalidOperationException($"Project directory already exists at {projectRootPath}.");
         }
-        
+
         // Find the selected template
         var template = ListTemplates().FirstOrDefault(t => t.ShortName.Equals(templateName, StringComparison.OrdinalIgnoreCase));
         if (template == null)
@@ -72,7 +74,7 @@ public class ProjectManager : IProjectManager
         }
 
         _logger.LogInformation("Scaffolding project '{ProjectName}' at '{ProjectRootPath}' using template '{TemplateName}'...", name, projectRootPath, templateName);
-        
+
         // 2. Leverage dotnet CLI for scaffolding
         if (template.IsPieceEngineTemplate)
         {
@@ -101,7 +103,7 @@ public class ProjectManager : IProjectManager
                     _logger.LogError("Failed to start dotnet process for template '{TemplateName}'.", templateName);
                     throw new InvalidOperationException("Failed to start dotnet process.");
                 }
-                
+
                 string output = await process.StandardOutput.ReadToEndAsync();
                 string error = await process.StandardError.ReadToEndAsync();
                 await process.WaitForExitAsync();
@@ -114,7 +116,7 @@ public class ProjectManager : IProjectManager
                 _logger.LogInformation("dotnet new output: {Output}", output);
             }
         }
-        
+
         // 3. Create PieceProject instance and save its configuration
         var project = new PieceProject
         {
@@ -231,7 +233,7 @@ public class ProjectManager : IProjectManager
                 _logger.LogError("dotnet add package failed with exit code {ExitCode} for module '{ModuleName}'.", process.ExitCode, moduleName);
                 return false;
             }
-            
+
             _logger.LogInformation("Module '{ModuleName}' added successfully to project '{ProjectName}'.", moduleName, project.Name);
             return true;
         }
@@ -290,7 +292,7 @@ public class ProjectManager : IProjectManager
                 _logger.LogError("dotnet remove package failed with exit code {ExitCode} for module '{ModuleName}'.", process.ExitCode, moduleName);
                 return false;
             }
-            
+
             _logger.LogInformation("Module '{ModuleName}' removed successfully from project '{ProjectName}'.", moduleName, project.Name);
             return true;
         }
@@ -322,5 +324,3 @@ public class ProjectManager : IProjectManager
         }
     }
 }
-
-

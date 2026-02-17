@@ -1,7 +1,9 @@
 using System;
-using Microsoft.Extensions.Logging;
-using Piece.Core; // For NativeCalls
 using System.Collections.Generic;
+
+using Microsoft.Extensions.Logging;
+
+using Piece.Core; // For NativeCalls
 
 namespace Piece.Framework;
 

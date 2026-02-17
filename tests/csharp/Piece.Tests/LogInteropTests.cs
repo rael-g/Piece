@@ -1,6 +1,6 @@
-using Piece.Core;
-
 using System.Runtime.InteropServices; // For Marshal.StringToHGlobalAnsi
+
+using Piece.Core;
 
 namespace Piece.Tests;
 

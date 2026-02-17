@@ -1,8 +1,9 @@
+using System;
 using System.Diagnostics;
 using System.IO;
-using System.Threading.Tasks;
-using System;
 using System.Linq; // For FirstOrDefault
+using System.Threading.Tasks;
+
 using Microsoft.Extensions.Logging; // Added for logging
 
 namespace Piece.ProjectManagement;
@@ -68,7 +69,7 @@ public class ProjectBuildService : IProjectBuildService
                 _logger.LogError("dotnet build failed with exit code {ExitCode} for project '{ProjectName}'.", process.ExitCode, project.Name);
                 return false;
             }
-            
+
             _logger.LogInformation("Project '{ProjectName}' built successfully ({Configuration}).", project.Name, configuration);
             return true;
         }
@@ -126,7 +127,7 @@ public class ProjectBuildService : IProjectBuildService
                 _logger.LogError("dotnet clean failed with exit code {ExitCode} for project '{ProjectName}'.", process.ExitCode, project.Name);
                 return false;
             }
-            
+
             _logger.LogInformation("Project '{ProjectName}' cleaned successfully ({Configuration}).", project.Name, configuration);
             return true;
         }

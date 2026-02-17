@@ -1,6 +1,8 @@
-using Microsoft.Extensions.DependencyInjection;
-using Piece.Core.Abstractions;
 using System;
+
+using Microsoft.Extensions.DependencyInjection;
+
+using Piece.Core.Abstractions;
 
 namespace Piece.Glfw;
 

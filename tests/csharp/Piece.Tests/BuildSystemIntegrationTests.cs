@@ -87,7 +87,7 @@ public class BuildSystemIntegrationTests
                     // Note: process.Kill() without 'true' parameter sometimes only kills the parent process.
                     // For dotnet, this is typically enough, but a more robust solution might use platform-specific tools like taskkill.
                     // For simplicity and cross-platform compatibility, we rely on process.Kill() which often kills process trees.
-                    process.Kill(true); 
+                    process.Kill(true);
                 }
                 catch (Exception ex)
                 {
@@ -128,14 +128,14 @@ public class BuildSystemIntegrationTests
         RunDotNetCommand(pieceCoreProjectPath, "build", $"-c {configuration}");
         RunDotNetCommand(pieceGlfwProjectPath, "build", $"-c {configuration}");
         RunDotNetCommand(nativeBuildTargetProjectPath, "build", $"-c {configuration}");
-        
+
         // Construct the expected path in the root output directory
         string nativeFileName = GetNativeLibraryFileName(expectedNativeLibrariesBaseNames[0], configuration);
         string nativeFilePath = Path.Combine(outputDir, nativeFileName);
-        
+
         // 5. Verify native libraries
         Assert.True(File.Exists(nativeFilePath), $"Expected native library '{nativeFileName}' not found in '{outputDir}' for {configuration} build.");
-        
+
         // 6. Run the NativeBuildTarget executable to ensure it loads and exits cleanly, implying no 'DLL not found' errors
         string executableName = Path.Combine(outputDir, "NativeBuildTarget" + (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : ""));
         Assert.True(File.Exists(executableName), $"Executable '{executableName}' not found for {configuration} build.");
@@ -172,7 +172,7 @@ public class BuildSystemIntegrationTests
 
         // Determine the expected output directory for MissingNativeLibTarget
         string outputDir = Path.Combine(missingNativeLibTargetProjectPath, "bin", configuration, targetFramework);
-        
+
         string nativeFileName = GetNativeLibraryFileName("wal_glfw", configuration);
         string nativeFilePathInRoot = Path.Combine(outputDir, nativeFileName);
 
@@ -190,7 +190,7 @@ public class BuildSystemIntegrationTests
         {
             File.Delete(nativeFilePathInRoot);
         }
-        
+
         Assert.False(File.Exists(nativeFilePathInRoot), $"Pre-test sanity check failed: Native library '{nativeFileName}' was not deleted successfully.");
 
 
@@ -200,7 +200,7 @@ public class BuildSystemIntegrationTests
 
         var runProcessStartInfo = new ProcessStartInfo(executableName)
         {
-            WorkingDirectory = outputDir, 
+            WorkingDirectory = outputDir,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
