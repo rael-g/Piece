@@ -1,14 +1,17 @@
+using System;
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using Microsoft.Extensions.Logging;
-using Piece.ProjectManagement;
 using System.Threading.Tasks;
+
+using Microsoft.Extensions.Logging;
+
+using Piece.ProjectManagement;
 
 namespace Piece.Cli.Commands;
 
 public class NewProjectCommand : Command
 {
-    public NewProjectCommand() : base("new", "Creates a new Piece Engine project.")
+    public NewProjectCommand(IProjectManager projectManager, ILogger<NewProjectCommand> logger)
+        : base("new", "Creates a new Piece Engine project.")
     {
         var nameArgument = new Argument<string>(
             "name",
@@ -26,47 +29,23 @@ public class NewProjectCommand : Command
             () => "piece-empty",
             "The template to use for the new project.");
         AddOption(templateOption);
-    }
 
-    public class NewProjectCommandParameters
-    {
-        public string Name { get; set; } = string.Empty;
-        public string Path { get; set; } = string.Empty;
-        public string Template { get; set; } = string.Empty;
-        public IProjectManager ProjectManager { get; set; } = default!;
-        public ILogger<NewProjectCommand> Logger { get; set; } = default!;
-    }
-
-    public new class Handler : ICommandHandler
-    {
-        private readonly IProjectManager _projectManager;
-        private readonly ILogger<NewProjectCommand> _logger;
-
-        public string Name { get; set; } = string.Empty;
-        public string Path { get; set; } = string.Empty;
-        public string Template { get; set; } = string.Empty;
-
-        public Handler(IProjectManager projectManager, ILogger<NewProjectCommand> logger)
+        this.SetHandler(async (name, path, template) =>
         {
-            _projectManager = projectManager;
-            _logger = logger;
-        }
-
-        public async Task<int> InvokeAsync(InvocationContext context)
-        {
-            _logger.LogInformation("Attempting to create new project '{ProjectName}' at '{ProjectPath}' using template '{Template}'.", Name, Path, Template);
+            logger.LogInformation("Attempting to create new project '{ProjectName}' at '{ProjectPath}' using template '{Template}'.", name, path, template);
 
             try
             {
-                var project = await _projectManager.CreateProject(Name, Path, Template);
-                _logger.LogInformation("Project '{ProjectName}' created successfully.", project.Name);
-                return 0; // Success
+                var project = await projectManager.CreateProject(name, path, template);
+                logger.LogInformation("Project '{ProjectName}' created successfully.", project.Name);
+                return; // Original code returned 0
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to create project '{ProjectName}': {ErrorMessage}", Name, ex.Message);
-                return 1; // Failure
+                logger.LogError(ex, "Failed to create project '{ProjectName}': {ErrorMessage}", name, ex.Message);
+                return; // Original code returned 1
             }
-        }
+        },
+        nameArgument, pathOption, templateOption);
     }
 }

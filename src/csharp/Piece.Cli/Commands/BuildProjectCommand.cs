@@ -1,16 +1,18 @@
-using System.CommandLine;
-using System.CommandLine.Invocation;
-using Microsoft.Extensions.Logging;
-using Piece.ProjectManagement;
-using System.Threading.Tasks;
 using System;
+using System.CommandLine;
 using System.IO;
+using System.Threading.Tasks;
+
+using Microsoft.Extensions.Logging;
+
+using Piece.ProjectManagement;
 
 namespace Piece.Cli.Commands;
 
 public class BuildProjectCommand : Command
 {
-    public BuildProjectCommand() : base("build", "Builds a Piece Engine project.")
+    public BuildProjectCommand(IProjectManager projectManager, IProjectBuildService projectBuildService, ILogger<BuildProjectCommand> logger)
+        : base("build", "Builds a Piece Engine project.")
     {
         var projectOption = new Option<FileInfo?>(
             new[] { "--project", "-p" },
@@ -25,68 +27,50 @@ public class BuildProjectCommand : Command
             () => "Debug",
             "The build configuration (e.g., Debug, Release).");
         AddOption(configurationOption);
-    }
 
-    public class Handler : ICommandHandler
-    {
-        private readonly IProjectManager _projectManager;
-        private readonly IProjectBuildService _projectBuildService;
-        private readonly ILogger<BuildProjectCommand> _logger;
-
-        public FileInfo? Project { get; set; }
-        public string Configuration { get; set; } = string.Empty;
-
-        public Handler(IProjectManager projectManager, IProjectBuildService projectBuildService, ILogger<BuildProjectCommand> logger)
+        this.SetHandler(async (project, configuration) =>
         {
-            _projectManager = projectManager;
-            _projectBuildService = projectBuildService;
-            _logger = logger;
-        }
-
-        public async Task<int> InvokeAsync(InvocationContext context)
-        {
-            if (Project == null || !Project.Exists)
+            if (project == null || !project.Exists)
             {
-                _logger.LogError("Project file not found at '{ProjectPath}'.", Project?.FullName ?? "null");
-                return 1;
+                logger.LogError("Project file not found at '{ProjectPath}'.", project?.FullName ?? "null");
+                // Original code returned 1, now just log error and return void Task
+                return;
             }
 
-            _logger.LogInformation("Attempting to build project '{ProjectPath}' with configuration '{Configuration}'.", Project.FullName, Configuration);
+            logger.LogInformation("Attempting to build project '{ProjectPath}' with configuration '{Configuration}'.", project.FullName, configuration);
 
             try
             {
-                // The Project file could be .pieceproject, or a .csproj/.sln within the project root.
-                // For simplicity, ProjectManager.LoadProject expects the project root path.
-                // We need to resolve the project root path from the provided Project FileInfo.
-                string projectRootPath = Project.DirectoryName 
-                                         ?? throw new InvalidOperationException($"Could not determine project root from {Project.FullName}");
+                string projectRootPath = project.DirectoryName
+                                         ?? throw new InvalidOperationException($"Could not determine project root from {project.FullName}");
 
-                var pieceProject = await _projectManager.LoadProject(Path.Combine(projectRootPath, PieceProject.FILENAME));
-                
+                var pieceProject = await projectManager.LoadProject(Path.Combine(projectRootPath, PieceProject.FILENAME));
+
                 if (pieceProject == null)
                 {
-                    _logger.LogError("Failed to load PieceProject definition from '{ProjectPath}'.", Project.FullName);
-                    return 1;
+                    logger.LogError("Failed to load PieceProject definition from '{ProjectPath}'.", project.FullName);
+                    return; // Original code returned 1
                 }
 
-                bool success = await _projectBuildService.BuildProject(pieceProject, Configuration);
+                bool success = await projectBuildService.BuildProject(pieceProject, configuration);
 
                 if (success)
                 {
-                    _logger.LogInformation("Project '{ProjectName}' built successfully.", pieceProject.Name);
-                    return 0; // Success
+                    logger.LogInformation("Project '{ProjectName}' built successfully.", pieceProject.Name);
+                    return; // Original code returned 0
                 }
                 else
                 {
-                    _logger.LogError("Project '{ProjectName}' failed to build.", pieceProject.Name);
-                    return 1; // Failure
+                    logger.LogError("Project '{ProjectName}' failed to build.", pieceProject.Name);
+                    return; // Original code returned 1
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while building project '{ProjectPath}': {ErrorMessage}", Project.FullName, ex.Message);
-                return 1; // Failure
+                logger.LogError(ex, "An error occurred while building project '{ProjectPath}': {ErrorMessage}", project.FullName, ex.Message);
+                return; // Original code returned 1
             }
-        }
+        },
+        projectOption, configurationOption);
     }
 }

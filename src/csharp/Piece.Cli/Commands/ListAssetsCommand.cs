@@ -1,17 +1,19 @@
-using System.CommandLine;
-using System.CommandLine.Invocation;
-using Microsoft.Extensions.Logging;
-using Piece.ProjectManagement;
-using System.Threading.Tasks;
 using System;
+using System.CommandLine;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+
+using Microsoft.Extensions.Logging;
+
+using Piece.ProjectManagement;
 
 namespace Piece.Cli.Commands;
 
 public class ListAssetsCommand : Command
 {
-    public ListAssetsCommand() : base("list", "Lists assets in a Piece Engine project.")
+    public ListAssetsCommand(IProjectManager projectManager, IProjectAssetService projectAssetService, ILogger<ListAssetsCommand> logger)
+        : base("list", "Lists assets in a Piece Engine project.")
     {
         var projectOption = new Option<FileInfo?>(
             new[] { "--project", "-p" },
@@ -20,67 +22,52 @@ public class ListAssetsCommand : Command
             IsRequired = true
         };
         AddOption(projectOption);
-    }
 
-    public class Handler : ICommandHandler
-    {
-        private readonly IProjectManager _projectManager;
-        private readonly IProjectAssetService _projectAssetService;
-        private readonly ILogger<ListAssetsCommand> _logger;
-
-        public FileInfo? Project { get; set; }
-
-        public Handler(IProjectManager projectManager, IProjectAssetService projectAssetService, ILogger<ListAssetsCommand> logger)
+        this.SetHandler(async (project) =>
         {
-            _projectManager = projectManager;
-            _projectAssetService = projectAssetService;
-            _logger = logger;
-        }
-
-        public async Task<int> InvokeAsync(InvocationContext context)
-        {
-            if (Project == null || !Project.Exists)
+            if (project == null || !project.Exists)
             {
-                _logger.LogError("Project file not found at '{ProjectPath}'.", Project?.FullName ?? "null");
-                return 1;
+                logger.LogError("Project file not found at '{ProjectPath}'.", project?.FullName ?? "null");
+                return; // Original code returned 1
             }
 
-            _logger.LogInformation("Attempting to list assets for project '{ProjectPath}'.", Project.FullName);
+            logger.LogInformation("Attempting to list assets for project '{ProjectPath}'.", project.FullName);
 
             try
             {
-                string projectRootPath = Project.DirectoryName 
-                                         ?? throw new InvalidOperationException($"Could not determine project root from {Project.FullName}");
+                string projectRootPath = project.DirectoryName
+                                         ?? throw new InvalidOperationException($"Could not determine project root from {project.FullName}");
 
-                var pieceProject = await _projectManager.LoadProject(Path.Combine(projectRootPath, PieceProject.FILENAME));
-                
+                var pieceProject = await projectManager.LoadProject(Path.Combine(projectRootPath, PieceProject.FILENAME));
+
                 if (pieceProject == null)
                 {
-                    _logger.LogError("Failed to load PieceProject definition from '{ProjectPath}'.", Project.FullName);
-                    return 1;
+                    logger.LogError("Failed to load PieceProject definition from '{ProjectPath}'.", project.FullName);
+                    return; // Original code returned 1
                 }
 
-                var assets = await _projectAssetService.ListAssets(pieceProject);
+                var assets = await projectAssetService.ListAssets(pieceProject);
 
                 if (assets.Any())
                 {
-                    _logger.LogInformation("Assets in project '{ProjectName}':", pieceProject.Name);
+                    logger.LogInformation("Assets in project '{ProjectName}':", pieceProject.Name);
                     foreach (var asset in assets)
                     {
-                        _logger.LogInformation("- {Asset}", asset);
+                        logger.LogInformation("- {Asset}", asset);
                     }
                 }
                 else
                 {
-                    _logger.LogInformation("No assets found in project '{ProjectName}'.", pieceProject.Name);
+                    logger.LogInformation("No assets found in project '{ProjectName}'.", pieceProject.Name);
                 }
-                return 0; // Success
+                return; // Original code returned 0
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while listing assets for project '{ProjectPath}': {ErrorMessage}", Project.FullName, ex.Message);
-                return 1; // Failure
+                logger.LogError(ex, "An error occurred while listing assets for project '{ProjectPath}': {ErrorMessage}", project.FullName, ex.Message);
+                return; // Original code returned 1
             }
-        }
+        },
+        projectOption);
     }
 }

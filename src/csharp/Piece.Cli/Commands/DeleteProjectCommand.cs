@@ -1,16 +1,18 @@
-using System.CommandLine;
-using System.CommandLine.Invocation;
-using Microsoft.Extensions.Logging;
-using Piece.ProjectManagement;
-using System.Threading.Tasks;
 using System;
+using System.CommandLine;
 using System.IO;
+using System.Threading.Tasks;
+
+using Microsoft.Extensions.Logging;
+
+using Piece.ProjectManagement;
 
 namespace Piece.Cli.Commands;
 
 public class DeleteProjectCommand : Command
 {
-    public DeleteProjectCommand() : base("delete", "Deletes a Piece Engine project.")
+    public DeleteProjectCommand(IProjectManager projectManager, ILogger<DeleteProjectCommand> logger)
+        : base("delete", "Deletes a Piece Engine project.")
     {
         var projectPathArgument = new Argument<DirectoryInfo>(
             "projectPath",
@@ -19,51 +21,38 @@ public class DeleteProjectCommand : Command
             Arity = ArgumentArity.ExactlyOne
         };
         AddArgument(projectPathArgument);
-    }
 
-    public class Handler : ICommandHandler
-    {
-        private readonly IProjectManager _projectManager;
-        private readonly ILogger<DeleteProjectCommand> _logger;
-
-        public DirectoryInfo ProjectPath { get; set; } = default!;
-
-        public Handler(IProjectManager projectManager, ILogger<DeleteProjectCommand> logger)
+        this.SetHandler(async (projectPath) =>
         {
-            _projectManager = projectManager;
-            _logger = logger;
-        }
-
-        public async Task<int> InvokeAsync(InvocationContext context)
-        {
-            if (!ProjectPath.Exists)
+            if (!projectPath.Exists)
             {
-                _logger.LogError("Project directory not found at '{ProjectPath}'.", ProjectPath.FullName);
-                return 1;
+                logger.LogError("Project directory not found at '{ProjectPath}'.", projectPath.FullName);
+                return; // Original code returned 1
             }
 
-            _logger.LogInformation("Attempting to delete project at '{ProjectPath}'.", ProjectPath.FullName);
+            logger.LogInformation("Attempting to delete project at '{ProjectPath}'.", projectPath.FullName);
 
             try
             {
-                bool success = await _projectManager.DeleteProject(ProjectPath.FullName);
+                bool success = await projectManager.DeleteProject(projectPath.FullName);
 
                 if (success)
                 {
-                    _logger.LogInformation("Project directory '{ProjectPath}' deleted successfully.", ProjectPath.FullName);
-                    return 0; // Success
+                    logger.LogInformation("Project directory '{ProjectPath}' deleted successfully.", projectPath.FullName);
+                    return; // Original code returned 0
                 }
                 else
                 {
-                    _logger.LogError("Failed to delete project directory '{ProjectPath}'.", ProjectPath.FullName);
-                    return 1; // Failure
+                    logger.LogError("Failed to delete project directory '{ProjectPath}'.", projectPath.FullName);
+                    return; // Original code returned 1
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while deleting project directory '{ProjectPath}': {ErrorMessage}", ProjectPath.FullName, ex.Message);
-                return 1; // Failure
+                logger.LogError(ex, "An error occurred while deleting project directory '{ProjectPath}': {ErrorMessage}", projectPath.FullName, ex.Message);
+                return; // Original code returned 1
             }
-        }
+        },
+        projectPathArgument);
     }
 }

@@ -1,10 +1,14 @@
 using System.CommandLine;
+using System.CommandLine.Builder; // Re-added
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Piece.ProjectManagement;
-using Serilog; // For Serilog configuration
+
 using Piece.Cli; // Added for CliServiceCollectionExtensions
 using Piece.Cli.Commands; // Added for all command classes
+using Piece.ProjectManagement;
+
+using Serilog; // For Serilog configuration
 
 namespace Piece.Cli;
 
@@ -12,54 +16,11 @@ public class Program
 {
     public static async Task<int> Main(string[] args)
     {
-        var rootCommand = new RootCommand("Piece Engine CLI");
-
-        // Define main commands
-        var projectCommand = new Command("project", "Commands for managing Piece Engine projects.");
-        rootCommand.Add(projectCommand);
-
-        var newProjectCommand = new NewProjectCommand();
-        projectCommand.Add(newProjectCommand);
-
-        var deleteProjectCommand = new DeleteProjectCommand();
-        projectCommand.Add(deleteProjectCommand);
-
-        var buildCommand = new BuildProjectCommand();
-        rootCommand.Add(buildCommand);
-
-        var assetCommand = new Command("asset", "Commands for managing project assets.");
-        rootCommand.Add(assetCommand);
-
-        var importAssetCommand = new ImportAssetCommand();
-        assetCommand.Add(importAssetCommand);
-
-        var listAssetsCommand = new ListAssetsCommand();
-        assetCommand.Add(listAssetsCommand);
-
-        var deleteAssetCommand = new DeleteAssetCommand();
-        assetCommand.Add(deleteAssetCommand);
-
-        var moduleCommand = new Command("module", "Commands for managing project modules (NuGet packages).");
-        rootCommand.Add(moduleCommand);
-
-        var addModuleCommand = new AddModuleCommand();
-        moduleCommand.Add(addModuleCommand);
-
-        var removeModuleCommand = new RemoveModuleCommand();
-        moduleCommand.Add(removeModuleCommand);
-
-        var parser = new CommandLineBuilder(rootCommand)
-            .UseHost(CreateHostBuilder)
-            .UseDefaults()
-            .Build();
-
-        return await parser.InvokeAsync(args);
-    }
-
-    private static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
-            .UseSerilog((hostContext, services, configuration) => {
-                configuration.ReadFrom.Configuration(hostContext.Configuration)
+        // Configure and build the host
+        var host = Host.CreateDefaultBuilder(args)
+            .UseSerilog((hostContext, services, loggerConfiguration) =>
+            {
+                loggerConfiguration.ReadFrom.Configuration(hostContext.Configuration)
                              .ReadFrom.Services(services)
                              .Enrich.FromLogContext()
                              .WriteTo.Console(); // Configure Serilog to write to console
@@ -67,19 +28,52 @@ public class Program
             .ConfigureServices((hostContext, services) =>
             {
                 // Register ProjectManagement services
-                services.AddProjectManagement(hostContext.Configuration);
+                services.AddProjectManagement();
 
                 // Register CLI-specific services
                 services.AddCliServices();
 
-                // Register command handlers
-                services.AddTransient<NewProjectCommand.Handler>();
-                services.AddTransient<DeleteProjectCommand.Handler>();
-                services.AddTransient<BuildProjectCommand.Handler>();
-                services.AddTransient<ImportAssetCommand.Handler>();
-                services.AddTransient<ListAssetsCommand.Handler>();
-                services.AddTransient<AddModuleCommand.Handler>();
-                services.AddTransient<RemoveModuleCommand.Handler>();
-                services.AddTransient<DeleteAssetCommand.Handler>();
-            });
+                // Add all command definitions to the DI container
+                // These commands will now directly contain their handlers
+                services.AddTransient<NewProjectCommand>();
+                services.AddTransient<DeleteProjectCommand>();
+                services.AddTransient<BuildProjectCommand>();
+                services.AddTransient<ImportAssetCommand>();
+                services.AddTransient<ListAssetsCommand>();
+                services.AddTransient<AddModuleCommand>();
+                services.AddTransient<RemoveModuleCommand>();
+                services.AddTransient<DeleteAssetCommand>();
+            })
+            .Build();
+
+        // Create the root command and add subcommands
+        var rootCommand = new RootCommand("Piece Engine CLI");
+
+        // Resolve commands from the host's service provider
+        // These are the top-level commands like 'piece build'
+        rootCommand.Add(host.Services.GetRequiredService<BuildProjectCommand>());
+
+        // Add "project" subcommand container
+        var projectCommand = new Command("project", "Commands for managing Piece Engine projects.");
+        projectCommand.Add(host.Services.GetRequiredService<NewProjectCommand>());
+        projectCommand.Add(host.Services.GetRequiredService<DeleteProjectCommand>());
+        rootCommand.Add(projectCommand);
+
+        // Add "asset" subcommand container
+        var assetCommand = new Command("asset", "Commands for managing project assets.");
+        assetCommand.Add(host.Services.GetRequiredService<ImportAssetCommand>());
+        assetCommand.Add(host.Services.GetRequiredService<ListAssetsCommand>());
+        assetCommand.Add(host.Services.GetRequiredService<DeleteAssetCommand>());
+        rootCommand.Add(assetCommand);
+
+        // Add "module" subcommand container
+        var moduleCommand = new Command("module", "Commands for managing project modules (NuGet packages).");
+        moduleCommand.Add(host.Services.GetRequiredService<AddModuleCommand>());
+        moduleCommand.Add(host.Services.GetRequiredService<RemoveModuleCommand>());
+        rootCommand.Add(moduleCommand);
+
+
+        // Invoke the root command
+        return await rootCommand.InvokeAsync(args);
+    }
 }

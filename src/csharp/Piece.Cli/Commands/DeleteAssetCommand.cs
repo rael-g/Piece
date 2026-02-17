@@ -1,16 +1,18 @@
-using System.CommandLine;
-using System.CommandLine.Invocation;
-using Microsoft.Extensions.Logging;
-using Piece.ProjectManagement;
-using System.Threading.Tasks;
 using System;
+using System.CommandLine;
 using System.IO;
+using System.Threading.Tasks;
+
+using Microsoft.Extensions.Logging;
+
+using Piece.ProjectManagement;
 
 namespace Piece.Cli.Commands;
 
 public class DeleteAssetCommand : Command
 {
-    public DeleteAssetCommand() : base("delete", "Deletes an asset from a Piece Engine project.")
+    public DeleteAssetCommand(IProjectManager projectManager, IProjectAssetService projectAssetService, ILogger<DeleteAssetCommand> logger)
+        : base("delete", "Deletes an asset from a Piece Engine project.")
     {
         var assetPathArgument = new Argument<string>(
             "assetPath",
@@ -24,65 +26,49 @@ public class DeleteAssetCommand : Command
             IsRequired = true
         };
         AddOption(projectOption);
-    }
 
-    public class Handler : ICommandHandler
-    {
-        private readonly IProjectManager _projectManager;
-        private readonly IProjectAssetService _projectAssetService;
-        private readonly ILogger<DeleteAssetCommand> _logger;
-
-        public string AssetPath { get; set; } = string.Empty;
-        public FileInfo? Project { get; set; }
-
-        public Handler(IProjectManager projectManager, IProjectAssetService projectAssetService, ILogger<DeleteAssetCommand> logger)
+        this.SetHandler(async (assetPath, project) =>
         {
-            _projectManager = projectManager;
-            _projectAssetService = projectAssetService;
-            _logger = logger;
-        }
-
-        public async Task<int> InvokeAsync(InvocationContext context)
-        {
-            if (Project == null || !Project.Exists)
+            if (project == null || !project.Exists)
             {
-                _logger.LogError("Project file not found at '{ProjectPath}'.", Project?.FullName ?? "null");
-                return 1;
+                logger.LogError("Project file not found at '{ProjectPath}'.", project?.FullName ?? "null");
+                return; // Original code returned 1
             }
 
-            _logger.LogInformation("Attempting to delete asset '{AssetPath}' from project '{ProjectPath}'.", AssetPath, Project.FullName);
+            logger.LogInformation("Attempting to delete asset '{AssetPath}' from project '{ProjectPath}'.", assetPath, project.FullName);
 
             try
             {
-                string projectRootPath = Project.DirectoryName 
-                                         ?? throw new InvalidOperationException($"Could not determine project root from {Project.FullName}");
+                string projectRootPath = project.DirectoryName
+                                         ?? throw new InvalidOperationException($"Could not determine project root from {project.FullName}");
 
-                var pieceProject = await _projectManager.LoadProject(Path.Combine(projectRootPath, PieceProject.FILENAME));
-                
+                var pieceProject = await projectManager.LoadProject(Path.Combine(projectRootPath, PieceProject.FILENAME));
+
                 if (pieceProject == null)
                 {
-                    _logger.LogError("Failed to load PieceProject definition from '{ProjectPath}'.", Project.FullName);
-                    return 1;
+                    logger.LogError("Failed to load PieceProject definition from '{ProjectPath}'.", project.FullName);
+                    return; // Original code returned 1
                 }
 
-                bool success = await _projectAssetService.DeleteAsset(pieceProject, AssetPath);
+                bool success = await projectAssetService.DeleteAsset(pieceProject, assetPath);
 
                 if (success)
                 {
-                    _logger.LogInformation("Asset '{AssetPath}' deleted successfully from project '{ProjectName}'.", AssetPath, pieceProject.Name);
-                    return 0; // Success
+                    logger.LogInformation("Asset '{AssetPath}' deleted successfully from project '{ProjectName}'.", assetPath, pieceProject.Name);
+                    return; // Original code returned 0
                 }
                 else
                 {
-                    _logger.LogError("Failed to delete asset '{AssetPath}' from project '{ProjectName}'.", AssetPath, pieceProject.Name);
-                    return 1; // Failure
+                    logger.LogError("Failed to delete asset '{AssetPath}' from project '{ProjectName}'.", assetPath, pieceProject.Name);
+                    return; // Original code returned 1
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while deleting asset '{AssetPath}' from project '{ProjectPath}': {ErrorMessage}", AssetPath, Project.FullName, ex.Message);
-                return 1; // Failure
+                logger.LogError(ex, "An error occurred while deleting asset '{AssetPath}' from project '{ProjectPath}': {ErrorMessage}", assetPath, project.FullName, ex.Message);
+                return; // Original code returned 1
             }
-        }
+        },
+        assetPathArgument, projectOption);
     }
 }
