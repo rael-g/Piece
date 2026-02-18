@@ -113,6 +113,11 @@ extern "C"
      * @param message The log message.
      */
     PIECE_CORE_API void PieceCoreLog(int level, const char *message);
+
+    /**
+     * @brief Initializes the logger. This should be called once at the start of the application.
+     */
+    PIECE_CORE_API void PieceCoreInitializeLogger();
 }
 
 #endif // NATIVE_EXPORTS_H

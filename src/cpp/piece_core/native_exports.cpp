@@ -88,13 +88,8 @@ extern "C"
     PIECE_CORE_API Piece::Core::EngineCore *EngineInitialize()
     {
         PIECE_TRACE("EngineInitialize()");
-        static bool logger_initialized = false;
-        if (!logger_initialized)
-        {
-            Piece::Core::InitializeLogger();
-            logger_initialized = true;
-        }
-        PIECE_INFO("EngineInitialize called. Attempting to create EngineCore...");
+        // Logger initialization is now handled by PieceCoreInitializeLogger(), which should be called once by the host application.
+        // PIECE_INFO("EngineInitialize called. Attempting to create EngineCore..."); // This log might not be captured if PieceCoreInitializeLogger is not called first.
         
         Piece::Core::EngineCore *core = nullptr;
         auto *factory = Piece::Core::ServiceLocator::Get().GetEngineCoreFactory();
@@ -125,6 +120,18 @@ extern "C"
         }
         PIECE_INFO("EngineCore fully initialized.");
         return core;
+    }
+    
+    // ... (other API functions) ...
+
+    PIECE_CORE_API void PieceCoreInitializeLogger()
+    {
+        static bool logger_initialized = false;
+        if (!logger_initialized)
+        {
+            Piece::Core::InitializeLogger();
+            logger_initialized = true;
+        }
     }
 
     PIECE_CORE_API void EngineDestroy(Piece::Core::EngineCore *core_ptr)
@@ -207,19 +214,24 @@ extern "C"
     PIECE_CORE_API void *EngineLoadMesh(Piece::Core::EngineCore *core_ptr, const char *path)
     {
         PIECE_TRACE("EngineLoadMesh(core_ptr: {0}, path: \"{1}\")", fmt::ptr(core_ptr), path);
-        if (!core_ptr || !core_ptr->GetResourceManager())
+        if (!core_ptr)
         {
-            PIECE_WARN("EngineLoadMesh called with null core_ptr or resource_manager_.");
+            PIECE_ERROR("EngineCore is null. Cannot load mesh.");
+            return nullptr;
+        }
+        if (!core_ptr->GetResourceManager())
+        {
+            PIECE_ERROR("ResourceManager is null. Cannot load mesh.");
             return nullptr;
         }
         std::string s_path(path);
         auto mesh_ptr = core_ptr->GetResourceManager()->LoadMesh(s_path);
         if (!mesh_ptr)
         {
-            PIECE_ERROR("Failed to load mesh: {}.", s_path);
+            PIECE_ERROR("Failed to load mesh from path: {0}", s_path);
             return nullptr;
         }
-        PIECE_INFO("Loaded mesh: {}. Returning raw pointer {}.", s_path, static_cast<void *>(mesh_ptr.get()));
+        PIECE_INFO("Loaded mesh: {0}. Returning raw pointer {1}.", s_path, static_cast<void *>(mesh_ptr.get()));
         return mesh_ptr.get(); // Return raw pointer, ResourceManager owns shared_ptr
     }
 
