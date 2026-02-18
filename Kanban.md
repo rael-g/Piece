@@ -197,21 +197,21 @@
       - [ ] EngineCore_Update_HandlesNullPhysicsSystem
       - [x] EngineCore_Render_CallsGraphicsDeviceBeginEndFrame
       - [x] EngineCore_Render_CallsRenderContextClear
-      - [ ] EngineCore_Render_CallsRenderSystemRenderFrame
+      - [x] EngineCore_Render_CallsRenderSystemRenderFrame
       - [x] EngineCore_Render_HandlesNullDependencies
       - [ ] EngineCore_Render_SkipsIncompleteModels
-      - [ ] NativeExports_SetGraphicsDeviceFactory_SetsFactoryCorrectly
-      - [ ] NativeExports_SetGraphicsDeviceFactory_HandlesNullPtr
-      - [ ] NativeExports_SetWindowFactory_SetsFactoryCorrectly
-      - [ ] NativeExports_SetWindowFactory_HandlesNullPtr
-      - [ ] NativeExports_SetPhysicsWorldFactory_SetsFactoryCorrectly
-      - [ ] NativeExports_SetPhysicsWorldFactory_HandlesNullPtr
+      - [x] NativeExports_SetGraphicsDeviceFactory_SetsFactoryCorrectly
+      - [x] NativeExports_SetGraphicsDeviceFactory_HandlesNullPtr
+      - [x] NativeExports_SetWindowFactory_SetsFactoryCorrectly
+      - [x] NativeExports_SetWindowFactory_HandlesNullPtr
+      - [x] NativeExports_SetPhysicsWorldFactory_SetsFactoryCorrectly
+      - [x] NativeExports_SetPhysicsWorldFactory_HandlesNullPtr
       - [ ] NativeExports_EngineInitialize_InitializesLoggerOnce
       - [x] NativeExports_EngineInitialize_CreatesEngineCore
       - [ ] NativeExports_EngineInitialize_ReturnsNullOnCoreAllocationFailure
       - [ ] NativeExports_EngineInitialize_LogsInitializationInfo
       - [ ] NativeExports_EngineDestroy_DeletesEngineCore
-      - [ ] NativeExports_EngineDestroy_HandlesNullCorePtr
+      - [x] NativeExports_EngineDestroy_HandlesNullCorePtr
       - [ ] NativeExports_EngineUpdate_CallsCoreUpdate
       - [ ] NativeExports_EngineUpdate_HandlesNullCorePtr
       - [ ] NativeExports_EngineRender_CallsCoreRender
@@ -242,7 +242,7 @@
       - [ ] NativeExports_PieceCoreLog_InvokesCallbackWhenRegistered
       - [ ] NativeExports_PieceCoreLog_FallsBackToStdOutWhenNoCallback
       - [ ] NativeExports_PieceCoreLog_HandlesNullMessage
-      - [ ] ResourceManager_Constructor_InitializesCorrectly
+      - [x] ResourceManager_Constructor_InitializesCorrectly
       - [ ] ResourceManager_Destructor_CleansUpResources
       - [ ] ResourceManager_LoadMaterial_ReturnsValidMaterial
       - [ ] ResourceManager_LoadMaterial_ReturnsDifferentMaterialForDifferentPaths
@@ -298,46 +298,46 @@
       - [ ] ServiceLocator_GetPhysicsWorldFactory_ReturnsSetFactory
       - [ ] ServiceLocator_GetFactory_ReturnsNullWhenNotSet
       - [ ] ServiceLocator_Logging_GeneratesAppropriateMessages
-      - [ ] MinimalPhysicsWorldFactory_Constructor_StoresOptions
+      - [x] MinimalPhysicsWorldFactory_Constructor_StoresOptions
       - [ ] MinimalPhysicsWorldFactory_CreatePhysicsWorld_UsesFactoryOptionsWhenNoneProvided
       - [ ] MinimalPhysicsWorldFactory_CreatePhysicsWorld_UsesProvidedOptions
-      - [ ] MinimalPhysicsWorldFactory_CreatePhysicsWorld_ReturnsValidWorld
+      - [x] MinimalPhysicsWorldFactory_CreatePhysicsWorld_ReturnsValidWorld
       - [ ] MinimalPhysicsWorldFactory_CreatePhysicsWorld_ReturnsNullOnWorldInitFailure
       - [ ] MinimalPhysicsWorldFactory_Logging_GeneratesAppropriateMessages
-      - [ ] MinimalPhysicsWorld_Constructor_InitializesCorrectly
-      - [ ] MinimalPhysicsWorld_Destructor_CompletesWithoutErrors
-      - [ ] MinimalPhysicsWorld_Init_SetsOptions
-      - [ ] MinimalPhysicsWorld_Step_NoOpButDoesNotCrash
-      - [ ] MinimalPhysicsWorld_SetGravity_SetsInternalState
-      - [ ] MinimalPhysicsWorld_CreateRigidBody_ReturnsValidBody
-      - [ ] MinimalPhysicsWorld_CreateBoxShape_ReturnsValidShape
-      - [ ] MinimalPhysicsWorld_CreateSphereShape_ReturnsValidShape
-      - [ ] MinimalPhysicsWorld_CreatePhysicsMaterial_ReturnsValidMaterial
+      - [x] MinimalPhysicsWorld_Constructor_InitializesCorrectly
+      - [x] MinimalPhysicsWorld_Destructor_CompletesWithoutErrors
+      - [x] MinimalPhysicsWorld_Init_SetsOptions
+      - [x] MinimalPhysicsWorld_Step_NoOpButDoesNotCrash
+      - [x] MinimalPhysicsWorld_SetGravity_SetsInternalState
+      - [x] MinimalPhysicsWorld_CreateRigidBody_ReturnsValidBody
+      - [x] MinimalPhysicsWorld_CreateBoxShape_ReturnsValidShape
+      - [x] MinimalPhysicsWorld_CreateSphereShape_ReturnsValidShape
+      - [x] MinimalPhysicsWorld_CreatePhysicsMaterial_ReturnsValidMaterial
       - [ ] MinimalPhysicsWorld_Logging_GeneratesAppropriateMessages
-      - [ ] MinimalPhysicsBody_Constructor_InitializesCorrectly
-      - [ ] MinimalPhysicsBody_Destructor_CompletesWithoutErrors
+      - [x] MinimalPhysicsBody_Constructor_InitializesCorrectly
+      - [x] MinimalPhysicsBody_Destructor_CompletesWithoutErrors
       - [ ] MinimalPhysicsBody_SetShape_StoresShape
       - [ ] MinimalPhysicsBody_SetMaterial_StoresMaterial
-      - [ ] MinimalPhysicsBody_SetMass_UpdatesMass
-      - [ ] MinimalPhysicsBody_SetPosition_UpdatesPosition
+      - [x] MinimalPhysicsBody_SetMass_UpdatesMass
+      - [x] MinimalPhysicsBody_SetPosition_UpdatesPosition
       - [ ] MinimalPhysicsBody_GetPosition_ReturnsCurrentPosition
-      - [ ] MinimalPhysicsBody_SetRotation_UpdatesRotation
+      - [x] MinimalPhysicsBody_SetRotation_UpdatesRotation
       - [ ] MinimalPhysicsBody_GetRotation_ReturnsCurrentRotation
-      - [ ] MinimalPhysicsBody_SetLinearVelocity_UpdatesVelocity
-      - [ ] MinimalPhysicsBody_SetAngularVelocity_UpdatesVelocity
-      - [ ] MinimalPhysicsBody_ApplyForce_NoOpButDoesNotCrash
+      - [x] MinimalPhysicsBody_SetLinearVelocity_UpdatesVelocity
+      - [x] MinimalPhysicsBody_SetAngularVelocity_UpdatesVelocity
+      - [x] MinimalPhysicsBody_ApplyForce_NoOpButDoesNotCrash
       - [ ] MinimalPhysicsBody_Logging_GeneratesAppropriateMessages
-      - [ ] MinimalColliderShape_Constructor_InitializesCorrectly
-      - [ ] MinimalColliderShape_Destructor_CompletesWithoutErrors
+      - [x] MinimalColliderShape_Constructor_InitializesCorrectly
+      - [x] MinimalColliderShape_Destructor_CompletesWithoutErrors
       - [ ] MinimalColliderShape_Logging_GeneratesAppropriateMessages
-      - [ ] MinimalJoint_Constructor_InitializesCorrectly
-      - [ ] MinimalJoint_Destructor_CompletesWithoutErrors
-      - [ ] MinimalJoint_SetBodies_StoresBodies
+      - [x] MinimalJoint_Constructor_InitializesCorrectly
+      - [x] MinimalJoint_Destructor_CompletesWithoutErrors
+      - [x] MinimalJoint_SetBodies_StoresBodies
       - [ ] MinimalJoint_Logging_GeneratesAppropriateMessages
-      - [ ] MinimalPhysicsMaterial_Constructor_InitializesCorrectly
-      - [ ] MinimalPhysicsMaterial_Destructor_CompletesWithoutErrors
-      - [ ] MinimalPhysicsMaterial_GetFriction_ReturnsCorrectValue
-      - [ ] MinimalPhysicsMaterial_GetRestitution_ReturnsCorrectValue
+      - [x] MinimalPhysicsMaterial_Constructor_InitializesCorrectly
+      - [x] MinimalPhysicsMaterial_Destructor_CompletesWithoutErrors
+      - [x] MinimalPhysicsMaterial_GetFriction_ReturnsCorrectValue
+      - [x] MinimalPhysicsMaterial_GetRestitution_ReturnsCorrectValue
       - [ ] MinimalPhysicsMaterial_Logging_GeneratesAppropriateMessages
       - [ ] CreateBox2DPhysicsWorldFactory_ReturnsValidFactory
       - [ ] CreateBox2DPhysicsWorldFactory_Logging_GeneratesAppropriateMessages
@@ -498,16 +498,16 @@
       - [ ] CreateOpenGLGraphicsDeviceFactory_Logging_GeneratesAppropriateMessages
       - [ ] DestroyOpenGLGraphicsDeviceFactory_DeletesFactory
       - [ ] DestroyOpenGLGraphicsDeviceFactory_Logging_GeneratesAppropriateMessages
-      - [ ] GlfwWindowFactory_Constructor_StoresOptions
+      - [x] GlfwWindowFactory_Constructor_StoresOptions
       - [ ] GlfwWindowFactory_CreateGlfwWindow_UsesFactoryOptionsWhenNoneProvided
       - [ ] GlfwWindowFactory_CreateGlfwWindow_UsesProvidedOptions
-      - [ ] GlfwWindowFactory_CreateGlfwWindow_ReturnsValidWindow
+      - [x] GlfwWindowFactory_CreateGlfwWindow_ReturnsValidWindow
       - [ ] GlfwWindowFactory_CreateGlfwWindow_ReturnsNullOnWindowInitFailure
       - [ ] GlfwWindowFactory_Logging_GeneratesAppropriateMessages
-      - [ ] GlfwWindow_Constructor_InitializesGLFWAndLogs
+      - [x] GlfwWindow_Constructor_InitializesGLFWAndLogs
       - [ ] GlfwWindow_Constructor_HandlesGLFWInitFailure
       - [ ] GlfwWindow_Destructor_TerminatesGLFWAndDestroysWindow
-      - [ ] GlfwWindow_Init_CreatesGLFWWindowSuccessfully
+      - [x] GlfwWindow_Init_CreatesGLFWWindowSuccessfully
       - [ ] GlfwWindow_Init_HandlesGLFWWindowCreationFailure
       - [ ] GlfwWindow_Init_SetsWindowHintsCorrectly
       - [ ] GlfwWindow_Init_MakesContextCurrentAndEnablesVSync
