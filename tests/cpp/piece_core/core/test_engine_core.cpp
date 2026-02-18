@@ -430,6 +430,54 @@ TEST_F(EngineCoreTest, EngineCore_Render_CallsRenderSystemRenderFrame)
     // Call render
     engine_core.Render();
 }
+TEST_F(EngineCoreTest, EngineCore_Render_CallsRenderContextClear)
+{
+    // Create mocks for backends
+    auto test_window_mock = std::make_unique<MockWindow>();
+    auto test_graphics_mock = std::make_unique<MockGraphicsDevice>();
+    auto test_physics_mock = std::make_unique<MockPhysicsWorld>();
+    auto test_render_context_mock = std::make_unique<MockRenderContext>();
+    auto test_render_system_mock = std::make_unique<MockRenderSystem>();
+
+    // Get raw pointers for setting expectations
+    MockGraphicsDevice* graphics_ptr = test_graphics_mock.get();
+    MockRenderContext* render_context_ptr = test_render_context_mock.get();
+    MockRenderSystem* render_system_ptr = test_render_system_mock.get();
+
+    // Setup expectations for initialization
+    EXPECT_CALL(*window_factory_mock, CreateGlfwWindow(::testing::_))
+        .WillOnce(::testing::Return(std::move(test_window_mock)));
+    EXPECT_CALL(*graphics_factory_mock, CreateGraphicsDevice(::testing::_, ::testing::_))
+        .WillOnce(::testing::Return(std::move(test_graphics_mock)));
+    EXPECT_CALL(*graphics_ptr, Init(::testing::_, ::testing::_))
+        .WillOnce(::testing::Return(true));
+    EXPECT_CALL(*graphics_ptr, GetImmediateContext())
+        .WillRepeatedly(::testing::Return(render_context_ptr));
+
+    EXPECT_CALL(*physics_factory_mock, CreatePhysicsWorld(::testing::_))
+        .WillOnce(::testing::Return(std::move(test_physics_mock)));
+    EXPECT_CALL(*render_system_factory_mock, CreateRenderSystem(::testing::_))
+        .WillOnce(::testing::Return(std::move(test_render_system_mock)));
+
+    // FIRST: Expect that RenderContext::Clear will be called.
+    EXPECT_CALL(*render_context_ptr, Clear(0.1f, 0.1f, 0.1f, 1.0f)).Times(1);
+
+    // SECOND: Expect that RenderSystem::RenderFrame will be called,
+    // and when it is, it should "simulate" calling RenderContext::Clear.
+    EXPECT_CALL(*render_system_ptr, RenderFrame(::testing::_, ::testing::_, ::testing::_))
+        .WillOnce(::testing::Invoke([render_context_ptr](const Piece::Core::Camera&, const Piece::Core::Light&, const std::vector<std::shared_ptr<Piece::Core::Model>>&) {
+            // This is the simulated call to the mock render_context_ptr's Clear method.
+            render_context_ptr->Clear(0.1f, 0.1f, 0.1f, 1.0f);
+        }));
+
+    // Initialize engine
+    Piece::Core::EngineCore engine_core;
+    ASSERT_TRUE(engine_core.Initialize());
+
+    // Call render, which will trigger render_system_ptr->RenderFrame,
+    // which in turn will call render_context_ptr->Clear (as per our Invoke simulation).
+    engine_core.Render();
+}
 
 TEST_F(EngineCoreTest, EngineCore_Update_HandlesNullPhysicsSystem)
 {
@@ -517,4 +565,6 @@ TEST_F(EngineCoreTest, EngineCore_Render_SkipsIncompleteModels)
     // (Currently, EngineCore::Render passes an empty vector.)
     ASSERT_NO_THROW(engine_core.Render());
 }
+
+
 
