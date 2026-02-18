@@ -56,6 +56,8 @@ class NativeExportsTest : public ::testing::Test
         PieceCoreInitializeLogger();
         // Register the test-specific log callback
         PieceCoreRegisterLogCallback(TestLogCallback);
+        // Force ServiceLocator initialization and clear any logs from its constructor
+        (void)Piece::Core::ServiceLocator::Get();
         g_test_log_buffer.clear();
     }
 
@@ -148,6 +150,26 @@ TEST_F(NativeExportsTest, NativeExports_SetGraphicsDeviceFactory_SetsFactoryCorr
 
     // Clean up (ServiceLocator's TearDown will handle deletion of the unique_ptr)
     // No explicit delete here, as ownership was transferred.
+}
+
+TEST_F(NativeExportsTest, NativeExports_SetGraphicsDeviceFactory_HandlesNullPtr)
+{
+    // Call the C-style export function with a nullptr
+    SetGraphicsDeviceFactory(nullptr);
+
+    // Verify that the ServiceLocator now holds a nullptr for the graphics device factory
+    ASSERT_EQ(Piece::Core::ServiceLocator::Get().GetGraphicsDeviceFactory(), nullptr);
+
+    // Verify that the specific warning message is present in the log buffer
+    bool warning_found = false;
+    for (size_t i = 0; i < g_test_log_buffer.messages.size(); ++i) {
+        if (g_test_log_buffer.messages[i].find("Received null IGraphicsDeviceFactory pointer. Clearing existing factory.") != std::string::npos) {
+            ASSERT_EQ(g_test_log_buffer.levels[i], spdlog::level::level_enum::warn);
+            warning_found = true;
+            break;
+        }
+    }
+    ASSERT_TRUE(warning_found) << "Expected warning message not found in log buffer.";
 }
 
 TEST_F(NativeExportsTest, NativeExports_EngineLoadMesh_CallsResourceManagerLoadMesh)
