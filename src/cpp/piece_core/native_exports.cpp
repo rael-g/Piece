@@ -49,7 +49,8 @@ extern "C"
         PIECE_TRACE("SetGraphicsDeviceFactory(factory_ptr: {0})", fmt::ptr(factory_ptr));
         if (!factory_ptr)
         {
-            PIECE_ERROR("Received null IGraphicsDeviceFactory pointer.");
+            PIECE_WARN("Received null IGraphicsDeviceFactory pointer. Clearing existing factory.");
+            Piece::Core::ServiceLocator::Get().SetGraphicsDeviceFactory(nullptr); // Explicitly clear if null
             return;
         }
         Piece::Core::ServiceLocator::Get().SetGraphicsDeviceFactory(
@@ -62,7 +63,8 @@ extern "C"
         PIECE_TRACE("SetWindowFactory(factory_ptr: {0})", fmt::ptr(factory_ptr));
         if (!factory_ptr)
         {
-            PIECE_ERROR("Received null IWindowFactory pointer.");
+            PIECE_WARN("Received null IWindowFactory pointer. Clearing existing factory.");
+            Piece::Core::ServiceLocator::Get().SetWindowFactory(nullptr); // Explicitly clear if null
             return;
         }
         Piece::Core::ServiceLocator::Get().SetWindowFactory(std::unique_ptr<Piece::WAL::IWindowFactory>(factory_ptr));
@@ -74,7 +76,8 @@ extern "C"
         PIECE_TRACE("SetPhysicsWorldFactory(factory_ptr: {0})", fmt::ptr(factory_ptr));
         if (!factory_ptr)
         {
-            PIECE_ERROR("Received null IPhysicsWorldFactory pointer.");
+            PIECE_WARN("Received null IPhysicsWorldFactory pointer. Clearing existing factory.");
+            Piece::Core::ServiceLocator::Get().SetPhysicsWorldFactory(nullptr); // Explicitly clear if null
             return;
         }
         Piece::Core::ServiceLocator::Get().SetPhysicsWorldFactory(
