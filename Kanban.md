@@ -213,7 +213,7 @@
       - [x] EngineCore_Render_SkipsIncompleteModels
       - [x] NativeExports_SetGraphicsDeviceFactory_SetsFactoryCorrectly
       - [x] NativeExports_SetGraphicsDeviceFactory_HandlesNullPtr
-      - [ ] NativeExports_SetWindowFactory_SetsFactoryCorrectly
+      - [x] NativeExports_SetWindowFactory_SetsFactoryCorrectly
       - [ ] NativeExports_SetWindowFactory_HandlesNullPtr
       - [ ] NativeExports_SetPhysicsWorldFactory_SetsFactoryCorrectly
       - [ ] NativeExports_SetPhysicsWorldFactory_HandlesNullPtr

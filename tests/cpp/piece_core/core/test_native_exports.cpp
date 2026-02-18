@@ -172,6 +172,22 @@ TEST_F(NativeExportsTest, NativeExports_SetGraphicsDeviceFactory_HandlesNullPtr)
     ASSERT_TRUE(warning_found) << "Expected warning message not found in log buffer.";
 }
 
+TEST_F(NativeExportsTest, NativeExports_SetWindowFactory_SetsFactoryCorrectly)
+{
+    // Create a mock factory
+    MockWindowFactory* mock_factory = new MockWindowFactory();
+
+    // Call the C-style export function
+    SetWindowFactory(mock_factory);
+
+    // Verify that the ServiceLocator now holds this factory
+    // Note: ServiceLocator takes ownership, so we expect Get() to return the same raw pointer
+    ASSERT_EQ(Piece::Core::ServiceLocator::Get().GetWindowFactory(), mock_factory);
+
+    // Clean up (ServiceLocator's TearDown will handle deletion of the unique_ptr)
+    // No explicit delete here, as ownership was transferred.
+}
+
 TEST_F(NativeExportsTest, NativeExports_EngineLoadMesh_CallsResourceManagerLoadMesh)
 {
     // Create and configure factory mocks BEFORE transferring ownership to ServiceLocator
