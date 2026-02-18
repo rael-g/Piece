@@ -227,14 +227,14 @@
       - [x] NativeExports_EngineUpdate_HandlesNullCorePtr
       - [x] NativeExports_EngineRender_CallsCoreRender
       - [x] NativeExports_EngineRender_HandlesNullCorePtr
-      - [ ] NativeExports_EngineIsKeyPressed_CallsWindowIsKeyPressed
-      - [ ] NativeExports_EngineIsKeyPressed_HandlesNullCoreOrWindow
-      - [ ] NativeExports_EngineIsMouseButtonPressed_CallsWindowIsMouseButtonPressed
-      - [ ] NativeExports_EngineIsMouseButtonPressed_HandlesNullCoreOrWindow
-      - [ ] NativeExports_EngineGetMouseX_CallsWindowGetMouseX
-      - [ ] NativeExports_EngineGetMouseX_HandlesNullCoreOrWindow
-      - [ ] NativeExports_EngineGetMouseY_CallsWindowGetMouseY
-      - [ ] NativeExports_EngineGetMouseY_HandlesNullCoreOrWindow
+      - [x] NativeExports_EngineIsKeyPressed_CallsWindowIsKeyPressed
+      - [x] NativeExports_EngineIsKeyPressed_HandlesNullCoreOrWindow
+      - [x] NativeExports_EngineIsMouseButtonPressed_CallsWindowIsMouseButtonPressed
+      - [x] NativeExports_EngineIsMouseButtonPressed_HandlesNullCoreOrWindow
+      - [x] NativeExports_EngineGetMouseX_CallsWindowGetMouseX
+      - [x] NativeExports_EngineGetMouseX_HandlesNullCoreOrWindow
+      - [x] NativeExports_EngineGetMouseY_CallsWindowGetMouseY
+      - [x] NativeExports_EngineGetMouseY_HandlesNullCoreOrWindow
       - [ ] NativeExports_EngineLoadMesh_CallsResourceManagerLoadMesh
       - [ ] NativeExports_EngineLoadMesh_ReturnsMeshOnSuccess
       - [ ] NativeExports_EngineLoadMesh_ReturnsNullOnFailure

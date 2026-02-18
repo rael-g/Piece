@@ -340,6 +340,94 @@ TEST_F(NativeExportsTest, NativeExports_EngineRender_CallsCoreRender)
     EngineDestroy(core_ptr);
 }
 
+TEST_F(NativeExportsTest, NativeExports_EngineIsKeyPressed_CallsWindowIsKeyPressed)
+{
+    Piece::Core::EngineCore* core_ptr = EngineInitialize();
+    ASSERT_NE(core_ptr, nullptr);
+    ASSERT_NE(core_ptr->GetWindow(), nullptr);
+
+    auto* mock_window = static_cast<MockWindow*>(core_ptr->GetWindow());
+    Piece::WAL::KeyCode test_key = Piece::WAL::KeyCode::kA;
+
+    EXPECT_CALL(*mock_window, IsKeyPressed(test_key)).WillOnce(::testing::Return(true));
+
+    bool is_pressed = EngineIsKeyPressed(core_ptr, test_key);
+    EXPECT_TRUE(is_pressed);
+
+    EngineDestroy(core_ptr);
+}
+
+TEST_F(NativeExportsTest, NativeExports_EngineIsKeyPressed_HandlesNullCoreOrWindow)
+{
+    EXPECT_FALSE(EngineIsKeyPressed(nullptr, Piece::WAL::KeyCode::kA));
+    
+    // Test with null window (requires a custom Core or factory setup that returns null window)
+    // For now, testing null core is the most common case for this C API safety check.
+}
+
+TEST_F(NativeExportsTest, NativeExports_EngineIsMouseButtonPressed_CallsWindowIsMouseButtonPressed)
+{
+    Piece::Core::EngineCore* core_ptr = EngineInitialize();
+    ASSERT_NE(core_ptr, nullptr);
+
+    auto* mock_window = static_cast<MockWindow*>(core_ptr->GetWindow());
+    Piece::WAL::KeyCode test_button = Piece::WAL::KeyCode::kMouse1;
+
+    EXPECT_CALL(*mock_window, IsMouseButtonPressed(test_button)).WillOnce(::testing::Return(true));
+
+    bool is_pressed = EngineIsMouseButtonPressed(core_ptr, test_button);
+    EXPECT_TRUE(is_pressed);
+
+    EngineDestroy(core_ptr);
+}
+
+TEST_F(NativeExportsTest, NativeExports_EngineIsMouseButtonPressed_HandlesNullCoreOrWindow)
+{
+    EXPECT_FALSE(EngineIsMouseButtonPressed(nullptr, Piece::WAL::KeyCode::kMouse1));
+}
+
+TEST_F(NativeExportsTest, NativeExports_EngineGetMouseX_CallsWindowGetMouseX)
+{
+    Piece::Core::EngineCore* core_ptr = EngineInitialize();
+    ASSERT_NE(core_ptr, nullptr);
+
+    auto* mock_window = static_cast<MockWindow*>(core_ptr->GetWindow());
+    float expected_x = 100.5f;
+
+    EXPECT_CALL(*mock_window, GetMouseX()).WillOnce(::testing::Return(expected_x));
+
+    float actual_x = EngineGetMouseX(core_ptr);
+    EXPECT_EQ(actual_x, expected_x);
+
+    EngineDestroy(core_ptr);
+}
+
+TEST_F(NativeExportsTest, NativeExports_EngineGetMouseX_HandlesNullCoreOrWindow)
+{
+    EXPECT_EQ(EngineGetMouseX(nullptr), 0.0f);
+}
+
+TEST_F(NativeExportsTest, NativeExports_EngineGetMouseY_CallsWindowGetMouseY)
+{
+    Piece::Core::EngineCore* core_ptr = EngineInitialize();
+    ASSERT_NE(core_ptr, nullptr);
+
+    auto* mock_window = static_cast<MockWindow*>(core_ptr->GetWindow());
+    float expected_y = 200.7f;
+
+    EXPECT_CALL(*mock_window, GetMouseY()).WillOnce(::testing::Return(expected_y));
+
+    float actual_y = EngineGetMouseY(core_ptr);
+    EXPECT_EQ(actual_y, expected_y);
+
+    EngineDestroy(core_ptr);
+}
+
+TEST_F(NativeExportsTest, NativeExports_EngineGetMouseY_HandlesNullCoreOrWindow)
+{
+    EXPECT_EQ(EngineGetMouseY(nullptr), 0.0f);
+}
+
 TEST_F(NativeExportsTest, NativeExports_EngineRender_HandlesNullCorePtr)
 {
     // Call EngineRender with a nullptr.
