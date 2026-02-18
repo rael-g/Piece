@@ -8,6 +8,7 @@
 #include <pal/iphysics_world_factory.h>
 #include <ral/igraphics_device_factory.h>
 #include <wal/iwindow_factory.h>
+#include "irender_system_factory.h"
 
 #include <memory>
 #include <piece_core/logging_api.h>
@@ -67,6 +68,16 @@ class ServiceLocator
         PIECE_INFO("ServiceLocator::SetPhysicsWorldFactory(factory: {0})", fmt::ptr(factory.get()));
         physics_world_factory_ = std::move(factory);
     }
+    
+    /**
+     * @brief Sets the render system factory.
+     * @param factory A unique pointer to the render system factory.
+     */
+    void SetRenderSystemFactory(std::unique_ptr<IRenderSystemFactory> factory)
+    {
+        PIECE_INFO("ServiceLocator::SetRenderSystemFactory(factory: {0})", fmt::ptr(factory.get()));
+        render_system_factory_ = std::move(factory);
+    }
 
     /**
      * @brief Gets the graphics device factory.
@@ -95,6 +106,16 @@ class ServiceLocator
         PIECE_TRACE("ServiceLocator::GetPhysicsWorldFactory() -> {0}", fmt::ptr(physics_world_factory_.get()));
         return physics_world_factory_.get();
     }
+    
+    /**
+     * @brief Gets the render system factory.
+     * @return A pointer to the render system factory.
+     */
+    [[nodiscard]] IRenderSystemFactory *GetRenderSystemFactory() const
+    {
+        PIECE_TRACE("ServiceLocator::GetRenderSystemFactory() -> {0}", fmt::ptr(render_system_factory_.get()));
+        return render_system_factory_.get();
+    }
 
   private:
     /**
@@ -108,6 +129,8 @@ class ServiceLocator
     std::unique_ptr<Piece::WAL::IWindowFactory> window_factory_;
     /** @brief The physics world factory instance. */
     std::unique_ptr<Piece::PAL::IPhysicsWorldFactory> physics_world_factory_;
+    /** @brief The render system factory instance. */
+    std::unique_ptr<IRenderSystemFactory> render_system_factory_;
 };
 
 } // namespace Piece::Core

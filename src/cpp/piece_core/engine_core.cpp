@@ -11,6 +11,7 @@
 #include <pal/iphysics_world.h>
 #include <ral/igraphics_device.h>
 #include <wal/iwindow.h>
+#include "core/irender_system_factory.h"
 
 namespace Piece::Core
 {
@@ -37,6 +38,7 @@ bool EngineCore::Initialize()
     WAL::IWindowFactory *window_factory = ServiceLocator::Get().GetWindowFactory();
     RAL::IGraphicsDeviceFactory *graphics_factory = ServiceLocator::Get().GetGraphicsDeviceFactory();
     PAL::IPhysicsWorldFactory *physics_factory = ServiceLocator::Get().GetPhysicsWorldFactory();
+    IRenderSystemFactory *render_system_factory = ServiceLocator::Get().GetRenderSystemFactory();
 
     if (!window_factory)
     {
@@ -51,6 +53,11 @@ bool EngineCore::Initialize()
     if (!physics_factory)
     {
         PIECE_ERROR("IPhysicsWorldFactory not set in ServiceLocator. Engine cannot initialize.");
+        return false;
+    }
+    if (!render_system_factory)
+    {
+        PIECE_ERROR("IRenderSystemFactory not set in ServiceLocator. Engine cannot initialize.");
         return false;
     }
 
@@ -89,7 +96,13 @@ bool EngineCore::Initialize()
 
     // Initialize core systems
     resource_manager_ = std::make_unique<ResourceManager>(graphics_device_.get());
-    render_system_ = std::make_unique<RenderSystem>(graphics_device_.get());
+    render_system_ = render_system_factory->CreateRenderSystem(graphics_device_.get());
+    if (!render_system_)
+    {
+        PIECE_ERROR("Failed to create RenderSystem instance.");
+        return false;
+    }
+    PIECE_INFO("IRenderSystem created.");
     physics_system_ = std::make_unique<PhysicsSystemCpp>(physics_world_.get());
 
     PIECE_INFO("EngineCore: Initialized successfully.");

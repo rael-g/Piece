@@ -105,7 +105,7 @@ class PIECE_CORE_API EngineCore
     std::unique_ptr<Piece::PAL::IPhysicsWorld> physics_world_;
 
     std::unique_ptr<ResourceManager> resource_manager_;
-    std::unique_ptr<RenderSystem> render_system_;
+    std::unique_ptr<IRenderSystem> render_system_;
     std::unique_ptr<PhysicsSystemCpp> physics_system_;
 };
 
