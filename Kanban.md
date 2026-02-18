@@ -211,7 +211,7 @@
       - [x] EngineCore_Render_CallsRenderSystemRenderFrame
       - [x] EngineCore_Render_HandlesNullDependencies
       - [x] EngineCore_Render_SkipsIncompleteModels
-      - [ ] NativeExports_SetGraphicsDeviceFactory_SetsFactoryCorrectly
+      - [x] NativeExports_SetGraphicsDeviceFactory_SetsFactoryCorrectly
       - [ ] NativeExports_SetGraphicsDeviceFactory_HandlesNullPtr
       - [ ] NativeExports_SetWindowFactory_SetsFactoryCorrectly
       - [ ] NativeExports_SetWindowFactory_HandlesNullPtr
