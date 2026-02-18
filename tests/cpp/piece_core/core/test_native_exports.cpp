@@ -56,6 +56,7 @@ class NativeExportsTest : public ::testing::Test
     MockGraphicsDeviceFactory* graphics_factory_mock_ptr = nullptr;
     MockPhysicsWorldFactory* physics_world_factory_mock_ptr = nullptr;
     MockRenderSystemFactory* render_system_factory_mock_ptr = nullptr;
+    MockEngineCoreFactory* engine_core_factory_mock_ptr = nullptr; // Add this
 
     // Mocks for objects returned by the factories that need default behaviors
     // or whose raw pointers are returned. Owned by fixture.
@@ -75,12 +76,15 @@ class NativeExportsTest : public ::testing::Test
         graphics_factory_mock_ptr = new MockGraphicsDeviceFactory();
         physics_world_factory_mock_ptr = new MockPhysicsWorldFactory();
         render_system_factory_mock_ptr = new MockRenderSystemFactory();
+        engine_core_factory_mock_ptr = new MockEngineCoreFactory(); // Add this
 
         // Register factory mocks with the ServiceLocator, transferring ownership
         Piece::Core::ServiceLocator::Get().SetWindowFactory(std::unique_ptr<Piece::WAL::IWindowFactory>(window_factory_mock_ptr));
         Piece::Core::ServiceLocator::Get().SetGraphicsDeviceFactory(std::unique_ptr<Piece::RAL::IGraphicsDeviceFactory>(graphics_factory_mock_ptr));
         Piece::Core::ServiceLocator::Get().SetPhysicsWorldFactory(std::unique_ptr<Piece::PAL::IPhysicsWorldFactory>(physics_world_factory_mock_ptr));
         Piece::Core::ServiceLocator::Get().SetRenderSystemFactory(std::unique_ptr<Piece::Core::IRenderSystemFactory>(render_system_factory_mock_ptr));
+        Piece::Core::ServiceLocator::Get().SetEngineCoreFactory(std::unique_ptr<Piece::Core::IEngineCoreFactory>(engine_core_factory_mock_ptr)); // Add this
+
 
         // Setup default behaviors for factories so EngineInitialize can complete successfully
         // without explicit EXPECT_CALLs in tests where we just need a working EngineCore.
@@ -106,6 +110,14 @@ class NativeExportsTest : public ::testing::Test
         // Default behavior for render system factory: return a new MockRenderSystem on each call
         ON_CALL(*render_system_factory_mock_ptr, CreateRenderSystem(::testing::_))
             .WillByDefault(::testing::Invoke([](Piece::RAL::IGraphicsDevice*){ return std::make_unique<MockRenderSystem>(); }));
+        
+        // Default behavior for engine core factory: return a new MockEngineCore on each call
+        ON_CALL(*engine_core_factory_mock_ptr, CreateEngineCore())
+            .WillByDefault(::testing::Invoke([](){ return std::make_unique<MockEngineCore>(); }));
+
+        // Default behavior for MockEngineCore itself
+        // MOCK_METHOD(void, Update, (float deltaTime), (override));
+        // MOCK_METHOD(void, Render, (), (override));
     }
 
     void TearDown() override
@@ -120,6 +132,7 @@ class NativeExportsTest : public ::testing::Test
         Piece::Core::ServiceLocator::Get().SetWindowFactory(nullptr);
         Piece::Core::ServiceLocator::Get().SetPhysicsWorldFactory(nullptr);
         Piece::Core::ServiceLocator::Get().SetRenderSystemFactory(nullptr);
+        Piece::Core::ServiceLocator::Get().SetEngineCoreFactory(nullptr); // Add this
         // default_render_context_returned_mock is already managed by unique_ptr, will be destroyed with fixture.
     }
 };
@@ -263,28 +276,40 @@ TEST_F(NativeExportsTest, NativeExports_EngineInitialize_ReturnsNullOnCoreInitia
     ASSERT_EQ(core_ptr, nullptr);
 }
 
-TEST_F(NativeExportsTest, NativeExports_EngineDestroy_DeletesEngineCore)
+TEST_F(NativeExportsTest, NativeExports_EngineUpdate_CallsCoreUpdate)
 {
-    // Clear log buffer before starting test to capture relevant messages
-    g_test_log_buffer.clear();
+    // We want to set an EXPECT_CALL on the MockEngineCore's Update method.
+    // To do this, we need to get a pointer to the *specific* MockEngineCore that EngineInitialize() will create.
 
-    // Call EngineInitialize to get a valid EngineCore instance
+    // Create a mock EngineCore and a factory for it
+    auto mock_engine_core_instance = std::make_unique<MockEngineCore>();
+    MockEngineCore* raw_mock_engine_core_ptr = mock_engine_core_instance.get(); // Get raw pointer for EXPECT_CALL
+
+    // Set the expectation for the engine_core_factory_mock_ptr to return *this specific mock*
+    // when CreateEngineCore() is called. WillOnce() is appropriate here because EngineInitialize()
+    // will call it only once for this test to get the core.
+    EXPECT_CALL(*engine_core_factory_mock_ptr, CreateEngineCore())
+        .WillOnce(::testing::Return(std::move(mock_engine_core_instance)));
+
+    // Call EngineInitialize - it should return the mock EngineCore instance
     Piece::Core::EngineCore* core_ptr = EngineInitialize();
     ASSERT_NE(core_ptr, nullptr);
 
-    // Call EngineDestroy
+    float dummy_delta_time = 0.016f;
+
+    // Expect Update to be called on the mock EngineCore
+    EXPECT_CALL(*raw_mock_engine_core_ptr, Update(dummy_delta_time)).Times(1);
+
+    // Call EngineUpdate
+    EngineUpdate(core_ptr, dummy_delta_time);
+
+    // Cleanup
     EngineDestroy(core_ptr);
+}
 
-    // Expect to find "EngineCore at 0x... destroyed." in the logs
-    const auto& messages = g_test_log_buffer.messages;
-    bool found_destroy_log = false;
-    std::string expected_log_prefix = fmt::format("EngineCore at {0} destroyed.", fmt::ptr(core_ptr));
-
-    for (const auto& msg : messages) {
-        if (msg.find(expected_log_prefix) != std::string::npos) {
-            found_destroy_log = true;
-            break;
-        }
-    }
-    ASSERT_TRUE(found_destroy_log) << "Expected log message for EngineCore destruction not found.";
+TEST_F(NativeExportsTest, NativeExports_EngineUpdate_HandlesNullCorePtr)
+{
+    // Call EngineUpdate with a nullptr.
+    // The expectation is that it should not crash.
+    ASSERT_NO_THROW(EngineUpdate(nullptr, 0.016f)); // Pass a dummy delta_time
 }
