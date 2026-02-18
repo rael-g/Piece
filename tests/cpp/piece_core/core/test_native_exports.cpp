@@ -188,6 +188,44 @@ TEST_F(NativeExportsTest, NativeExports_SetWindowFactory_SetsFactoryCorrectly)
     // No explicit delete here, as ownership was transferred.
 }
 
+TEST_F(NativeExportsTest, NativeExports_SetWindowFactory_HandlesNullPtr)
+{
+    g_test_log_buffer.clear(); // Clear buffer to only capture logs from this test step
+
+    // Call the C-style export function with a nullptr
+    SetWindowFactory(nullptr);
+
+    // Verify that the ServiceLocator now holds a nullptr for the window factory
+    ASSERT_EQ(Piece::Core::ServiceLocator::Get().GetWindowFactory(), nullptr);
+
+    // Verify that the specific warning message is present in the log buffer
+    bool warning_found = false;
+    for (size_t i = 0; i < g_test_log_buffer.messages.size(); ++i) {
+        if (g_test_log_buffer.messages[i].find("Received null IWindowFactory pointer. Clearing existing factory.") != std::string::npos) {
+            ASSERT_EQ(g_test_log_buffer.levels[i], spdlog::level::level_enum::warn);
+            warning_found = true;
+            break;
+        }
+    }
+    ASSERT_TRUE(warning_found) << "Expected warning message not found in log buffer.";
+}
+
+TEST_F(NativeExportsTest, NativeExports_SetPhysicsWorldFactory_SetsFactoryCorrectly)
+{
+    // Create a mock factory
+    MockPhysicsWorldFactory* mock_factory = new MockPhysicsWorldFactory();
+
+    // Call the C-style export function
+    SetPhysicsWorldFactory(mock_factory);
+
+    // Verify that the ServiceLocator now holds this factory
+    // Note: ServiceLocator takes ownership, so we expect Get() to return the same raw pointer
+    ASSERT_EQ(Piece::Core::ServiceLocator::Get().GetPhysicsWorldFactory(), mock_factory);
+
+    // Clean up (ServiceLocator's TearDown will handle deletion of the unique_ptr)
+    // No explicit delete here, as ownership was transferred.
+}
+
 TEST_F(NativeExportsTest, NativeExports_EngineLoadMesh_CallsResourceManagerLoadMesh)
 {
     // Create and configure factory mocks BEFORE transferring ownership to ServiceLocator
@@ -214,21 +252,27 @@ TEST_F(NativeExportsTest, NativeExports_EngineLoadMesh_CallsResourceManagerLoadM
 
     // Set up ON_CALLs for the mocks that factories will return
     ON_CALL(*raw_window_factory_ptr, CreateGlfwWindow(::testing::_))
-        .WillByDefault(::testing::Return(::testing::ByMove(std::make_unique<MockWindow>())));
+        .WillByDefault(::testing::Invoke([](const Piece::WAL::NativeWindowOptions*) -> std::unique_ptr<Piece::WAL::IWindow> {
+            return std::make_unique<MockWindow>();
+        }));
 
     ON_CALL(*raw_graphics_factory_ptr, CreateGraphicsDevice(::testing::_, ::testing::_))
-        .WillByDefault(::testing::Invoke([](Piece::WAL::IWindow*, const Piece::RAL::NativeGraphicsOptions*){
+        .WillByDefault(::testing::Invoke([](Piece::WAL::IWindow*, const Piece::RAL::NativeGraphicsOptions*) -> std::unique_ptr<Piece::RAL::IGraphicsDevice> {
             auto mock_device = std::make_unique<MockGraphicsDevice>();
             ON_CALL(*mock_device, Init(::testing::_, ::testing::_)).WillByDefault(::testing::Return(true));
-            ON_CALL(*mock_device, GetImmediateContext()).WillByDefault(::testing::Return(std::make_unique<MockRenderContext>().release()));
+            ON_CALL(*mock_device, GetImmediateContext()).WillByDefault(::testing::Return(std::unique_ptr<Piece::RAL::IRenderContext>(new MockRenderContext()).release()));
             return mock_device;
         }));
 
     ON_CALL(*raw_physics_world_factory_ptr, CreatePhysicsWorld(::testing::_))
-        .WillByDefault(::testing::Return(::testing::ByMove(std::make_unique<MockPhysicsWorld>())));
+        .WillByDefault(::testing::Invoke([](const Piece::PAL::NativePhysicsOptions*) -> std::unique_ptr<Piece::PAL::IPhysicsWorld> {
+            return std::make_unique<MockPhysicsWorld>();
+        }));
 
     ON_CALL(*raw_render_system_factory_ptr, CreateRenderSystem(::testing::_))
-        .WillByDefault(::testing::Return(::testing::ByMove(std::make_unique<MockRenderSystem>())));
+        .WillByDefault(::testing::Invoke([](Piece::RAL::IGraphicsDevice*) -> std::unique_ptr<Piece::Core::IRenderSystem> {
+            return std::make_unique<MockRenderSystem>();
+        }));
     
     // Configure MockResourceManagerFactory to return our specific MockResourceManager
     ON_CALL(*raw_resource_manager_factory_ptr, CreateResourceManager(::testing::_))
@@ -311,10 +355,12 @@ TEST_F(NativeExportsTest, NativeExports_EngineLoadMesh_ReturnsMeshOnSuccess)
 
     // Set up ON_CALLs for the mocks that factories will return
     ON_CALL(*raw_window_factory_ptr, CreateGlfwWindow(::testing::_))
-        .WillByDefault(::testing::Return(::testing::ByMove(std::make_unique<MockWindow>())));
+        .WillByDefault(::testing::Invoke([](const Piece::WAL::NativeWindowOptions*) -> std::unique_ptr<Piece::WAL::IWindow> {
+            return std::make_unique<MockWindow>();
+        }));
 
     ON_CALL(*raw_graphics_factory_ptr, CreateGraphicsDevice(::testing::_, ::testing::_))
-        .WillByDefault(::testing::Invoke([](Piece::WAL::IWindow*, const Piece::RAL::NativeGraphicsOptions*){
+        .WillByDefault(::testing::Invoke([](Piece::WAL::IWindow*, const Piece::RAL::NativeGraphicsOptions*) -> std::unique_ptr<Piece::RAL::IGraphicsDevice> {
             auto mock_device = std::make_unique<MockGraphicsDevice>();
             ON_CALL(*mock_device, Init(::testing::_, ::testing::_)).WillByDefault(::testing::Return(true));
             ON_CALL(*mock_device, GetImmediateContext()).WillByDefault(::testing::Return(std::make_unique<MockRenderContext>().release()));
@@ -322,10 +368,14 @@ TEST_F(NativeExportsTest, NativeExports_EngineLoadMesh_ReturnsMeshOnSuccess)
         }));
 
     ON_CALL(*raw_physics_world_factory_ptr, CreatePhysicsWorld(::testing::_))
-        .WillByDefault(::testing::Return(::testing::ByMove(std::make_unique<MockPhysicsWorld>())));
+        .WillByDefault(::testing::Invoke([](const Piece::PAL::NativePhysicsOptions*) -> std::unique_ptr<Piece::PAL::IPhysicsWorld> {
+            return std::make_unique<MockPhysicsWorld>();
+        }));
 
     ON_CALL(*raw_render_system_factory_ptr, CreateRenderSystem(::testing::_))
-        .WillByDefault(::testing::Return(::testing::ByMove(std::make_unique<MockRenderSystem>())));
+        .WillByDefault(::testing::Invoke([](Piece::RAL::IGraphicsDevice*) -> std::unique_ptr<Piece::Core::IRenderSystem> {
+            return std::make_unique<MockRenderSystem>();
+        }));
     
     // Configure MockResourceManagerFactory to return our specific MockResourceManager
     ON_CALL(*raw_resource_manager_factory_ptr, CreateResourceManager(::testing::_))
@@ -407,7 +457,9 @@ TEST_F(NativeExportsTest, NativeExports_EngineLoadMesh_ReturnsNullOnFailure)
 
     // Set up ON_CALLs for the mocks that factories will return
     ON_CALL(*raw_window_factory_ptr, CreateGlfwWindow(::testing::_))
-        .WillByDefault(::testing::Return(::testing::ByMove(std::make_unique<MockWindow>())));
+        .WillByDefault(::testing::Invoke([](const Piece::WAL::NativeWindowOptions*) -> std::unique_ptr<Piece::WAL::IWindow> {
+            return std::make_unique<MockWindow>();
+        }));
 
     ON_CALL(*raw_graphics_factory_ptr, CreateGraphicsDevice(::testing::_, ::testing::_))
         .WillByDefault(::testing::Invoke([](Piece::WAL::IWindow*, const Piece::RAL::NativeGraphicsOptions*){
@@ -418,10 +470,14 @@ TEST_F(NativeExportsTest, NativeExports_EngineLoadMesh_ReturnsNullOnFailure)
         }));
 
     ON_CALL(*raw_physics_world_factory_ptr, CreatePhysicsWorld(::testing::_))
-        .WillByDefault(::testing::Return(::testing::ByMove(std::make_unique<MockPhysicsWorld>())));
+        .WillByDefault(::testing::Invoke([](const Piece::PAL::NativePhysicsOptions*) -> std::unique_ptr<Piece::PAL::IPhysicsWorld> {
+            return std::make_unique<MockPhysicsWorld>();
+        }));
 
     ON_CALL(*raw_render_system_factory_ptr, CreateRenderSystem(::testing::_))
-        .WillByDefault(::testing::Return(::testing::ByMove(std::make_unique<MockRenderSystem>())));
+        .WillByDefault(::testing::Invoke([](Piece::RAL::IGraphicsDevice*) -> std::unique_ptr<Piece::Core::IRenderSystem> {
+            return std::make_unique<MockRenderSystem>();
+        }));
     
     // Configure MockResourceManagerFactory to return our specific MockResourceManager
     ON_CALL(*raw_resource_manager_factory_ptr, CreateResourceManager(::testing::_))
@@ -517,7 +573,9 @@ TEST_F(NativeExportsTest, NativeExports_EngineLoadMesh_HandlesNullResourceManage
 
     // Set up ON_CALLs for the factories
     ON_CALL(*raw_window_factory_ptr, CreateGlfwWindow(::testing::_))
-        .WillByDefault(::testing::Return(::testing::ByMove(std::make_unique<MockWindow>())));
+        .WillByDefault(::testing::Invoke([](const Piece::WAL::NativeWindowOptions*) -> std::unique_ptr<Piece::WAL::IWindow> {
+            return std::make_unique<MockWindow>();
+        }));
     ON_CALL(*raw_graphics_factory_ptr, CreateGraphicsDevice(::testing::_, ::testing::_))
         .WillByDefault(::testing::Invoke([](Piece::WAL::IWindow*, const Piece::RAL::NativeGraphicsOptions*){
             auto mock_device = std::make_unique<MockGraphicsDevice>();
@@ -526,9 +584,13 @@ TEST_F(NativeExportsTest, NativeExports_EngineLoadMesh_HandlesNullResourceManage
             return mock_device;
         }));
     ON_CALL(*raw_physics_world_factory_ptr, CreatePhysicsWorld(::testing::_))
-        .WillByDefault(::testing::Return(::testing::ByMove(std::make_unique<MockPhysicsWorld>())));
+        .WillByDefault(::testing::Invoke([](const Piece::PAL::NativePhysicsOptions*) -> std::unique_ptr<Piece::PAL::IPhysicsWorld> {
+            return std::make_unique<MockPhysicsWorld>();
+        }));
     ON_CALL(*raw_render_system_factory_ptr, CreateRenderSystem(::testing::_))
-        .WillByDefault(::testing::Return(::testing::ByMove(std::make_unique<MockRenderSystem>())));
+        .WillByDefault(::testing::Invoke([](Piece::RAL::IGraphicsDevice*) -> std::unique_ptr<Piece::Core::IRenderSystem> {
+            return std::make_unique<MockRenderSystem>();
+        }));
     ON_CALL(*raw_resource_manager_factory_ptr, CreateResourceManager(::testing::_))
         .WillByDefault(::testing::Invoke([](Piece::RAL::IGraphicsDevice*){ return std::make_unique<MockResourceManager>(); }));
     ON_CALL(*raw_engine_core_factory_ptr, CreateEngineCore())
@@ -603,7 +665,9 @@ TEST_F(NativeExportsTest, NativeExports_EngineLoadMaterial_CallsResourceManagerL
 
     // Set up ON_CALLs for the mocks that factories will return
     ON_CALL(*raw_window_factory_ptr, CreateGlfwWindow(::testing::_))
-        .WillByDefault(::testing::Return(::testing::ByMove(std::make_unique<MockWindow>())));
+        .WillByDefault(::testing::Invoke([](const Piece::WAL::NativeWindowOptions*) -> std::unique_ptr<Piece::WAL::IWindow> {
+            return std::make_unique<MockWindow>();
+        }));
 
     ON_CALL(*raw_graphics_factory_ptr, CreateGraphicsDevice(::testing::_, ::testing::_))
         .WillByDefault(::testing::Invoke([](Piece::WAL::IWindow*, const Piece::RAL::NativeGraphicsOptions*){
@@ -614,10 +678,14 @@ TEST_F(NativeExportsTest, NativeExports_EngineLoadMaterial_CallsResourceManagerL
         }));
 
     ON_CALL(*raw_physics_world_factory_ptr, CreatePhysicsWorld(::testing::_))
-        .WillByDefault(::testing::Return(::testing::ByMove(std::make_unique<MockPhysicsWorld>())));
+        .WillByDefault(::testing::Invoke([](const Piece::PAL::NativePhysicsOptions*) -> std::unique_ptr<Piece::PAL::IPhysicsWorld> {
+            return std::make_unique<MockPhysicsWorld>();
+        }));
 
     ON_CALL(*raw_render_system_factory_ptr, CreateRenderSystem(::testing::_))
-        .WillByDefault(::testing::Return(::testing::ByMove(std::make_unique<MockRenderSystem>())));
+        .WillByDefault(::testing::Invoke([](Piece::RAL::IGraphicsDevice*) -> std::unique_ptr<Piece::Core::IRenderSystem> {
+            return std::make_unique<MockRenderSystem>();
+        }));
     
     // Configure MockResourceManagerFactory to return our specific MockResourceManager
     ON_CALL(*raw_resource_manager_factory_ptr, CreateResourceManager(::testing::_))
@@ -700,7 +768,9 @@ TEST_F(NativeExportsTest, NativeExports_EngineLoadMaterial_ReturnsMaterialOnSucc
 
     // Set up ON_CALLs for the mocks that factories will return
     ON_CALL(*raw_window_factory_ptr, CreateGlfwWindow(::testing::_))
-        .WillByDefault(::testing::Return(::testing::ByMove(std::make_unique<MockWindow>())));
+        .WillByDefault(::testing::Invoke([](const Piece::WAL::NativeWindowOptions*) -> std::unique_ptr<Piece::WAL::IWindow> {
+            return std::make_unique<MockWindow>();
+        }));
 
     ON_CALL(*raw_graphics_factory_ptr, CreateGraphicsDevice(::testing::_, ::testing::_))
         .WillByDefault(::testing::Invoke([](Piece::WAL::IWindow*, const Piece::RAL::NativeGraphicsOptions*){
@@ -711,10 +781,14 @@ TEST_F(NativeExportsTest, NativeExports_EngineLoadMaterial_ReturnsMaterialOnSucc
         }));
 
     ON_CALL(*raw_physics_world_factory_ptr, CreatePhysicsWorld(::testing::_))
-        .WillByDefault(::testing::Return(::testing::ByMove(std::make_unique<MockPhysicsWorld>())));
+        .WillByDefault(::testing::Invoke([](const Piece::PAL::NativePhysicsOptions*) -> std::unique_ptr<Piece::PAL::IPhysicsWorld> {
+            return std::make_unique<MockPhysicsWorld>();
+        }));
 
     ON_CALL(*raw_render_system_factory_ptr, CreateRenderSystem(::testing::_))
-        .WillByDefault(::testing::Return(::testing::ByMove(std::make_unique<MockRenderSystem>())));
+        .WillByDefault(::testing::Invoke([](Piece::RAL::IGraphicsDevice*) -> std::unique_ptr<Piece::Core::IRenderSystem> {
+            return std::make_unique<MockRenderSystem>();
+        }));
     
     // Configure MockResourceManagerFactory to return our specific MockResourceManager
     ON_CALL(*raw_resource_manager_factory_ptr, CreateResourceManager(::testing::_))
@@ -797,7 +871,9 @@ TEST_F(NativeExportsTest, NativeExports_EngineLoadTexture_ReturnsTextureOnSucces
 
     // Set up ON_CALLs for the mocks that factories will return
     ON_CALL(*raw_window_factory_ptr, CreateGlfwWindow(::testing::_))
-        .WillByDefault(::testing::Return(::testing::ByMove(std::make_unique<MockWindow>())));
+        .WillByDefault(::testing::Invoke([](const Piece::WAL::NativeWindowOptions*) -> std::unique_ptr<Piece::WAL::IWindow> {
+            return std::make_unique<MockWindow>();
+        }));
 
     ON_CALL(*raw_graphics_factory_ptr, CreateGraphicsDevice(::testing::_, ::testing::_))
         .WillByDefault(::testing::Invoke([](Piece::WAL::IWindow*, const Piece::RAL::NativeGraphicsOptions*){
@@ -808,10 +884,14 @@ TEST_F(NativeExportsTest, NativeExports_EngineLoadTexture_ReturnsTextureOnSucces
         }));
 
     ON_CALL(*raw_physics_world_factory_ptr, CreatePhysicsWorld(::testing::_))
-        .WillByDefault(::testing::Return(::testing::ByMove(std::make_unique<MockPhysicsWorld>())));
+        .WillByDefault(::testing::Invoke([](const Piece::PAL::NativePhysicsOptions*) -> std::unique_ptr<Piece::PAL::IPhysicsWorld> {
+            return std::make_unique<MockPhysicsWorld>();
+        }));
 
     ON_CALL(*raw_render_system_factory_ptr, CreateRenderSystem(::testing::_))
-        .WillByDefault(::testing::Return(::testing::ByMove(std::make_unique<MockRenderSystem>())));
+        .WillByDefault(::testing::Invoke([](Piece::RAL::IGraphicsDevice*) -> std::unique_ptr<Piece::Core::IRenderSystem> {
+            return std::make_unique<MockRenderSystem>();
+        }));
     
     // Configure MockResourceManagerFactory to return our specific MockResourceManager
     ON_CALL(*raw_resource_manager_factory_ptr, CreateResourceManager(::testing::_))

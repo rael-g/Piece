@@ -215,7 +215,7 @@
       - [x] NativeExports_SetGraphicsDeviceFactory_HandlesNullPtr
       - [x] NativeExports_SetWindowFactory_SetsFactoryCorrectly
       - [ ] NativeExports_SetWindowFactory_HandlesNullPtr
-      - [ ] NativeExports_SetPhysicsWorldFactory_SetsFactoryCorrectly
+      - [x] NativeExports_SetPhysicsWorldFactory_SetsFactoryCorrectly
       - [ ] NativeExports_SetPhysicsWorldFactory_HandlesNullPtr
       - [ ] NativeExports_EngineInitialize_InitializesLoggerOnce
       - [x] NativeExports_EngineInitialize_CreatesEngineCore
