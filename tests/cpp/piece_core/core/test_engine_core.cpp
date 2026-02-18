@@ -472,3 +472,49 @@ TEST_F(EngineCoreTest, EngineCore_Update_HandlesNullPhysicsSystem)
     ASSERT_NO_THROW(engine_core.Update(0.016f));
 }
 
+TEST_F(EngineCoreTest, EngineCore_Render_SkipsIncompleteModels)
+{
+    // Mocks for successful initialization of Window, Graphics, Physics, and RenderSystem
+    auto test_window_mock = std::make_unique<MockWindow>();
+    auto test_graphics_mock = std::make_unique<MockGraphicsDevice>();
+    MockGraphicsDevice* graphics_ptr = test_graphics_mock.get();
+    auto test_physics_mock = std::make_unique<MockPhysicsWorld>();
+    auto test_render_context_mock = std::make_unique<MockRenderContext>();
+    auto test_render_system_mock = std::make_unique<MockRenderSystem>();
+
+    MockRenderSystem* render_system_ptr = test_render_system_mock.get();
+
+    // Configure factories for successful creation
+    EXPECT_CALL(*window_factory_mock, CreateGlfwWindow(::testing::_))
+        .WillOnce(::testing::Return(std::move(test_window_mock)));
+    EXPECT_CALL(*graphics_factory_mock, CreateGraphicsDevice(::testing::_, ::testing::_))
+        .WillOnce(::testing::Return(std::move(test_graphics_mock)));
+    EXPECT_CALL(*graphics_ptr, Init(::testing::_, ::testing::_))
+        .WillOnce(::testing::Return(true));
+    EXPECT_CALL(*graphics_ptr, GetImmediateContext())
+        .WillRepeatedly(::testing::Return(test_render_context_mock.get()));
+    EXPECT_CALL(*physics_factory_mock, CreatePhysicsWorld(::testing::_))
+        .WillOnce(::testing::Return(std::move(test_physics_mock)));
+    EXPECT_CALL(*render_system_factory_mock, CreateRenderSystem(::testing::_))
+        .WillOnce(::testing::Return(std::move(test_render_system_mock)));
+
+    // Expect RenderSystem::RenderFrame to be called.
+    // The actual content of the models vector is managed internally by EngineCore::Render()
+    // (currently an empty vector), so we don't need to pass a specific vector here.
+    EXPECT_CALL(*render_system_ptr, RenderFrame(::testing::_, ::testing::_, ::testing::_))
+        .Times(1)
+        .WillOnce(::testing::DoAll(
+            ::testing::InvokeWithoutArgs(graphics_ptr, &MockGraphicsDevice::BeginFrame),
+            ::testing::Invoke([=]() { graphics_ptr->GetImmediateContext()->Clear(0.1f, 0.1f, 0.1f, 1.0f); }),
+            ::testing::InvokeWithoutArgs(graphics_ptr, &MockGraphicsDevice::EndFrame)
+        ));
+
+    // Initialize EngineCore
+    Piece::Core::EngineCore engine_core;
+    ASSERT_TRUE(engine_core.Initialize());
+
+    // Calling Render should not crash, even if the models it passes to RenderSystem are conceptually incomplete.
+    // (Currently, EngineCore::Render passes an empty vector.)
+    ASSERT_NO_THROW(engine_core.Render());
+}
+

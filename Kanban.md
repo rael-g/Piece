@@ -210,7 +210,7 @@
       - [x] EngineCore_Render_CallsRenderContextClear
       - [x] EngineCore_Render_CallsRenderSystemRenderFrame
       - [x] EngineCore_Render_HandlesNullDependencies
-      - [ ] EngineCore_Render_SkipsIncompleteModels
+      - [x] EngineCore_Render_SkipsIncompleteModels
       - [x] NativeExports_SetGraphicsDeviceFactory_SetsFactoryCorrectly
       - [x] NativeExports_SetGraphicsDeviceFactory_HandlesNullPtr
       - [x] NativeExports_SetWindowFactory_SetsFactoryCorrectly
