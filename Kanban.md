@@ -301,11 +301,11 @@
       - [ ] JobSystem_Concurrency_NoRaceConditionsOnSharedState
       - [ ] JobSystem_Logging_GeneratesAppropriateMessages
       - [x] ServiceLocator_Get_ReturnsSingletonInstance
-      - [ ] ServiceLocator_SetGraphicsDeviceFactory_SetsFactory
+      - [x] ServiceLocator_SetGraphicsDeviceFactory_SetsFactory
       - [ ] ServiceLocator_GetGraphicsDeviceFactory_ReturnsSetFactory
-      - [ ] ServiceLocator_SetWindowFactory_SetsFactory
+      - [x] ServiceLocator_SetWindowFactory_SetsFactory
       - [ ] ServiceLocator_GetWindowFactory_ReturnsSetFactory
-      - [ ] ServiceLocator_SetPhysicsWorldFactory_SetsFactory
+      - [x] ServiceLocator_SetPhysicsWorldFactory_SetsFactory
       - [ ] ServiceLocator_GetPhysicsWorldFactory_ReturnsSetFactory
       - [ ] ServiceLocator_GetFactory_ReturnsNullWhenNotSet
       - [ ] ServiceLocator_Logging_GeneratesAppropriateMessages

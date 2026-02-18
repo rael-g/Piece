@@ -6,7 +6,7 @@
 
 #include <ral/igraphics_device.h>
 #include <ral/irender_context.h>
-
+#include <piece_core/piece_core_exports.h> // For PIECE_CORE_API
 #include "camera.h"
 #include "light.h"
 #include "model.h"
@@ -19,13 +19,13 @@ namespace Piece::Core
  * @details This class is responsible for collecting renderable objects, culling, sorting,
  *          and submitting drawing commands to the graphics device.
  */
-class RenderSystem
+class PIECE_CORE_API RenderSystem
 {
   public:
     explicit RenderSystem(Piece::RAL::IGraphicsDevice *graphics_device);
     ~RenderSystem();
 
-    void RenderFrame(const Camera &camera, const Light &light, const std::vector<std::shared_ptr<Model>> &models);
+    virtual void RenderFrame(const Camera &camera, const Light &light, const std::vector<std::shared_ptr<Model>> &models);
 
   private:
     Piece::RAL::IGraphicsDevice *graphics_device_;
