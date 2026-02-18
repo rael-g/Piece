@@ -239,7 +239,7 @@
       - [x] NativeExports_EngineLoadMesh_ReturnsMeshOnSuccess
       - [x] NativeExports_EngineLoadMesh_ReturnsNullOnFailure
       - [x] NativeExports_EngineLoadMesh_HandlesNullCoreOrResourceManager
-      - [ ] NativeExports_EngineLoadMaterial_CallsResourceManagerLoadMaterial
+      - [x] NativeExports_EngineLoadMaterial_CallsResourceManagerLoadMaterial
       - [ ] NativeExports_EngineLoadMaterial_ReturnsMaterialOnSuccess
       - [ ] NativeExports_EngineLoadMaterial_ReturnsNullOnFailure
       - [ ] NativeExports_EngineLoadMaterial_HandlesNullCoreOrResourceManager
