@@ -44,7 +44,7 @@ class PIECE_CORE_API EngineCore
      * @brief Destroys the EngineCore instance.
      *        Cleans up resources and shuts down engine components.
      */
-    ~EngineCore();
+    virtual ~EngineCore();
 
     /**
      * @brief Initializes the engine's core components and services.

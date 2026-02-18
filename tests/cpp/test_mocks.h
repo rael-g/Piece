@@ -5,7 +5,7 @@
 #include <wal/iwindow_factory.h>
 #include <ral/igraphics_device.h>
 #include <ral/igraphics_device_factory.h>
-#include <ral/irender_context.h>
+#include <ral/irender_context.h> // Corrected include
 #include <ral/native_graphics_options.h>
 #include <pal/iphysics_world.h>
 #include <pal/iphysics_world_factory.h>
@@ -15,6 +15,8 @@
 #include <pal/iphysics_material.h>
 #include <piece_core/ir_system.h>
 #include <piece_core/core/irender_system_factory.h>
+#include <piece_core/engine_core.h> // For MockEngineCore
+#include <piece_core/core/iengine_core_factory.h> // For MockEngineCoreFactory
 
 // For GraphicsDevice and RenderContext mock methods
 #include <ral/interfaces/iindex_buffer.h>
@@ -135,6 +137,16 @@ class MockRenderSystem : public Piece::Core::IRenderSystem
                 (override));
 };
 
+// Mock for EngineCore
+class MockEngineCore : public Piece::Core::EngineCore
+{
+public:
+    MOCK_METHOD(void, Update, (float deltaTime), (override));
+    MOCK_METHOD(void, Render, (), (override));
+    // Note: Do not mock constructor/destructor unless absolutely necessary and carefully
+    // Virtual methods must be public.
+};
+
 
 // Mocks for factories
 class MockWindowFactory : public Piece::WAL::IWindowFactory
@@ -164,4 +176,11 @@ class MockRenderSystemFactory : public Piece::Core::IRenderSystemFactory
   public:
     MOCK_METHOD(std::unique_ptr<Piece::Core::IRenderSystem>, CreateRenderSystem,
                 (Piece::RAL::IGraphicsDevice * graphicsDevice), (override));
+};
+
+// Mock for IEngineCoreFactory
+class MockEngineCoreFactory : public Piece::Core::IEngineCoreFactory
+{
+  public:
+    MOCK_METHOD(std::unique_ptr<Piece::Core::EngineCore>, CreateEngineCore, (), (override));
 };
