@@ -10,6 +10,7 @@
 
 #include "material.h"
 #include "mesh.h"
+#include "piece_core_exports.h" // Include PIECE_CORE_API definition
 
 namespace Piece::Core
 {
@@ -17,7 +18,7 @@ namespace Piece::Core
 /**
  * @brief Represents a renderable object in the 3D world, combining a Mesh, Material, and transformation.
  */
-class Model
+class PIECE_CORE_API Model
 {
   public:
     Model();
