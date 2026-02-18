@@ -9,6 +9,7 @@
 #include <ral/igraphics_device_factory.h>
 #include <wal/iwindow_factory.h>
 #include "irender_system_factory.h"
+#include "iengine_core_factory.h" // Add this include
 
 #include <memory>
 #include <piece_core/logging_api.h>
@@ -80,6 +81,16 @@ class ServiceLocator
     }
 
     /**
+     * @brief Sets the engine core factory.
+     * @param factory A unique pointer to the engine core factory.
+     */
+    void SetEngineCoreFactory(std::unique_ptr<IEngineCoreFactory> factory)
+    {
+        PIECE_INFO("ServiceLocator::SetEngineCoreFactory(factory: {0})", fmt::ptr(factory.get()));
+        engine_core_factory_ = std::move(factory);
+    }
+
+    /**
      * @brief Gets the graphics device factory.
      * @return A pointer to the graphics device factory.
      */
@@ -117,6 +128,16 @@ class ServiceLocator
         return render_system_factory_.get();
     }
 
+    /**
+     * @brief Gets the engine core factory.
+     * @return A pointer to the engine core factory.
+     */
+    [[nodiscard]] IEngineCoreFactory *GetEngineCoreFactory() const
+    {
+        PIECE_TRACE("ServiceLocator::GetEngineCoreFactory() -> {0}", fmt::ptr(engine_core_factory_.get()));
+        return engine_core_factory_.get();
+    }
+
   private:
     /**
      * @brief Private constructor to enforce singleton pattern.
@@ -131,6 +152,8 @@ class ServiceLocator
     std::unique_ptr<Piece::PAL::IPhysicsWorldFactory> physics_world_factory_;
     /** @brief The render system factory instance. */
     std::unique_ptr<IRenderSystemFactory> render_system_factory_;
+    /** @brief The engine core factory instance. */
+    std::unique_ptr<IEngineCoreFactory> engine_core_factory_; // Add this
 };
 
 } // namespace Piece::Core

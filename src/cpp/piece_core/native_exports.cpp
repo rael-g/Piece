@@ -95,7 +95,20 @@ extern "C"
             logger_initialized = true;
         }
         PIECE_INFO("EngineInitialize called. Attempting to create EngineCore...");
-        auto *core = new Piece::Core::EngineCore();
+        
+        Piece::Core::EngineCore *core = nullptr;
+        auto *factory = Piece::Core::ServiceLocator::Get().GetEngineCoreFactory();
+        if (factory)
+        {
+            PIECE_INFO("Using EngineCoreFactory to create EngineCore.");
+            core = factory->CreateEngineCore().release();
+        }
+        else
+        {
+            PIECE_INFO("No EngineCoreFactory found. Creating default EngineCore.");
+            core = new Piece::Core::EngineCore();
+        }
+
         if (!core)
         {
             PIECE_FATAL("Failed to allocate EngineCore.");
