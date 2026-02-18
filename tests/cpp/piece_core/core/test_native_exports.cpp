@@ -101,3 +101,142 @@ class NativeExportsTest : public ::testing::Test
         // default_render_context_returned_mock is already managed by unique_ptr, will be destroyed with fixture.
     }
 };
+
+TEST_F(NativeExportsTest, NativeExports_SetGraphicsDeviceFactory_SetsFactoryCorrectly)
+{
+    // The C-style API takes ownership, so we allocate the mock on the heap.
+    // The ServiceLocator's unique_ptr will be responsible for deleting it in TearDown.
+    auto* mock_factory = new MockGraphicsDeviceFactory();
+
+    // Call the C function to set the factory.
+    SetGraphicsDeviceFactory(mock_factory);
+
+    // Retrieve the factory from the ServiceLocator and verify it's the one we set.
+    // We don't own this raw pointer.
+    Piece::RAL::IGraphicsDeviceFactory* retrieved_factory = Piece::Core::ServiceLocator::Get().GetGraphicsDeviceFactory();
+    
+    ASSERT_EQ(retrieved_factory, mock_factory);
+}
+
+TEST_F(NativeExportsTest, NativeExports_SetGraphicsDeviceFactory_HandlesNullPtr)
+{
+    // After SetUp(), the ServiceLocator has a non-null factory.
+    // We are testing that passing nullptr to SetGraphicsDeviceFactory works.
+
+    // Call the C function with a null pointer
+    SetGraphicsDeviceFactory(nullptr);
+
+    // Verify that the factory in the ServiceLocator is now null
+    ASSERT_EQ(Piece::Core::ServiceLocator::Get().GetGraphicsDeviceFactory(), nullptr);
+
+    // Call again to ensure it remains null and doesn't crash
+    ASSERT_NO_THROW(SetGraphicsDeviceFactory(nullptr));
+    ASSERT_EQ(Piece::Core::ServiceLocator::Get().GetGraphicsDeviceFactory(), nullptr);
+}
+
+TEST_F(NativeExportsTest, NativeExports_SetWindowFactory_SetsFactoryCorrectly)
+{
+    auto* mock_factory = new MockWindowFactory();
+    SetWindowFactory(mock_factory);
+    Piece::WAL::IWindowFactory* retrieved_factory = Piece::Core::ServiceLocator::Get().GetWindowFactory();
+    ASSERT_EQ(retrieved_factory, mock_factory);
+}
+
+TEST_F(NativeExportsTest, NativeExports_SetWindowFactory_HandlesNullPtr)
+{
+    // After SetUp(), the ServiceLocator has a non-null factory.
+    // We are testing that passing nullptr to SetWindowFactory works.
+
+    // Call the C function with a null pointer
+    SetWindowFactory(nullptr);
+
+    // Verify that the factory in the ServiceLocator is now null
+    ASSERT_EQ(Piece::Core::ServiceLocator::Get().GetWindowFactory(), nullptr);
+
+    // Call again to ensure it remains null and doesn't crash
+    ASSERT_NO_THROW(SetWindowFactory(nullptr));
+    ASSERT_EQ(Piece::Core::ServiceLocator::Get().GetWindowFactory(), nullptr);
+}
+
+TEST_F(NativeExportsTest, NativeExports_SetPhysicsWorldFactory_SetsFactoryCorrectly)
+{
+    auto* mock_factory = new MockPhysicsWorldFactory();
+    SetPhysicsWorldFactory(mock_factory);
+    Piece::PAL::IPhysicsWorldFactory* retrieved_factory = Piece::Core::ServiceLocator::Get().GetPhysicsWorldFactory();
+    ASSERT_EQ(retrieved_factory, mock_factory);
+}
+
+TEST_F(NativeExportsTest, NativeExports_SetPhysicsWorldFactory_HandlesNullPtr)
+{
+    // After SetUp(), the ServiceLocator has a non-null factory.
+    // We are testing that passing nullptr to SetPhysicsWorldFactory works.
+
+    // Call the C function with a null pointer
+    SetPhysicsWorldFactory(nullptr);
+
+    // Verify that the factory in the ServiceLocator is now null
+    ASSERT_EQ(Piece::Core::ServiceLocator::Get().GetPhysicsWorldFactory(), nullptr);
+
+    // Call again to ensure it remains null and doesn't crash
+    ASSERT_NO_THROW(SetPhysicsWorldFactory(nullptr));
+    ASSERT_EQ(Piece::Core::ServiceLocator::Get().GetPhysicsWorldFactory(), nullptr);
+}
+
+TEST_F(NativeExportsTest, NativeExports_EngineInitialize_CreatesEngineCore)
+{
+    // The factories are already set up and have default behaviors via ON_CALL in SetUp().
+    // We just need to ensure the EngineCore can be created and initialized successfully.
+
+    // Call the EngineInitialize function
+    Piece::Core::EngineCore* engine_core_ptr = EngineInitialize();
+
+    // Assert that a non-null pointer is returned (implies successful initialization)
+    ASSERT_NE(engine_core_ptr, nullptr);
+
+    // Clean up the created engine core
+    EngineDestroy(engine_core_ptr);
+}
+
+TEST_F(NativeExportsTest, NativeExports_EngineDestroy_HandlesNullCorePtr)
+{
+    // Call EngineDestroy with a nullptr.
+    // The expectation is that it should not crash.
+    ASSERT_NO_THROW(EngineDestroy(nullptr));
+}
+
+TEST_F(NativeExportsTest, NativeExports_EngineInitialize_InitializesLoggerOnce)
+{
+    // All factory mocks and their ON_CALL behaviors are set up in SetUp().
+    // We just need to ensure the logger is initialized only once.
+
+    Piece::Core::EngineCore* core1 = nullptr;
+    Piece::Core::EngineCore* core2 = nullptr;
+
+    // First call to EngineInitialize: should initialize the logger and create an EngineCore
+    ASSERT_NO_THROW(core1 = EngineInitialize());
+    ASSERT_NE(core1, nullptr);
+
+    // Second call to EngineInitialize: should NOT re-initialize the logger,
+    // and thus should not throw any spdlog-related exceptions.
+    // The static guard in EngineInitialize() should prevent re-initialization.
+    ASSERT_NO_THROW(core2 = EngineInitialize());
+    ASSERT_NE(core2, nullptr); // It should still create a new EngineCore instance
+
+    // Cleanup
+    EngineDestroy(core1);
+    EngineDestroy(core2);
+}
+
+TEST_F(NativeExportsTest, NativeExports_EngineInitialize_ReturnsNullOnCoreInitializationFailure)
+{
+    // Configure window_factory_mock_ptr to return nullptr when CreateGlfwWindow is called.
+    // This will cause EngineCore::Initialize() to fail.
+    EXPECT_CALL(*window_factory_mock_ptr, CreateGlfwWindow(::testing::_))
+        .WillOnce(::testing::Return(std::unique_ptr<MockWindow>(nullptr)));
+
+    // Call EngineInitialize - it should return nullptr due to Core initialization failure
+    Piece::Core::EngineCore* core_ptr = EngineInitialize();
+
+    // Assert that a null pointer is returned
+    ASSERT_EQ(core_ptr, nullptr);
+}

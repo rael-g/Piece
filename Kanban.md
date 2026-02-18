@@ -219,7 +219,7 @@
       - [x] NativeExports_SetPhysicsWorldFactory_HandlesNullPtr
       - [x] NativeExports_EngineInitialize_InitializesLoggerOnce
       - [x] NativeExports_EngineInitialize_CreatesEngineCore
-      - [ ] NativeExports_EngineInitialize_ReturnsNullOnCoreAllocationFailure
+      - [x] NativeExports_EngineInitialize_ReturnsNullOnCoreInitializationFailure
       - [ ] NativeExports_EngineInitialize_LogsInitializationInfo
       - [ ] NativeExports_EngineDestroy_DeletesEngineCore
       - [x] NativeExports_EngineDestroy_HandlesNullCorePtr
