@@ -207,34 +207,34 @@
       - [x] EngineCore_Update_CallsPhysicsSystemStep
       - [x] EngineCore_Update_HandlesNullPhysicsSystem
       - [x] EngineCore_Render_CallsGraphicsDeviceBeginEndFrame
-      - [x] EngineCore_Render_CallsRenderContextClear
+      - [ ] EngineCore_Render_CallsRenderContextClear
       - [x] EngineCore_Render_CallsRenderSystemRenderFrame
       - [x] EngineCore_Render_HandlesNullDependencies
       - [x] EngineCore_Render_SkipsIncompleteModels
-      - [x] NativeExports_SetGraphicsDeviceFactory_SetsFactoryCorrectly
-      - [x] NativeExports_SetGraphicsDeviceFactory_HandlesNullPtr
-      - [x] NativeExports_SetWindowFactory_SetsFactoryCorrectly
-      - [x] NativeExports_SetWindowFactory_HandlesNullPtr
-      - [x] NativeExports_SetPhysicsWorldFactory_SetsFactoryCorrectly
-      - [x] NativeExports_SetPhysicsWorldFactory_HandlesNullPtr
-      - [x] NativeExports_EngineInitialize_InitializesLoggerOnce
+      - [ ] NativeExports_SetGraphicsDeviceFactory_SetsFactoryCorrectly
+      - [ ] NativeExports_SetGraphicsDeviceFactory_HandlesNullPtr
+      - [ ] NativeExports_SetWindowFactory_SetsFactoryCorrectly
+      - [ ] NativeExports_SetWindowFactory_HandlesNullPtr
+      - [ ] NativeExports_SetPhysicsWorldFactory_SetsFactoryCorrectly
+      - [ ] NativeExports_SetPhysicsWorldFactory_HandlesNullPtr
+      - [ ] NativeExports_EngineInitialize_InitializesLoggerOnce
       - [x] NativeExports_EngineInitialize_CreatesEngineCore
-      - [x] NativeExports_EngineInitialize_ReturnsNullOnCoreInitializationFailure
-      - [x] NativeExports_EngineInitialize_LogsInitializationInfo
-      - [x] NativeExports_EngineDestroy_DeletesEngineCore
-      - [x] NativeExports_EngineDestroy_HandlesNullCorePtr
-      - [x] NativeExports_EngineUpdate_CallsCoreUpdate
-      - [x] NativeExports_EngineUpdate_HandlesNullCorePtr
-      - [x] NativeExports_EngineRender_CallsCoreRender
-      - [x] NativeExports_EngineRender_HandlesNullCorePtr
-      - [x] NativeExports_EngineIsKeyPressed_CallsWindowIsKeyPressed
-      - [x] NativeExports_EngineIsKeyPressed_HandlesNullCoreOrWindow
-      - [x] NativeExports_EngineIsMouseButtonPressed_CallsWindowIsMouseButtonPressed
-      - [x] NativeExports_EngineIsMouseButtonPressed_HandlesNullCoreOrWindow
-      - [x] NativeExports_EngineGetMouseX_CallsWindowGetMouseX
-      - [x] NativeExports_EngineGetMouseX_HandlesNullCoreOrWindow
-      - [x] NativeExports_EngineGetMouseY_CallsWindowGetMouseY
-      - [x] NativeExports_EngineGetMouseY_HandlesNullCoreOrWindow
+      - [ ] NativeExports_EngineInitialize_ReturnsNullOnCoreInitializationFailure
+      - [ ] NativeExports_EngineInitialize_LogsInitializationInfo
+      - [ ] NativeExports_EngineDestroy_DeletesEngineCore
+      - [ ] NativeExports_EngineDestroy_HandlesNullCorePtr
+      - [ ] NativeExports_EngineUpdate_CallsCoreUpdate
+      - [ ] NativeExports_EngineUpdate_HandlesNullCorePtr
+      - [ ] NativeExports_EngineRender_CallsCoreRender
+      - [ ] NativeExports_EngineRender_HandlesNullCorePtr
+      - [ ] NativeExports_EngineIsKeyPressed_CallsWindowIsKeyPressed
+      - [ ] NativeExports_EngineIsKeyPressed_HandlesNullCoreOrWindow
+      - [ ] NativeExports_EngineIsMouseButtonPressed_CallsWindowIsMouseButtonPressed
+      - [ ] NativeExports_EngineIsMouseButtonPressed_HandlesNullCoreOrWindow
+      - [ ] NativeExports_EngineGetMouseX_CallsWindowGetMouseX
+      - [ ] NativeExports_EngineGetMouseX_HandlesNullCoreOrWindow
+      - [ ] NativeExports_EngineGetMouseY_CallsWindowGetMouseY
+      - [ ] NativeExports_EngineGetMouseY_HandlesNullCoreOrWindow
       - [x] NativeExports_EngineLoadMesh_CallsResourceManagerLoadMesh
       - [x] NativeExports_EngineLoadMesh_ReturnsMeshOnSuccess
       - [x] NativeExports_EngineLoadMesh_ReturnsNullOnFailure
@@ -301,11 +301,11 @@
       - [ ] JobSystem_Concurrency_NoRaceConditionsOnSharedState
       - [ ] JobSystem_Logging_GeneratesAppropriateMessages
       - [x] ServiceLocator_Get_ReturnsSingletonInstance
-      - [x] ServiceLocator_SetGraphicsDeviceFactory_SetsFactory
+      - [ ] ServiceLocator_SetGraphicsDeviceFactory_SetsFactory
       - [ ] ServiceLocator_GetGraphicsDeviceFactory_ReturnsSetFactory
-      - [x] ServiceLocator_SetWindowFactory_SetsFactory
+      - [ ] ServiceLocator_SetWindowFactory_SetsFactory
       - [ ] ServiceLocator_GetWindowFactory_ReturnsSetFactory
-      - [x] ServiceLocator_SetPhysicsWorldFactory_SetsFactory
+      - [ ] ServiceLocator_SetPhysicsWorldFactory_SetsFactory
       - [ ] ServiceLocator_GetPhysicsWorldFactory_ReturnsSetFactory
       - [ ] ServiceLocator_GetFactory_ReturnsNullWhenNotSet
       - [ ] ServiceLocator_Logging_GeneratesAppropriateMessages
@@ -619,4 +619,5 @@
     ```md
     Develop a minimal but functional CLI editor for the Piece Engine, providing stateless commands for project creation, building, and basic asset management. It will use `System.CommandLine` and interact with the `Piece.ProjectManagement` layer.
     ```
+
 
