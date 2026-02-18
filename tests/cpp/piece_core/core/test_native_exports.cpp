@@ -313,3 +313,29 @@ TEST_F(NativeExportsTest, NativeExports_EngineUpdate_HandlesNullCorePtr)
     // The expectation is that it should not crash.
     ASSERT_NO_THROW(EngineUpdate(nullptr, 0.016f)); // Pass a dummy delta_time
 }
+
+TEST_F(NativeExportsTest, NativeExports_EngineRender_CallsCoreRender)
+{
+    // Create a mock EngineCore and a factory for it
+    auto mock_engine_core_instance = std::make_unique<MockEngineCore>();
+    MockEngineCore* raw_mock_engine_core_ptr = mock_engine_core_instance.get(); // Get raw pointer for EXPECT_CALL
+
+    // Set the expectation for the engine_core_factory_mock_ptr to return *this specific mock*
+    // when CreateEngineCore() is called. WillOnce() is appropriate here because EngineInitialize()
+    // will call it only once for this test to get the core.
+    EXPECT_CALL(*engine_core_factory_mock_ptr, CreateEngineCore())
+        .WillOnce(::testing::Return(std::move(mock_engine_core_instance)));
+
+    // Call EngineInitialize - it should return the mock EngineCore instance
+    Piece::Core::EngineCore* core_ptr = EngineInitialize();
+    ASSERT_NE(core_ptr, nullptr);
+
+    // Expect Render to be called on the mock EngineCore
+    EXPECT_CALL(*raw_mock_engine_core_ptr, Render()).Times(1);
+
+    // Call EngineRender
+    EngineRender(core_ptr);
+
+    // Cleanup
+    EngineDestroy(core_ptr);
+}
