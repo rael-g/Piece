@@ -226,7 +226,7 @@
       - [x] NativeExports_EngineUpdate_CallsCoreUpdate
       - [x] NativeExports_EngineUpdate_HandlesNullCorePtr
       - [x] NativeExports_EngineRender_CallsCoreRender
-      - [ ] NativeExports_EngineRender_HandlesNullCorePtr
+      - [x] NativeExports_EngineRender_HandlesNullCorePtr
       - [ ] NativeExports_EngineIsKeyPressed_CallsWindowIsKeyPressed
       - [ ] NativeExports_EngineIsKeyPressed_HandlesNullCoreOrWindow
       - [ ] NativeExports_EngineIsMouseButtonPressed_CallsWindowIsMouseButtonPressed

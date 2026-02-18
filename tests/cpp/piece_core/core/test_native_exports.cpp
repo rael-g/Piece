@@ -339,3 +339,10 @@ TEST_F(NativeExportsTest, NativeExports_EngineRender_CallsCoreRender)
     // Cleanup
     EngineDestroy(core_ptr);
 }
+
+TEST_F(NativeExportsTest, NativeExports_EngineRender_HandlesNullCorePtr)
+{
+    // Call EngineRender with a nullptr.
+    // The expectation is that it should not crash.
+    ASSERT_NO_THROW(EngineRender(nullptr));
+}
