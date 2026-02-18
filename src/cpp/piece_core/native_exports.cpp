@@ -240,7 +240,7 @@ extern "C"
         PIECE_TRACE("EngineLoadMaterial(core_ptr: {0}, path: \"{1}\")", fmt::ptr(core_ptr), path);
         if (!core_ptr || !core_ptr->GetResourceManager())
         {
-            PIECE_WARN("EngineLoadMaterial called with null core_ptr or resource_manager_.");
+            PIECE_ERROR("EngineCore or ResourceManager is null. Cannot load material.");
             return nullptr;
         }
         std::string s_path(path);
@@ -259,7 +259,7 @@ extern "C"
         PIECE_TRACE("EngineLoadTexture(core_ptr: {0}, path: \"{1}\")", fmt::ptr(core_ptr), path);
         if (!core_ptr || !core_ptr->GetResourceManager())
         {
-            PIECE_WARN("EngineLoadTexture called with null core_ptr or resource_manager_.");
+            PIECE_ERROR("EngineCore or ResourceManager is null. Cannot load texture.");
             return nullptr;
         }
         std::string s_path(path);

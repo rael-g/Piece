@@ -667,7 +667,6 @@ TEST_F(NativeExportsTest, NativeExports_EngineLoadMaterial_ReturnsMaterialOnSucc
         }));
 
     // Configure the specific MockEngineCore to return our MockResourceManager when GetResourceManager is called
-    // This EXPECT_CALL must be set BEFORE EngineLoadMaterial is called, as it will call GetResourceManager()
     EXPECT_CALL(*raw_mock_engine_core_ptr, GetResourceManager())
         .Times(2) // Expect two calls to GetResourceManager()
         .WillRepeatedly(::testing::Return(raw_mock_resource_manager_ptr));
@@ -800,6 +799,106 @@ TEST_F(NativeExportsTest, NativeExports_EngineLoadMaterial_ReturnsNullOnFailure)
 
     // Verify
     ASSERT_EQ(result, nullptr);
+
+    // Cleanup
+    EngineDestroy(core_ptr);
+}
+
+// Test for NativeExports_EngineLoadMaterial_HandlesNullCore
+TEST_F(NativeExportsTest, NativeExports_EngineLoadMaterial_HandlesNullCore)
+{
+    std::string test_path = "path/to/material.mat";
+
+    // Test case: core is null
+    Piece::Core::EngineCore* null_core_ptr = nullptr;
+    void* result_null_core = EngineLoadMaterial(null_core_ptr, test_path.c_str());
+    ASSERT_EQ(result_null_core, nullptr);
+    // Verify error logging
+    ASSERT_FALSE(g_test_log_buffer.messages.empty());
+    ASSERT_EQ(g_test_log_buffer.levels.back(), spdlog::level::level_enum::err);
+    ASSERT_THAT(g_test_log_buffer.messages.back(), ::testing::HasSubstr("EngineCore or ResourceManager is null. Cannot load material."));
+}
+
+// Test for NativeExports_EngineLoadMaterial_HandlesNullResourceManager
+TEST_F(NativeExportsTest, NativeExports_EngineLoadMaterial_HandlesNullResourceManager)
+{
+    std::string test_path = "path/to/material.mat";
+
+    // Create and configure factory mocks, but ensure GetResourceManager returns nullptr
+    auto window_factory_unique = std::make_unique<MockWindowFactory>();
+    auto graphics_factory_unique = std::make_unique<MockGraphicsDeviceFactory>();
+    auto physics_world_factory_unique = std::make_unique<MockPhysicsWorldFactory>();
+    auto render_system_factory_unique = std::make_unique<MockRenderSystemFactory>();
+    auto resource_manager_factory_unique = std::make_unique<MockResourceManagerFactory>();
+    auto engine_core_factory_unique = std::make_unique<MockEngineCoreFactory>();
+
+    MockWindowFactory* raw_window_factory_ptr = window_factory_unique.get();
+    MockGraphicsDeviceFactory* raw_graphics_factory_ptr = graphics_factory_unique.get();
+    MockPhysicsWorldFactory* raw_physics_world_factory_ptr = physics_world_factory_unique.get();
+    MockRenderSystemFactory* raw_render_system_factory_ptr = render_system_factory_unique.get();
+    MockResourceManagerFactory* raw_resource_manager_factory_ptr = resource_manager_factory_unique.get();
+    MockEngineCoreFactory* raw_engine_core_factory_ptr = engine_core_factory_unique.get();
+
+    // Create the mock EngineCore that the factory will return
+    auto mock_engine_core_owned = std::make_unique<MockEngineCore>();
+    MockEngineCore* raw_mock_engine_core_ptr = mock_engine_core_owned.get();
+
+    // Set up ON_CALLs for the factories
+    ON_CALL(*raw_window_factory_ptr, CreateGlfwWindow(::testing::_))
+        .WillByDefault(::testing::Invoke([](const Piece::WAL::NativeWindowOptions*){ return std::make_unique<MockWindow>(); }));
+    ON_CALL(*raw_graphics_factory_ptr, CreateGraphicsDevice(::testing::_, ::testing::_))
+        .WillByDefault(::testing::Invoke([](Piece::WAL::IWindow*, const Piece::RAL::NativeGraphicsOptions*){
+            auto mock_device = std::make_unique<MockGraphicsDevice>();
+            ON_CALL(*mock_device, Init(::testing::_, ::testing::_)).WillByDefault(::testing::Return(true));
+            ON_CALL(*mock_device, GetImmediateContext()).WillByDefault(::testing::Return(std::make_unique<MockRenderContext>().release()));
+            return mock_device;
+        }));
+    ON_CALL(*raw_physics_world_factory_ptr, CreatePhysicsWorld(::testing::_))
+        .WillByDefault(::testing::Invoke([](const Piece::PAL::NativePhysicsOptions*){ return std::make_unique<MockPhysicsWorld>(); }));
+    ON_CALL(*raw_render_system_factory_ptr, CreateRenderSystem(::testing::_))
+        .WillByDefault(::testing::Invoke([](Piece::RAL::IGraphicsDevice*){ return std::make_unique<MockRenderSystem>(); }));
+    ON_CALL(*raw_resource_manager_factory_ptr, CreateResourceManager(::testing::_))
+        .WillByDefault(::testing::Invoke([](Piece::RAL::IGraphicsDevice*){ return std::make_unique<MockResourceManager>(); }));
+    ON_CALL(*raw_engine_core_factory_ptr, CreateEngineCore())
+        .WillByDefault(::testing::Invoke([&mock_engine_core_owned](){
+            return std::move(mock_engine_core_owned);
+        }));
+
+    // Configure the specific MockEngineCore to return nullptr for GetResourceManager()
+    EXPECT_CALL(*raw_mock_engine_core_ptr, GetResourceManager())
+        .Times(1) // Only called once in this path
+        .WillOnce(::testing::Return(nullptr));
+    ON_CALL(*raw_mock_engine_core_ptr, GetWindow())
+        .WillByDefault(::testing::Invoke([](){
+            static MockWindow window; 
+            return &window;
+        }));
+
+
+    // Transfer ownership of factories to ServiceLocator AFTER configuring them
+    Piece::Core::ServiceLocator::Get().SetWindowFactory(std::move(window_factory_unique));
+    Piece::Core::ServiceLocator::Get().SetGraphicsDeviceFactory(std::move(graphics_factory_unique));
+    Piece::Core::ServiceLocator::Get().SetPhysicsWorldFactory(std::move(physics_world_factory_unique));
+    Piece::Core::ServiceLocator::Get().SetRenderSystemFactory(std::move(render_system_factory_unique));
+    Piece::Core::ServiceLocator::Get().SetResourceManagerFactory(std::move(resource_manager_factory_unique));
+    Piece::Core::ServiceLocator::Get().SetEngineCoreFactory(std::move(engine_core_factory_unique));
+
+    // Act: Call EngineInitialize
+    Piece::Core::EngineCore* core_ptr = EngineInitialize();
+
+    // Assert that we got our mock EngineCore
+    ASSERT_NE(core_ptr, nullptr);
+    ASSERT_EQ(core_ptr, raw_mock_engine_core_ptr);
+
+    // Call the NativeExport function
+    void* result_null_resource_manager = EngineLoadMaterial(core_ptr, test_path.c_str());
+
+    // Verify
+    ASSERT_EQ(result_null_resource_manager, nullptr);
+    // Verify error logging
+    ASSERT_FALSE(g_test_log_buffer.messages.empty());
+    ASSERT_EQ(g_test_log_buffer.levels.back(), spdlog::level::level_enum::err);
+    ASSERT_THAT(g_test_log_buffer.messages.back(), ::testing::HasSubstr("ResourceManager is null. Cannot load material."));
 
     // Cleanup
     EngineDestroy(core_ptr);
