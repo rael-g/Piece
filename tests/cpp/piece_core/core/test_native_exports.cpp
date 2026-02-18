@@ -14,22 +14,36 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/base_sink.h>
 #include <vector>
+#include <string>
+#include <mutex> // For std::mutex in TestLogBuffer
+#include <piece_core/logging_api.h> // For LogCallback, spdlog::level::level_enum
 
-// Custom mock sink to capture log messages
-class MockSink : public spdlog::sinks::base_sink<std::mutex>
-{
-protected:
-    void sink_it_(const spdlog::details::log_msg& msg) override
-    {
-        // Capture log messages
-        // For this test, we are more interested in whether spdlog internals
-        // throw exceptions on re-initialization rather than message content.
+
+// Buffer to store captured log messages for testing
+struct TestLogBuffer {
+    std::mutex mutex;
+    std::vector<std::string> messages;
+    std::vector<spdlog::level::level_enum> levels;
+
+    void clear() {
+        std::lock_guard<std::mutex> lock(mutex);
+        messages.clear();
+        levels.clear();
     }
-    void flush_() override
-    {
-        // Flush not needed for this test
+
+    void add_log(spdlog::level::level_enum level, const std::string& message) {
+        std::lock_guard<std::mutex> lock(mutex);
+        messages.push_back(message);
+        levels.push_back(level);
     }
 };
+
+static TestLogBuffer g_test_log_buffer; // Global buffer to capture logs
+
+// Test-specific LogCallback function (C-compatible)
+void TestLogCallback(int level, const char* message) {
+    g_test_log_buffer.add_log(static_cast<spdlog::level::level_enum>(level), message);
+}
 
 
 // Test fixture for NativeExports functions
@@ -51,6 +65,10 @@ class NativeExportsTest : public ::testing::Test
     {
         // Reset spdlog global state to ensure clean slate for tests that involve logging
         // spdlog::drop_all(); // Temporarily commented out to debug SEH exceptions and mock leaks
+
+        // Register the test-specific log callback
+        PieceCoreRegisterLogCallback(TestLogCallback);
+        g_test_log_buffer.clear();
 
         // Create the factory mocks, they are owned by the ServiceLocator
         window_factory_mock_ptr = new MockWindowFactory();
@@ -92,6 +110,10 @@ class NativeExportsTest : public ::testing::Test
 
     void TearDown() override
     {
+        // Unregister the test-specific log callback
+        PieceCoreRegisterLogCallback(nullptr);
+        g_test_log_buffer.clear();
+
         // Reset the ServiceLocator to ensure no state leaks between tests.
         // This will also delete the factory pointer owned by the unique_ptr.
         Piece::Core::ServiceLocator::Get().SetGraphicsDeviceFactory(nullptr);
@@ -239,4 +261,58 @@ TEST_F(NativeExportsTest, NativeExports_EngineInitialize_ReturnsNullOnCoreInitia
 
     // Assert that a null pointer is returned
     ASSERT_EQ(core_ptr, nullptr);
+}
+
+TEST_F(NativeExportsTest, NativeExports_EngineInitialize_LogsInitializationInfo)
+{
+    // Call EngineInitialize
+    Piece::Core::EngineCore* core_ptr = EngineInitialize();
+    ASSERT_NE(core_ptr, nullptr);
+
+    // Expect specific log messages to be present
+    const auto& messages = g_test_log_buffer.messages;
+    const auto& levels = g_test_log_buffer.levels;
+
+    // Check for "spdlog initialized."
+    bool spdlog_init_found = false;
+    for(const auto& msg : messages) {
+        if (msg.find("spdlog initialized.") != std::string::npos) {
+            spdlog_init_found = true;
+            break;
+        }
+    }
+    ASSERT_TRUE(spdlog_init_found) << "Expected 'spdlog initialized.' log message not found.";
+
+    // Check for "EngineInitialize called. Attempting to create EngineCore..."
+    bool engine_init_called_found = false;
+    for(const auto& msg : messages) {
+        if (msg.find("EngineInitialize called. Attempting to create EngineCore...") != std::string::npos) {
+            engine_init_called_found = true;
+            break;
+        }
+    }
+    ASSERT_TRUE(engine_init_called_found) << "Expected 'EngineInitialize called...' log message not found.";
+
+    // Check for "EngineCore created successfully at 0x..."
+    bool core_created_found = false;
+    for(const auto& msg : messages) {
+        if (msg.find("EngineCore created successfully at 0x") != std::string::npos) {
+            core_created_found = true;
+            break;
+        }
+    }
+    ASSERT_TRUE(core_created_found) << "Expected 'EngineCore created successfully...' log message not found.";
+
+    // Check for "EngineCore fully initialized."
+    bool core_fully_init_found = false;
+    for(const auto& msg : messages) {
+        if (msg.find("EngineCore fully initialized.") != std::string::npos) {
+            core_fully_init_found = true;
+            break;
+        }
+    }
+    ASSERT_TRUE(core_fully_init_found) << "Expected 'EngineCore fully initialized.' log message not found.";
+
+    // Cleanup
+    EngineDestroy(core_ptr);
 }

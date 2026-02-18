@@ -220,7 +220,7 @@
       - [x] NativeExports_EngineInitialize_InitializesLoggerOnce
       - [x] NativeExports_EngineInitialize_CreatesEngineCore
       - [x] NativeExports_EngineInitialize_ReturnsNullOnCoreInitializationFailure
-      - [ ] NativeExports_EngineInitialize_LogsInitializationInfo
+      - [x] NativeExports_EngineInitialize_LogsInitializationInfo
       - [ ] NativeExports_EngineDestroy_DeletesEngineCore
       - [x] NativeExports_EngineDestroy_HandlesNullCorePtr
       - [ ] NativeExports_EngineUpdate_CallsCoreUpdate
