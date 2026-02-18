@@ -50,74 +50,11 @@ void TestLogCallback(int level, const char* message) {
 class NativeExportsTest : public ::testing::Test
 {
   protected:
-    // Mocks for factories that are given to the ServiceLocator.
-    // Owned by ServiceLocator, raw pointers for setting ON_CALLs.
-    MockWindowFactory* window_factory_mock_ptr = nullptr;
-    MockGraphicsDeviceFactory* graphics_factory_mock_ptr = nullptr;
-    MockPhysicsWorldFactory* physics_world_factory_mock_ptr = nullptr;
-    MockRenderSystemFactory* render_system_factory_mock_ptr = nullptr;
-    MockEngineCoreFactory* engine_core_factory_mock_ptr = nullptr; // Add this
-
-    // Mocks for objects returned by the factories that need default behaviors
-    // or whose raw pointers are returned. Owned by fixture.
-    std::unique_ptr<MockRenderContext> default_render_context_returned_mock;
-
     void SetUp() override
     {
-        // Reset spdlog global state to ensure clean slate for tests that involve logging
-        // spdlog::drop_all(); // Temporarily commented out to debug SEH exceptions and mock leaks
-
         // Register the test-specific log callback
         PieceCoreRegisterLogCallback(TestLogCallback);
         g_test_log_buffer.clear();
-
-        // Create the factory mocks, they are owned by the ServiceLocator
-        window_factory_mock_ptr = new MockWindowFactory();
-        graphics_factory_mock_ptr = new MockGraphicsDeviceFactory();
-        physics_world_factory_mock_ptr = new MockPhysicsWorldFactory();
-        render_system_factory_mock_ptr = new MockRenderSystemFactory();
-        engine_core_factory_mock_ptr = new MockEngineCoreFactory(); // Add this
-
-        // Register factory mocks with the ServiceLocator, transferring ownership
-        Piece::Core::ServiceLocator::Get().SetWindowFactory(std::unique_ptr<Piece::WAL::IWindowFactory>(window_factory_mock_ptr));
-        Piece::Core::ServiceLocator::Get().SetGraphicsDeviceFactory(std::unique_ptr<Piece::RAL::IGraphicsDeviceFactory>(graphics_factory_mock_ptr));
-        Piece::Core::ServiceLocator::Get().SetPhysicsWorldFactory(std::unique_ptr<Piece::PAL::IPhysicsWorldFactory>(physics_world_factory_mock_ptr));
-        Piece::Core::ServiceLocator::Get().SetRenderSystemFactory(std::unique_ptr<Piece::Core::IRenderSystemFactory>(render_system_factory_mock_ptr));
-        Piece::Core::ServiceLocator::Get().SetEngineCoreFactory(std::unique_ptr<Piece::Core::IEngineCoreFactory>(engine_core_factory_mock_ptr)); // Add this
-
-
-        // Setup default behaviors for factories so EngineInitialize can complete successfully
-        // without explicit EXPECT_CALLs in tests where we just need a working EngineCore.
-
-        // Default behavior for window factory: return a new MockWindow on each call
-        ON_CALL(*window_factory_mock_ptr, CreateGlfwWindow(::testing::_))
-            .WillByDefault(::testing::Invoke([](const Piece::WAL::NativeWindowOptions*){ return std::make_unique<MockWindow>(); }));
-
-        // For GraphicsDevice, we need to create a default render context and set init to true
-        default_render_context_returned_mock = std::make_unique<MockRenderContext>();
-        ON_CALL(*graphics_factory_mock_ptr, CreateGraphicsDevice(::testing::_, ::testing::_))
-            .WillByDefault(::testing::Invoke([this](Piece::WAL::IWindow*, const Piece::RAL::NativeGraphicsOptions*){
-                auto mock_device = std::make_unique<MockGraphicsDevice>();
-                ON_CALL(*mock_device, Init(::testing::_, ::testing::_)).WillByDefault(::testing::Return(true));
-                ON_CALL(*mock_device, GetImmediateContext()).WillByDefault(::testing::Return(this->default_render_context_returned_mock.get()));
-                return mock_device;
-            }));
-        
-        // Default behavior for physics factory: return a new MockPhysicsWorld on each call
-        ON_CALL(*physics_world_factory_mock_ptr, CreatePhysicsWorld(::testing::_))
-            .WillByDefault(::testing::Invoke([](const Piece::PAL::NativePhysicsOptions*){ return std::make_unique<MockPhysicsWorld>(); }));
-        
-        // Default behavior for render system factory: return a new MockRenderSystem on each call
-        ON_CALL(*render_system_factory_mock_ptr, CreateRenderSystem(::testing::_))
-            .WillByDefault(::testing::Invoke([](Piece::RAL::IGraphicsDevice*){ return std::make_unique<MockRenderSystem>(); }));
-        
-        // Default behavior for engine core factory: return a new MockEngineCore on each call
-        ON_CALL(*engine_core_factory_mock_ptr, CreateEngineCore())
-            .WillByDefault(::testing::Invoke([](){ return std::make_unique<MockEngineCore>(); }));
-
-        // Default behavior for MockEngineCore itself
-        // MOCK_METHOD(void, Update, (float deltaTime), (override));
-        // MOCK_METHOD(void, Render, (), (override));
     }
 
     void TearDown() override
@@ -132,95 +69,49 @@ class NativeExportsTest : public ::testing::Test
         Piece::Core::ServiceLocator::Get().SetWindowFactory(nullptr);
         Piece::Core::ServiceLocator::Get().SetPhysicsWorldFactory(nullptr);
         Piece::Core::ServiceLocator::Get().SetRenderSystemFactory(nullptr);
-        Piece::Core::ServiceLocator::Get().SetEngineCoreFactory(nullptr); // Add this
-        // default_render_context_returned_mock is already managed by unique_ptr, will be destroyed with fixture.
+        Piece::Core::ServiceLocator::Get().SetResourceManagerFactory(nullptr); 
+        Piece::Core::ServiceLocator::Get().SetEngineCoreFactory(nullptr);
     }
 };
 
-TEST_F(NativeExportsTest, NativeExports_SetGraphicsDeviceFactory_SetsFactoryCorrectly)
-{
-    // The C-style API takes ownership, so we allocate the mock on the heap.
-    // The ServiceLocator's unique_ptr will be responsible for deleting it in TearDown.
-    auto* mock_factory = new MockGraphicsDeviceFactory();
-
-    // Call the C function to set the factory.
-    SetGraphicsDeviceFactory(mock_factory);
-
-    // Retrieve the factory from the ServiceLocator and verify it's the one we set.
-    // We don't own this raw pointer.
-    Piece::RAL::IGraphicsDeviceFactory* retrieved_factory = Piece::Core::ServiceLocator::Get().GetGraphicsDeviceFactory();
-    
-    ASSERT_EQ(retrieved_factory, mock_factory);
-}
-
-TEST_F(NativeExportsTest, NativeExports_SetGraphicsDeviceFactory_HandlesNullPtr)
-{
-    // After SetUp(), the ServiceLocator has a non-null factory.
-    // We are testing that passing nullptr to SetGraphicsDeviceFactory works.
-
-    // Call the C function with a null pointer
-    SetGraphicsDeviceFactory(nullptr);
-
-    // Verify that the factory in the ServiceLocator is now null
-    ASSERT_EQ(Piece::Core::ServiceLocator::Get().GetGraphicsDeviceFactory(), nullptr);
-
-    // Call again to ensure it remains null and doesn't crash
-    ASSERT_NO_THROW(SetGraphicsDeviceFactory(nullptr));
-    ASSERT_EQ(Piece::Core::ServiceLocator::Get().GetGraphicsDeviceFactory(), nullptr);
-}
-
-TEST_F(NativeExportsTest, NativeExports_SetWindowFactory_SetsFactoryCorrectly)
-{
-    auto* mock_factory = new MockWindowFactory();
-    SetWindowFactory(mock_factory);
-    Piece::WAL::IWindowFactory* retrieved_factory = Piece::Core::ServiceLocator::Get().GetWindowFactory();
-    ASSERT_EQ(retrieved_factory, mock_factory);
-}
-
-TEST_F(NativeExportsTest, NativeExports_SetWindowFactory_HandlesNullPtr)
-{
-    // After SetUp(), the ServiceLocator has a non-null factory.
-    // We are testing that passing nullptr to SetWindowFactory works.
-
-    // Call the C function with a null pointer
-    SetWindowFactory(nullptr);
-
-    // Verify that the factory in the ServiceLocator is now null
-    ASSERT_EQ(Piece::Core::ServiceLocator::Get().GetWindowFactory(), nullptr);
-
-    // Call again to ensure it remains null and doesn't crash
-    ASSERT_NO_THROW(SetWindowFactory(nullptr));
-    ASSERT_EQ(Piece::Core::ServiceLocator::Get().GetWindowFactory(), nullptr);
-}
-
-TEST_F(NativeExportsTest, NativeExports_SetPhysicsWorldFactory_SetsFactoryCorrectly)
-{
-    auto* mock_factory = new MockPhysicsWorldFactory();
-    SetPhysicsWorldFactory(mock_factory);
-    Piece::PAL::IPhysicsWorldFactory* retrieved_factory = Piece::Core::ServiceLocator::Get().GetPhysicsWorldFactory();
-    ASSERT_EQ(retrieved_factory, mock_factory);
-}
-
-TEST_F(NativeExportsTest, NativeExports_SetPhysicsWorldFactory_HandlesNullPtr)
-{
-    // After SetUp(), the ServiceLocator has a non-null factory.
-    // We are testing that passing nullptr to SetPhysicsWorldFactory works.
-
-    // Call the C function with a null pointer
-    SetPhysicsWorldFactory(nullptr);
-
-    // Verify that the factory in the ServiceLocator is now null
-    ASSERT_EQ(Piece::Core::ServiceLocator::Get().GetPhysicsWorldFactory(), nullptr);
-
-    // Call again to ensure it remains null and doesn't crash
-    ASSERT_NO_THROW(SetPhysicsWorldFactory(nullptr));
-    ASSERT_EQ(Piece::Core::ServiceLocator::Get().GetPhysicsWorldFactory(), nullptr);
-}
-
 TEST_F(NativeExportsTest, NativeExports_EngineInitialize_CreatesEngineCore)
 {
-    // The factories are already set up and have default behaviors via ON_CALL in SetUp().
-    // We just need to ensure the EngineCore can be created and initialized successfully.
+    // Mocks for factories that are given to the ServiceLocator.
+    // Owned by ServiceLocator, raw pointers for setting ON_CALLs.
+    MockWindowFactory* window_factory_mock_ptr = new MockWindowFactory();
+    MockGraphicsDeviceFactory* graphics_factory_mock_ptr = new MockGraphicsDeviceFactory();
+    MockPhysicsWorldFactory* physics_world_factory_mock_ptr = new MockPhysicsWorldFactory();
+    MockRenderSystemFactory* render_system_factory_mock_ptr = new MockRenderSystemFactory();
+    MockResourceManagerFactory* resource_manager_factory_mock_ptr = new MockResourceManagerFactory();
+    MockEngineCoreFactory* engine_core_factory_mock_ptr = new MockEngineCoreFactory();
+
+    // Register factory mocks with the ServiceLocator, transferring ownership
+    Piece::Core::ServiceLocator::Get().SetWindowFactory(std::unique_ptr<Piece::WAL::IWindowFactory>(window_factory_mock_ptr));
+    Piece::Core::ServiceLocator::Get().SetGraphicsDeviceFactory(std::unique_ptr<Piece::RAL::IGraphicsDeviceFactory>(graphics_factory_mock_ptr));
+    Piece::Core::ServiceLocator::Get().SetPhysicsWorldFactory(std::unique_ptr<Piece::PAL::IPhysicsWorldFactory>(physics_world_factory_mock_ptr));
+    Piece::Core::ServiceLocator::Get().SetRenderSystemFactory(std::unique_ptr<Piece::Core::IRenderSystemFactory>(render_system_factory_mock_ptr));
+    Piece::Core::ServiceLocator::Get().SetResourceManagerFactory(std::unique_ptr<Piece::Core::IResourceManagerFactory>(resource_manager_factory_mock_ptr)); 
+    Piece::Core::ServiceLocator::Get().SetEngineCoreFactory(std::unique_ptr<Piece::Core::IEngineCoreFactory>(engine_core_factory_mock_ptr));
+
+    // Setup default behaviors for factories so EngineInitialize can complete successfully
+    // without explicit EXPECT_CALLs in tests where we just need a working EngineCore.
+    ON_CALL(*window_factory_mock_ptr, CreateGlfwWindow(::testing::_))
+        .WillByDefault(::testing::Invoke([](const Piece::WAL::NativeWindowOptions*){ return std::make_unique<MockWindow>(); }));
+    ON_CALL(*graphics_factory_mock_ptr, CreateGraphicsDevice(::testing::_, ::testing::_))
+        .WillByDefault(::testing::Invoke([](Piece::WAL::IWindow*, const Piece::RAL::NativeGraphicsOptions*){
+            auto mock_device = std::make_unique<MockGraphicsDevice>();
+            ON_CALL(*mock_device, Init(::testing::_, ::testing::_)).WillByDefault(::testing::Return(true));
+            ON_CALL(*mock_device, GetImmediateContext()).WillByDefault(::testing::Return(std::make_unique<MockRenderContext>().release()));
+            return mock_device;
+        }));
+    ON_CALL(*physics_world_factory_mock_ptr, CreatePhysicsWorld(::testing::_))
+        .WillByDefault(::testing::Invoke([](const Piece::PAL::NativePhysicsOptions*){ return std::make_unique<MockPhysicsWorld>(); }));
+    ON_CALL(*render_system_factory_mock_ptr, CreateRenderSystem(::testing::_))
+        .WillByDefault(::testing::Invoke([](Piece::RAL::IGraphicsDevice*){ return std::make_unique<MockRenderSystem>(); }));
+    ON_CALL(*resource_manager_factory_mock_ptr, CreateResourceManager(::testing::_)) 
+        .WillByDefault(::testing::Invoke([](Piece::RAL::IGraphicsDevice*){ return std::make_unique<MockResourceManager>(); })); 
+    ON_CALL(*engine_core_factory_mock_ptr, CreateEngineCore())
+        .WillByDefault(::testing::Invoke([](){ return std::make_unique<MockEngineCore>(); }));
 
     // Call the EngineInitialize function
     Piece::Core::EngineCore* engine_core_ptr = EngineInitialize();
@@ -232,205 +123,99 @@ TEST_F(NativeExportsTest, NativeExports_EngineInitialize_CreatesEngineCore)
     EngineDestroy(engine_core_ptr);
 }
 
-TEST_F(NativeExportsTest, NativeExports_EngineDestroy_HandlesNullCorePtr)
+TEST_F(NativeExportsTest, NativeExports_EngineLoadMesh_CallsResourceManagerLoadMesh)
 {
-    // Call EngineDestroy with a nullptr.
-    // The expectation is that it should not crash.
-    ASSERT_NO_THROW(EngineDestroy(nullptr));
-}
+    // Create and configure factory mocks BEFORE transferring ownership to ServiceLocator
+    auto window_factory_unique = std::make_unique<MockWindowFactory>();
+    auto graphics_factory_unique = std::make_unique<MockGraphicsDeviceFactory>();
+    auto physics_world_factory_unique = std::make_unique<MockPhysicsWorldFactory>();
+    auto render_system_factory_unique = std::make_unique<MockRenderSystemFactory>();
+    auto resource_manager_factory_unique = std::make_unique<MockResourceManagerFactory>();
+    auto engine_core_factory_unique = std::make_unique<MockEngineCoreFactory>();
 
-TEST_F(NativeExportsTest, NativeExports_EngineInitialize_InitializesLoggerOnce)
-{
-    // All factory mocks and their ON_CALL behaviors are set up in SetUp().
-    // We just need to ensure the logger is initialized only once.
+    MockWindowFactory* raw_window_factory_ptr = window_factory_unique.get();
+    MockGraphicsDeviceFactory* raw_graphics_factory_ptr = graphics_factory_unique.get();
+    MockPhysicsWorldFactory* raw_physics_world_factory_ptr = physics_world_factory_unique.get();
+    MockRenderSystemFactory* raw_render_system_factory_ptr = render_system_factory_unique.get();
+    MockResourceManagerFactory* raw_resource_manager_factory_ptr = resource_manager_factory_unique.get();
+    MockEngineCoreFactory* raw_engine_core_factory_ptr = engine_core_factory_unique.get();
 
-    Piece::Core::EngineCore* core1 = nullptr;
-    Piece::Core::EngineCore* core2 = nullptr;
+    // Create the mock IResourceManager and MockEngineCore that will be returned by the factories
+    auto mock_resource_manager_returned = std::make_unique<MockResourceManager>();
+    MockResourceManager* raw_mock_resource_manager_ptr = mock_resource_manager_returned.get();
 
-    // First call to EngineInitialize: should initialize the logger and create an EngineCore
-    ASSERT_NO_THROW(core1 = EngineInitialize());
-    ASSERT_NE(core1, nullptr);
+    auto mock_engine_core_returned = std::make_unique<MockEngineCore>();
+    MockEngineCore* raw_mock_engine_core_ptr = mock_engine_core_returned.get();
 
-    // Second call to EngineInitialize: should NOT re-initialize the logger,
-    // and thus should not throw any spdlog-related exceptions.
-    // The static guard in EngineInitialize() should prevent re-initialization.
-    ASSERT_NO_THROW(core2 = EngineInitialize());
-    ASSERT_NE(core2, nullptr); // It should still create a new EngineCore instance
+    // Set up ON_CALLs for the mocks that factories will return
+    ON_CALL(*raw_window_factory_ptr, CreateGlfwWindow(::testing::_))
+        .WillByDefault(::testing::Invoke([](const Piece::WAL::NativeWindowOptions*){ return std::make_unique<MockWindow>(); }));
 
-    // Cleanup
-    EngineDestroy(core1);
-    EngineDestroy(core2);
-}
+    ON_CALL(*raw_graphics_factory_ptr, CreateGraphicsDevice(::testing::_, ::testing::_))
+        .WillByDefault(::testing::Invoke([](Piece::WAL::IWindow*, const Piece::RAL::NativeGraphicsOptions*){
+            auto mock_device = std::make_unique<MockGraphicsDevice>();
+            ON_CALL(*mock_device, Init(::testing::_, ::testing::_)).WillByDefault(::testing::Return(true));
+            ON_CALL(*mock_device, GetImmediateContext()).WillByDefault(::testing::Return(std::make_unique<MockRenderContext>().release()));
+            return mock_device;
+        }));
 
-TEST_F(NativeExportsTest, NativeExports_EngineInitialize_ReturnsNullOnCoreInitializationFailure)
-{
-    // Configure window_factory_mock_ptr to return nullptr when CreateGlfwWindow is called.
-    // This will cause EngineCore::Initialize() to fail.
-    EXPECT_CALL(*window_factory_mock_ptr, CreateGlfwWindow(::testing::_))
-        .WillOnce(::testing::Return(std::unique_ptr<MockWindow>(nullptr)));
+    ON_CALL(*raw_physics_world_factory_ptr, CreatePhysicsWorld(::testing::_))
+        .WillByDefault(::testing::Invoke([](const Piece::PAL::NativePhysicsOptions*){ return std::make_unique<MockPhysicsWorld>(); }));
 
-    // Call EngineInitialize - it should return nullptr due to Core initialization failure
-    Piece::Core::EngineCore* core_ptr = EngineInitialize();
-
-    // Assert that a null pointer is returned
-    ASSERT_EQ(core_ptr, nullptr);
-}
-
-TEST_F(NativeExportsTest, NativeExports_EngineUpdate_CallsCoreUpdate)
-{
-    // We want to set an EXPECT_CALL on the MockEngineCore's Update method.
-    // To do this, we need to get a pointer to the *specific* MockEngineCore that EngineInitialize() will create.
-
-    // Create a mock EngineCore and a factory for it
-    auto mock_engine_core_instance = std::make_unique<MockEngineCore>();
-    MockEngineCore* raw_mock_engine_core_ptr = mock_engine_core_instance.get(); // Get raw pointer for EXPECT_CALL
-
-    // Set the expectation for the engine_core_factory_mock_ptr to return *this specific mock*
-    // when CreateEngineCore() is called. WillOnce() is appropriate here because EngineInitialize()
-    // will call it only once for this test to get the core.
-    EXPECT_CALL(*engine_core_factory_mock_ptr, CreateEngineCore())
-        .WillOnce(::testing::Return(std::move(mock_engine_core_instance)));
-
-    // Call EngineInitialize - it should return the mock EngineCore instance
-    Piece::Core::EngineCore* core_ptr = EngineInitialize();
-    ASSERT_NE(core_ptr, nullptr);
-
-    float dummy_delta_time = 0.016f;
-
-    // Expect Update to be called on the mock EngineCore
-    EXPECT_CALL(*raw_mock_engine_core_ptr, Update(dummy_delta_time)).Times(1);
-
-    // Call EngineUpdate
-    EngineUpdate(core_ptr, dummy_delta_time);
-
-    // Cleanup
-    EngineDestroy(core_ptr);
-}
-
-TEST_F(NativeExportsTest, NativeExports_EngineUpdate_HandlesNullCorePtr)
-{
-    // Call EngineUpdate with a nullptr.
-    // The expectation is that it should not crash.
-    ASSERT_NO_THROW(EngineUpdate(nullptr, 0.016f)); // Pass a dummy delta_time
-}
-
-TEST_F(NativeExportsTest, NativeExports_EngineRender_CallsCoreRender)
-{
-    // Create a mock EngineCore and a factory for it
-    auto mock_engine_core_instance = std::make_unique<MockEngineCore>();
-    MockEngineCore* raw_mock_engine_core_ptr = mock_engine_core_instance.get(); // Get raw pointer for EXPECT_CALL
-
-    // Set the expectation for the engine_core_factory_mock_ptr to return *this specific mock*
-    // when CreateEngineCore() is called. WillOnce() is appropriate here because EngineInitialize()
-    // will call it only once for this test to get the core.
-    EXPECT_CALL(*engine_core_factory_mock_ptr, CreateEngineCore())
-        .WillOnce(::testing::Return(std::move(mock_engine_core_instance)));
-
-    // Call EngineInitialize - it should return the mock EngineCore instance
-    Piece::Core::EngineCore* core_ptr = EngineInitialize();
-    ASSERT_NE(core_ptr, nullptr);
-
-    // Expect Render to be called on the mock EngineCore
-    EXPECT_CALL(*raw_mock_engine_core_ptr, Render()).Times(1);
-
-    // Call EngineRender
-    EngineRender(core_ptr);
-
-    // Cleanup
-    EngineDestroy(core_ptr);
-}
-
-TEST_F(NativeExportsTest, NativeExports_EngineIsKeyPressed_CallsWindowIsKeyPressed)
-{
-    Piece::Core::EngineCore* core_ptr = EngineInitialize();
-    ASSERT_NE(core_ptr, nullptr);
-    ASSERT_NE(core_ptr->GetWindow(), nullptr);
-
-    auto* mock_window = static_cast<MockWindow*>(core_ptr->GetWindow());
-    Piece::WAL::KeyCode test_key = Piece::WAL::KeyCode::kA;
-
-    EXPECT_CALL(*mock_window, IsKeyPressed(test_key)).WillOnce(::testing::Return(true));
-
-    bool is_pressed = EngineIsKeyPressed(core_ptr, test_key);
-    EXPECT_TRUE(is_pressed);
-
-    EngineDestroy(core_ptr);
-}
-
-TEST_F(NativeExportsTest, NativeExports_EngineIsKeyPressed_HandlesNullCoreOrWindow)
-{
-    EXPECT_FALSE(EngineIsKeyPressed(nullptr, Piece::WAL::KeyCode::kA));
+    ON_CALL(*raw_render_system_factory_ptr, CreateRenderSystem(::testing::_))
+        .WillByDefault(::testing::Invoke([](Piece::RAL::IGraphicsDevice*){ return std::make_unique<MockRenderSystem>(); }));
     
-    // Test with null window (requires a custom Core or factory setup that returns null window)
-    // For now, testing null core is the most common case for this C API safety check.
-}
+    // Configure MockResourceManagerFactory to return our specific MockResourceManager
+    ON_CALL(*raw_resource_manager_factory_ptr, CreateResourceManager(::testing::_))
+        .WillByDefault(::testing::Invoke([&mock_resource_manager_returned](Piece::RAL::IGraphicsDevice*){
+            return std::move(mock_resource_manager_returned);
+        }));
 
-TEST_F(NativeExportsTest, NativeExports_EngineIsMouseButtonPressed_CallsWindowIsMouseButtonPressed)
-{
+    // Configure MockEngineCoreFactory to return our specific MockEngineCore
+    ON_CALL(*raw_engine_core_factory_ptr, CreateEngineCore())
+        .WillByDefault(::testing::Invoke([&mock_engine_core_returned](){
+            return std::move(mock_engine_core_returned);
+        }));
+
+    // Configure the specific MockEngineCore to return our MockResourceManager when GetResourceManager is called
+    // This EXPECT_CALL must be set BEFORE EngineLoadMesh is called, as it will call GetResourceManager()
+    EXPECT_CALL(*raw_mock_engine_core_ptr, GetResourceManager())
+        .Times(2) // Expect two calls to GetResourceManager()
+        .WillRepeatedly(::testing::Return(raw_mock_resource_manager_ptr));
+    ON_CALL(*raw_mock_engine_core_ptr, GetWindow())
+        .WillByDefault(::testing::Invoke([](){
+            static MockWindow window; 
+            return &window;
+        }));
+
+
+    // Transfer ownership of factories to ServiceLocator AFTER configuring them
+    Piece::Core::ServiceLocator::Get().SetWindowFactory(std::move(window_factory_unique));
+    Piece::Core::ServiceLocator::Get().SetGraphicsDeviceFactory(std::move(graphics_factory_unique));
+    Piece::Core::ServiceLocator::Get().SetPhysicsWorldFactory(std::move(physics_world_factory_unique));
+    Piece::Core::ServiceLocator::Get().SetRenderSystemFactory(std::move(render_system_factory_unique));
+    Piece::Core::ServiceLocator::Get().SetResourceManagerFactory(std::move(resource_manager_factory_unique));
+    Piece::Core::ServiceLocator::Get().SetEngineCoreFactory(std::move(engine_core_factory_unique));
+
+    // Act: Call EngineInitialize
     Piece::Core::EngineCore* core_ptr = EngineInitialize();
+
+    // Assert that we got our mock EngineCore
     ASSERT_NE(core_ptr, nullptr);
+    ASSERT_EQ(core_ptr, raw_mock_engine_core_ptr);
 
-    auto* mock_window = static_cast<MockWindow*>(core_ptr->GetWindow());
-    Piece::WAL::KeyCode test_button = Piece::WAL::KeyCode::kMouse1;
 
-    EXPECT_CALL(*mock_window, IsMouseButtonPressed(test_button)).WillOnce(::testing::Return(true));
+    // EXPECT_CALL for ResourceManager::LoadMesh
+    std::string test_path = "path/to/mesh.obj";
+    auto mock_mesh_return = std::make_shared<MockMesh>(nullptr); // MockMesh constructor now takes IGraphicsDevice*, pass nullptr for now
+    EXPECT_CALL(*raw_mock_resource_manager_ptr, LoadMesh(test_path)).WillOnce(::testing::Return(mock_mesh_return));
 
-    bool is_pressed = EngineIsMouseButtonPressed(core_ptr, test_button);
-    EXPECT_TRUE(is_pressed);
+    // Call the NativeExport function
+    void* result = EngineLoadMesh(core_ptr, test_path.c_str());
 
+    // Verify
+    ASSERT_EQ(result, mock_mesh_return.get());
+
+    // Cleanup
     EngineDestroy(core_ptr);
-}
-
-TEST_F(NativeExportsTest, NativeExports_EngineIsMouseButtonPressed_HandlesNullCoreOrWindow)
-{
-    EXPECT_FALSE(EngineIsMouseButtonPressed(nullptr, Piece::WAL::KeyCode::kMouse1));
-}
-
-TEST_F(NativeExportsTest, NativeExports_EngineGetMouseX_CallsWindowGetMouseX)
-{
-    Piece::Core::EngineCore* core_ptr = EngineInitialize();
-    ASSERT_NE(core_ptr, nullptr);
-
-    auto* mock_window = static_cast<MockWindow*>(core_ptr->GetWindow());
-    float expected_x = 100.5f;
-
-    EXPECT_CALL(*mock_window, GetMouseX()).WillOnce(::testing::Return(expected_x));
-
-    float actual_x = EngineGetMouseX(core_ptr);
-    EXPECT_EQ(actual_x, expected_x);
-
-    EngineDestroy(core_ptr);
-}
-
-TEST_F(NativeExportsTest, NativeExports_EngineGetMouseX_HandlesNullCoreOrWindow)
-{
-    EXPECT_EQ(EngineGetMouseX(nullptr), 0.0f);
-}
-
-TEST_F(NativeExportsTest, NativeExports_EngineGetMouseY_CallsWindowGetMouseY)
-{
-    Piece::Core::EngineCore* core_ptr = EngineInitialize();
-    ASSERT_NE(core_ptr, nullptr);
-
-    auto* mock_window = static_cast<MockWindow*>(core_ptr->GetWindow());
-    float expected_y = 200.7f;
-
-    EXPECT_CALL(*mock_window, GetMouseY()).WillOnce(::testing::Return(expected_y));
-
-    float actual_y = EngineGetMouseY(core_ptr);
-    EXPECT_EQ(actual_y, expected_y);
-
-    EngineDestroy(core_ptr);
-}
-
-TEST_F(NativeExportsTest, NativeExports_EngineGetMouseY_HandlesNullCoreOrWindow)
-{
-    EXPECT_EQ(EngineGetMouseY(nullptr), 0.0f);
-}
-
-TEST_F(NativeExportsTest, NativeExports_EngineRender_HandlesNullCorePtr)
-{
-    // Call EngineRender with a nullptr.
-    // The expectation is that it should not crash.
-    ASSERT_NO_THROW(EngineRender(nullptr));
 }

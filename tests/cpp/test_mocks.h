@@ -31,6 +31,11 @@
 #include <ral/iframebuffer.h>
 #include <ral/iuniform_buffer.h>
 
+// Mocks for EngineCore dependencies
+#include <piece_core/core/iresource_manager.h>         // Include IResourceManager
+#include <piece_core/core/iresource_manager_factory.h> // Include the new factory interface
+#include <piece_core/core/mesh.h>                      // Include for Mesh
+#include <piece_core/core/resource_manager.h>          // Include concrete ResourceManager for Mocking its constructor
 
 // Mocks for low-level interfaces
 class MockWindow : public Piece::WAL::IWindow
@@ -145,6 +150,8 @@ public:
     MOCK_METHOD(void, Render, (), (override));
     // Note: Do not mock constructor/destructor unless absolutely necessary and carefully
     // Virtual methods must be public.
+    MOCK_METHOD(Piece::Core::IResourceManager*, GetResourceManager, (), (const, override)); // Added override
+    MOCK_METHOD(Piece::WAL::IWindow*, GetWindow, (), (const, override)); // Added override
 };
 
 
@@ -178,9 +185,42 @@ class MockRenderSystemFactory : public Piece::Core::IRenderSystemFactory
                 (Piece::RAL::IGraphicsDevice * graphicsDevice), (override));
 };
 
+// Mock for IResourceManagerFactory
+class MockResourceManagerFactory : public Piece::Core::IResourceManagerFactory
+{
+  public:
+    MOCK_METHOD(std::unique_ptr<Piece::Core::IResourceManager>, CreateResourceManager,
+                (Piece::RAL::IGraphicsDevice * graphics_device), (override));
+};
+
 // Mock for IEngineCoreFactory
 class MockEngineCoreFactory : public Piece::Core::IEngineCoreFactory
 {
   public:
     MOCK_METHOD(std::unique_ptr<Piece::Core::EngineCore>, CreateEngineCore, (), (override));
+};
+
+// Mock for Mesh (base class methods are not virtual, so no 'override' keyword)
+class MockMesh : public Piece::Core::Mesh
+{
+public:
+    // Mesh constructor now explicitly takes IGraphicsDevice*
+    explicit MockMesh(Piece::RAL::IGraphicsDevice* graphicsDevice)
+        : Piece::Core::Mesh(graphicsDevice) {}
+
+    // Methods are mocked, but without 'override' as they are not virtual in the base class.
+    MOCK_METHOD(void, SetVertexBuffer, (std::unique_ptr<Piece::RAL::IVertexBuffer> vertex_buffer));
+    MOCK_METHOD(void, SetIndexBuffer, (std::unique_ptr<Piece::RAL::IIndexBuffer> index_buffer));
+    MOCK_METHOD(Piece::RAL::IVertexBuffer*, GetVertexBuffer, (), (const));
+    MOCK_METHOD(Piece::RAL::IIndexBuffer*, GetIndexBuffer, (), (const));
+};
+
+// Mock for ResourceManager (inherits from IResourceManager)
+class MockResourceManager : public Piece::Core::IResourceManager // Removed constructor
+{
+public:
+    MOCK_METHOD(std::shared_ptr<Piece::Core::Mesh>, LoadMesh, (const std::string& path), (override));
+    MOCK_METHOD(std::shared_ptr<Piece::Core::Material>, LoadMaterial, (const std::string& path), (override));
+    MOCK_METHOD(std::shared_ptr<Piece::RAL::ITexture>, LoadTexture, (const std::string& path), (override));
+    MOCK_METHOD(std::shared_ptr<Piece::RAL::IShaderProgram>, LoadShaderProgram, (const std::string& path), (override));
 };

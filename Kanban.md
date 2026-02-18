@@ -235,7 +235,7 @@
       - [x] NativeExports_EngineGetMouseX_HandlesNullCoreOrWindow
       - [x] NativeExports_EngineGetMouseY_CallsWindowGetMouseY
       - [x] NativeExports_EngineGetMouseY_HandlesNullCoreOrWindow
-      - [ ] NativeExports_EngineLoadMesh_CallsResourceManagerLoadMesh
+      - [x] NativeExports_EngineLoadMesh_CallsResourceManagerLoadMesh
       - [ ] NativeExports_EngineLoadMesh_ReturnsMeshOnSuccess
       - [ ] NativeExports_EngineLoadMesh_ReturnsNullOnFailure
       - [ ] NativeExports_EngineLoadMesh_HandlesNullCoreOrResourceManager

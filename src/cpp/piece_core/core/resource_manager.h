@@ -12,7 +12,7 @@
 #include <ral/interfaces/ishader_program.h>
 #include <ral/interfaces/ivertex_buffer.h>
 #include <ral/itexture.h>
-#include <ral/ral_types.h>
+#include <piece_core/core/iresource_manager.h> // Include the new interface
 
 namespace Piece::Core
 {
@@ -26,17 +26,16 @@ class Mesh;
  * @details This class is responsible for loading assets from files and converting them into
  *          RAL resources, and maintaining a cache of these resources.
  */
-class PIECE_CORE_API ResourceManager
+class PIECE_CORE_API ResourceManager : public IResourceManager
 {
   public:
     explicit ResourceManager(Piece::RAL::IGraphicsDevice *graphics_device);
-    ~ResourceManager();
+    ~ResourceManager() override; // Mark destructor as override
 
-    std::shared_ptr<Material> LoadMaterial(const std::string &path);
-    std::shared_ptr<Mesh> LoadMesh(const std::string &path);
-    std::shared_ptr<Piece::RAL::ITexture> LoadTexture(const std::string &path);
-    std::shared_ptr<Piece::RAL::IShaderProgram> LoadShaderProgram(const std::string &vertex_shader_path,
-                                                           const std::string &fragment_shader_path);
+    std::shared_ptr<Material> LoadMaterial(const std::string &path) override;
+    std::shared_ptr<Mesh> LoadMesh(const std::string &path) override;
+    std::shared_ptr<Piece::RAL::ITexture> LoadTexture(const std::string &path) override;
+    std::shared_ptr<Piece::RAL::IShaderProgram> LoadShaderProgram(const std::string &path) override;
 
   private:
     Piece::RAL::IGraphicsDevice *graphics_device_;

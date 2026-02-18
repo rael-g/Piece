@@ -10,6 +10,7 @@
 #include <ral/isampler.h>
 #include <ral/itexture.h>
 #include <ral/iuniform_buffer.h>
+#include "piece_core_exports.h" // Include PIECE_CORE_API definition
 
 namespace Piece::Core
 {
@@ -17,11 +18,11 @@ namespace Piece::Core
 /**
  * @brief Represents a material, encapsulating shader program, textures, and uniform parameters.
  */
-class Material
+class PIECE_CORE_API Material
 {
   public:
     Material();
-    ~Material();
+    virtual ~Material();
 
     void SetShaderProgram(std::shared_ptr<Piece::RAL::IShaderProgram> shader_program);
     void SetTexture(const std::string &name, std::shared_ptr<Piece::RAL::ITexture> texture);

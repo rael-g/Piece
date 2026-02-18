@@ -7,6 +7,7 @@
 #include <ral/igraphics_device.h>
 #include <ral/interfaces/iindex_buffer.h>
 #include <ral/interfaces/ivertex_buffer.h>
+#include "piece_core_exports.h" // Include PIECE_CORE_API definition
 
 namespace Piece::Core
 {
@@ -14,11 +15,11 @@ namespace Piece::Core
 /**
  * @brief Represents a mesh, encapsulating vertex and index buffers.
  */
-class Mesh
+class PIECE_CORE_API Mesh
 {
   public:
     explicit Mesh(Piece::RAL::IGraphicsDevice *graphics_device);
-    ~Mesh();
+    virtual ~Mesh();
 
     void SetVertexBuffer(std::unique_ptr<Piece::RAL::IVertexBuffer> vertex_buffer);
     void SetIndexBuffer(std::unique_ptr<Piece::RAL::IIndexBuffer> index_buffer);

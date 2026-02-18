@@ -9,7 +9,7 @@
 
 #include "core/physics_system_cpp.h"
 #include "core/render_system.h"
-#include "core/resource_manager.h"
+#include "core/iresource_manager.h" // Include the IResourceManager interface
 #include <pal/iphysics_world.h>
 #include <ral/igraphics_device.h>
 #include <wal/iwindow.h>
@@ -20,6 +20,7 @@
 #include <pal/iphysics_world_factory.h>
 #include <ral/igraphics_device_factory.h>
 #include <wal/iwindow_factory.h>
+#include "core/iresource_manager_factory.h" // Include the IResourceManagerFactory
 
 #include "piece_core_exports.h" // Defines PIECE_CORE_API
 
@@ -73,7 +74,7 @@ class PIECE_CORE_API EngineCore
      * @brief Gets the window interface.
      * @return A pointer to the window interface.
      */
-    Piece::WAL::IWindow *GetWindow() const
+    virtual Piece::WAL::IWindow *GetWindow() const
     {
         return window_.get();
     }
@@ -82,7 +83,7 @@ class PIECE_CORE_API EngineCore
      * @brief Gets the resource manager.
      * @return A pointer to the resource manager.
      */
-    ResourceManager *GetResourceManager() const
+    virtual IResourceManager *GetResourceManager() const
     {
         return resource_manager_.get();
     }
@@ -104,7 +105,7 @@ class PIECE_CORE_API EngineCore
      */
     std::unique_ptr<Piece::PAL::IPhysicsWorld> physics_world_;
 
-    std::unique_ptr<ResourceManager> resource_manager_;
+    std::unique_ptr<IResourceManager> resource_manager_; // Changed to IResourceManager
     std::unique_ptr<IRenderSystem> render_system_;
     std::unique_ptr<PhysicsSystemCpp> physics_system_;
 };

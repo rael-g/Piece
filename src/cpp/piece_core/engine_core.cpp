@@ -5,13 +5,15 @@
 #include "engine_core.h"
 #include "core/physics_system_cpp.h"
 #include "core/render_system.h"
-#include "core/resource_manager.h"
+#include "core/resource_manager.h" // Still include for the default factory
 #include "core/service_locator.h"
 #include "piece_core/logging_api.h"
 #include <pal/iphysics_world.h>
 #include <ral/igraphics_device.h>
 #include <wal/iwindow.h>
 #include "core/irender_system_factory.h"
+#include "core/iresource_manager_factory.h" // Include the new resource manager factory interface
+#include "core/resource_manager_factory.h"   // Include the concrete resource manager factory
 
 namespace Piece::Core
 {
@@ -39,6 +41,7 @@ bool EngineCore::Initialize()
     RAL::IGraphicsDeviceFactory *graphics_factory = ServiceLocator::Get().GetGraphicsDeviceFactory();
     PAL::IPhysicsWorldFactory *physics_factory = ServiceLocator::Get().GetPhysicsWorldFactory();
     IRenderSystemFactory *render_system_factory = ServiceLocator::Get().GetRenderSystemFactory();
+    IResourceManagerFactory *resource_manager_factory = ServiceLocator::Get().GetResourceManagerFactory();
 
     if (!window_factory)
     {
@@ -95,7 +98,16 @@ bool EngineCore::Initialize()
     PIECE_INFO("IPhysicsWorld created.");
 
     // Initialize core systems
-    resource_manager_ = std::make_unique<ResourceManager>(graphics_device_.get());
+    if (resource_manager_factory)
+    {
+        resource_manager_ = resource_manager_factory->CreateResourceManager(graphics_device_.get());
+    }
+    else
+    {
+        PIECE_WARN("IResourceManagerFactory not set in ServiceLocator. Creating default ResourceManager.");
+        resource_manager_ = std::make_unique<ResourceManager>(graphics_device_.get());
+    }
+    
     render_system_ = render_system_factory->CreateRenderSystem(graphics_device_.get());
     if (!render_system_)
     {

@@ -45,15 +45,13 @@ std::shared_ptr<RAL::ITexture> ResourceManager::LoadTexture(const std::string &p
     return graphics_device_->CreateTexture(RAL::TextureType::kTexture2D, 1, 1, 1, RAL::TextureFormat::kR8G8B8A8Unorm);
 }
 
-std::shared_ptr<RAL::IShaderProgram> ResourceManager::LoadShaderProgram(const std::string &vertex_shader_path,
-                                                                        const std::string &fragment_shader_path)
+std::shared_ptr<RAL::IShaderProgram> ResourceManager::LoadShaderProgram(const std::string &path)
 {
-    PIECE_TRACE("ResourceManager::LoadShaderProgram(vertex: '{0}', fragment: '{1}')", vertex_shader_path,
-                fragment_shader_path);
-    PIECE_INFO("Loading shader program: {0} (Vertex), {1} (Fragment)", vertex_shader_path, fragment_shader_path);
-    // Stub: In a real scenario, load shader source, create IShader, then IShaderProgram
-    // For now, return a placeholder
-    return graphics_device_->CreateShaderProgram({}); // Empty vector for now
+    PIECE_TRACE("ResourceManager::LoadShaderProgram(path: '{0}')", path);
+    PIECE_INFO("Loading shader program from path: {0}", path);
+    // Stub: In a real scenario, parse path to determine shader type, load source, create IShader, then IShaderProgram
+    // For now, return nullptr
+    return nullptr;
 }
 
 } // namespace Piece::Core

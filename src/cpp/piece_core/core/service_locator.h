@@ -9,7 +9,8 @@
 #include <ral/igraphics_device_factory.h>
 #include <wal/iwindow_factory.h>
 #include "irender_system_factory.h"
-#include "iengine_core_factory.h" // Add this include
+#include "iengine_core_factory.h"
+#include "iresource_manager_factory.h" // Add this include
 
 #include <memory>
 #include <piece_core/logging_api.h>
@@ -81,6 +82,16 @@ class ServiceLocator
     }
 
     /**
+     * @brief Sets the resource manager factory.
+     * @param factory A unique pointer to the resource manager factory.
+     */
+    void SetResourceManagerFactory(std::unique_ptr<IResourceManagerFactory> factory)
+    {
+        PIECE_INFO("ServiceLocator::SetResourceManagerFactory(factory: {0})", fmt::ptr(factory.get()));
+        resource_manager_factory_ = std::move(factory);
+    }
+
+    /**
      * @brief Sets the engine core factory.
      * @param factory A unique pointer to the engine core factory.
      */
@@ -129,6 +140,16 @@ class ServiceLocator
     }
 
     /**
+     * @brief Gets the resource manager factory.
+     * @return A pointer to the resource manager factory.
+     */
+    [[nodiscard]] IResourceManagerFactory *GetResourceManagerFactory() const
+    {
+        PIECE_TRACE("ServiceLocator::GetResourceManagerFactory() -> {0}", fmt::ptr(resource_manager_factory_.get()));
+        return resource_manager_factory_.get();
+    }
+
+    /**
      * @brief Gets the engine core factory.
      * @return A pointer to the engine core factory.
      */
@@ -152,8 +173,10 @@ class ServiceLocator
     std::unique_ptr<Piece::PAL::IPhysicsWorldFactory> physics_world_factory_;
     /** @brief The render system factory instance. */
     std::unique_ptr<IRenderSystemFactory> render_system_factory_;
+    /** @brief The resource manager factory instance. */
+    std::unique_ptr<IResourceManagerFactory> resource_manager_factory_;
     /** @brief The engine core factory instance. */
-    std::unique_ptr<IEngineCoreFactory> engine_core_factory_; // Add this
+    std::unique_ptr<IEngineCoreFactory> engine_core_factory_;
 };
 
 } // namespace Piece::Core
