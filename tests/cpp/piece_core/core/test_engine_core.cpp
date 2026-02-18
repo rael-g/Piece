@@ -431,3 +431,44 @@ TEST_F(EngineCoreTest, EngineCore_Render_CallsRenderSystemRenderFrame)
     engine_core.Render();
 }
 
+TEST_F(EngineCoreTest, EngineCore_Update_HandlesNullPhysicsSystem)
+{
+    // Mocks for successful initialization of Window, Graphics, and RenderSystem
+    auto test_window_mock = std::make_unique<MockWindow>();
+    auto test_graphics_mock = std::make_unique<MockGraphicsDevice>();
+    MockGraphicsDevice* graphics_ptr = test_graphics_mock.get(); // Get raw pointer for expectations
+    auto test_render_context_mock = std::make_unique<MockRenderContext>();
+    // The RenderSystem will not be created if physics initialization fails, so no need for render system mock.
+    // auto test_render_system_mock = std::make_unique<MockRenderSystem>();
+
+    // Configure factories for successful creation of Window, Graphics, and RenderSystem
+    EXPECT_CALL(*window_factory_mock, CreateGlfwWindow(::testing::_))
+        .WillOnce(::testing::Return(std::move(test_window_mock)));
+    EXPECT_CALL(*graphics_factory_mock, CreateGraphicsDevice(::testing::_, ::testing::_))
+        .WillOnce(::testing::Return(std::move(test_graphics_mock)));
+    EXPECT_CALL(*graphics_ptr, Init(::testing::_, ::testing::_))
+        .WillOnce(::testing::Return(true));
+    EXPECT_CALL(*graphics_ptr, GetImmediateContext())
+        .WillRepeatedly(::testing::Return(test_render_context_mock.get())); // RenderSystem needs a context
+
+    // Remove expectation for render system factory call as it won't be reached
+    // EXPECT_CALL(*render_system_factory_mock, CreateRenderSystem(::testing::_))
+    //     .WillOnce(::testing::Return(std::move(test_render_system_mock)));
+
+    // Configure physics_factory_mock to return nullptr
+    EXPECT_CALL(*physics_factory_mock, CreatePhysicsWorld(::testing::_))
+        .WillOnce(::testing::Return(std::unique_ptr<MockPhysicsWorld>(nullptr))); // Simulate physics world creation failure
+
+    // Initialize EngineCore:
+    Piece::Core::EngineCore engine_core;
+    bool init_success = engine_core.Initialize();
+
+    // Expect initialization to fail because physics world creation failed.
+    ASSERT_FALSE(init_success);
+
+    // Call Update:
+    // This calls Update on an EngineCore that failed to initialize its physics system.
+    // We expect it not to crash, as the if (physics_system_) check should prevent a nullptr dereference.
+    ASSERT_NO_THROW(engine_core.Update(0.016f));
+}
+

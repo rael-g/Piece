@@ -2,6 +2,17 @@
 
 ## Backlog (Post v1.0.0 Features & Enhancements)
 
+### Miscellaneous Tasks
+
+  - tags: [misc, backlog]
+  - priority: low
+  - defaultExpanded: false
+  - steps:
+      - [ ] transformar em packs os projetos csharp
+    ```md
+    A section for small, unrelated tasks or ideas that don't fit into the main development roadmap but are worth noting for future consideration.
+    ```
+
 ### Implement Advanced Rendering Pipelines
 
   - tags: [rendering, advanced]
@@ -194,7 +205,7 @@
       - [x] EngineCore_Constructor_FailsIfPhysicsWorldCreationFails
       - [x] EngineCore_Destructor_CleansUpResources
       - [x] EngineCore_Update_CallsPhysicsSystemStep
-      - [ ] EngineCore_Update_HandlesNullPhysicsSystem
+      - [x] EngineCore_Update_HandlesNullPhysicsSystem
       - [x] EngineCore_Render_CallsGraphicsDeviceBeginEndFrame
       - [x] EngineCore_Render_CallsRenderContextClear
       - [x] EngineCore_Render_CallsRenderSystemRenderFrame
@@ -286,7 +297,7 @@
       - [ ] JobSystem_EnqueueJob_ExecutesMultipleJobs
       - [ ] JobSystem_EnqueueJob_HandlesJobsFromMultipleThreads
       - [ ] JobSystem_WaitUntilAllDone_BlocksUntilAllJobsComplete
-      - [ ] JobSystem_WaitUntilAllDone_DoesNotBlockIfNoJobs
+      - [ ] JobSystem_DoesNotBlockIfNoJobs
       - [ ] JobSystem_Concurrency_NoRaceConditionsOnSharedState
       - [ ] JobSystem_Logging_GeneratesAppropriateMessages
       - [x] ServiceLocator_Get_ReturnsSingletonInstance
@@ -494,20 +505,16 @@
       - [ ] OpenGLAccelerationStructure_Build_LogsWarning
       - [ ] OpenGLAccelerationStructure_Update_LogsWarning
       - [ ] OpenGLAccelerationStructure_Logging_GeneratesAppropriateMessages
-      - [ ] CreateOpenGLGraphicsDeviceFactory_ReturnsValidFactory
-      - [ ] CreateOpenGLGraphicsDeviceFactory_Logging_GeneratesAppropriateMessages
-      - [ ] DestroyOpenGLGraphicsDeviceFactory_DeletesFactory
-      - [ ] DestroyOpenGLGraphicsDeviceFactory_Logging_GeneratesAppropriateMessages
       - [x] GlfwWindowFactory_Constructor_StoresOptions
       - [ ] GlfwWindowFactory_CreateGlfwWindow_UsesFactoryOptionsWhenNoneProvided
       - [ ] GlfwWindowFactory_CreateGlfwWindow_UsesProvidedOptions
       - [x] GlfwWindowFactory_CreateGlfwWindow_ReturnsValidWindow
       - [ ] GlfwWindowFactory_CreateGlfwWindow_ReturnsNullOnWindowInitFailure
       - [ ] GlfwWindowFactory_Logging_GeneratesAppropriateMessages
-      - [x] GlfwWindow_Constructor_InitializesGLFWAndLogs
+      - [ ] GlfwWindow_Constructor_InitializesGLFWAndLogs
       - [ ] GlfwWindow_Constructor_HandlesGLFWInitFailure
       - [ ] GlfwWindow_Destructor_TerminatesGLFWAndDestroysWindow
-      - [x] GlfwWindow_Init_CreatesGLFWWindowSuccessfully
+      - [ ] GlfwWindow_Init_CreatesGLFWWindowSuccessfully
       - [ ] GlfwWindow_Init_HandlesGLFWWindowCreationFailure
       - [ ] GlfwWindow_Init_SetsWindowHintsCorrectly
       - [ ] GlfwWindow_Init_MakesContextCurrentAndEnablesVSync
