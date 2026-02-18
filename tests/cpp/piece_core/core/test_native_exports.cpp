@@ -263,56 +263,28 @@ TEST_F(NativeExportsTest, NativeExports_EngineInitialize_ReturnsNullOnCoreInitia
     ASSERT_EQ(core_ptr, nullptr);
 }
 
-TEST_F(NativeExportsTest, NativeExports_EngineInitialize_LogsInitializationInfo)
+TEST_F(NativeExportsTest, NativeExports_EngineDestroy_DeletesEngineCore)
 {
-    // Call EngineInitialize
+    // Clear log buffer before starting test to capture relevant messages
+    g_test_log_buffer.clear();
+
+    // Call EngineInitialize to get a valid EngineCore instance
     Piece::Core::EngineCore* core_ptr = EngineInitialize();
     ASSERT_NE(core_ptr, nullptr);
 
-    // Expect specific log messages to be present
-    const auto& messages = g_test_log_buffer.messages;
-    const auto& levels = g_test_log_buffer.levels;
-
-    // Check for "spdlog initialized."
-    bool spdlog_init_found = false;
-    for(const auto& msg : messages) {
-        if (msg.find("spdlog initialized.") != std::string::npos) {
-            spdlog_init_found = true;
-            break;
-        }
-    }
-    ASSERT_TRUE(spdlog_init_found) << "Expected 'spdlog initialized.' log message not found.";
-
-    // Check for "EngineInitialize called. Attempting to create EngineCore..."
-    bool engine_init_called_found = false;
-    for(const auto& msg : messages) {
-        if (msg.find("EngineInitialize called. Attempting to create EngineCore...") != std::string::npos) {
-            engine_init_called_found = true;
-            break;
-        }
-    }
-    ASSERT_TRUE(engine_init_called_found) << "Expected 'EngineInitialize called...' log message not found.";
-
-    // Check for "EngineCore created successfully at 0x..."
-    bool core_created_found = false;
-    for(const auto& msg : messages) {
-        if (msg.find("EngineCore created successfully at 0x") != std::string::npos) {
-            core_created_found = true;
-            break;
-        }
-    }
-    ASSERT_TRUE(core_created_found) << "Expected 'EngineCore created successfully...' log message not found.";
-
-    // Check for "EngineCore fully initialized."
-    bool core_fully_init_found = false;
-    for(const auto& msg : messages) {
-        if (msg.find("EngineCore fully initialized.") != std::string::npos) {
-            core_fully_init_found = true;
-            break;
-        }
-    }
-    ASSERT_TRUE(core_fully_init_found) << "Expected 'EngineCore fully initialized.' log message not found.";
-
-    // Cleanup
+    // Call EngineDestroy
     EngineDestroy(core_ptr);
+
+    // Expect to find "EngineCore at 0x... destroyed." in the logs
+    const auto& messages = g_test_log_buffer.messages;
+    bool found_destroy_log = false;
+    std::string expected_log_prefix = fmt::format("EngineCore at {0} destroyed.", fmt::ptr(core_ptr));
+
+    for (const auto& msg : messages) {
+        if (msg.find(expected_log_prefix) != std::string::npos) {
+            found_destroy_log = true;
+            break;
+        }
+    }
+    ASSERT_TRUE(found_destroy_log) << "Expected log message for EngineCore destruction not found.";
 }

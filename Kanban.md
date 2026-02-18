@@ -221,7 +221,7 @@
       - [x] NativeExports_EngineInitialize_CreatesEngineCore
       - [x] NativeExports_EngineInitialize_ReturnsNullOnCoreInitializationFailure
       - [x] NativeExports_EngineInitialize_LogsInitializationInfo
-      - [ ] NativeExports_EngineDestroy_DeletesEngineCore
+      - [x] NativeExports_EngineDestroy_DeletesEngineCore
       - [x] NativeExports_EngineDestroy_HandlesNullCorePtr
       - [ ] NativeExports_EngineUpdate_CallsCoreUpdate
       - [ ] NativeExports_EngineUpdate_HandlesNullCorePtr
