@@ -224,3 +224,14 @@ public:
     MOCK_METHOD(std::shared_ptr<Piece::RAL::ITexture>, LoadTexture, (const std::string& path), (override));
     MOCK_METHOD(std::shared_ptr<Piece::RAL::IShaderProgram>, LoadShaderProgram, (const std::string& path), (override));
 };
+
+// Mock for ITexture
+class MockTexture : public Piece::RAL::ITexture
+{
+public:
+    MOCK_METHOD(void, Bind, (uint32_t slot), (const, override));
+    MOCK_METHOD(void, Unbind, (), (const, override));
+    MOCK_METHOD(uint32_t, GetWidth, (), (const, override));
+    MOCK_METHOD(uint32_t, GetHeight, (), (const, override));
+    MOCK_METHOD(void*, GetNativeID, (), (const, override));
+};

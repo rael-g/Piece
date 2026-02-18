@@ -243,7 +243,7 @@
       - [x] NativeExports_EngineLoadMaterial_ReturnsMaterialOnSuccess
       - [x] NativeExports_EngineLoadMaterial_ReturnsNullOnFailure
       - [x] NativeExports_EngineLoadMaterial_HandlesNullCoreOrResourceManager
-      - [ ] NativeExports_EngineLoadTexture_CallsResourceManagerLoadTexture
+      - [x] NativeExports_EngineLoadTexture_CallsResourceManagerLoadTexture
       - [ ] NativeExports_EngineLoadTexture_ReturnsTextureOnSuccess
       - [ ] NativeExports_EngineLoadTexture_ReturnsNullOnFailure
       - [ ] NativeExports_EngineLoadTexture_HandlesNullCoreOrResourceManager
