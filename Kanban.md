@@ -217,7 +217,7 @@
       - [x] NativeExports_SetWindowFactory_HandlesNullPtr
       - [x] NativeExports_SetPhysicsWorldFactory_SetsFactoryCorrectly
       - [x] NativeExports_SetPhysicsWorldFactory_HandlesNullPtr
-      - [ ] NativeExports_EngineInitialize_InitializesLoggerOnce
+      - [x] NativeExports_EngineInitialize_InitializesLoggerOnce
       - [x] NativeExports_EngineInitialize_CreatesEngineCore
       - [ ] NativeExports_EngineInitialize_ReturnsNullOnCoreAllocationFailure
       - [ ] NativeExports_EngineInitialize_LogsInitializationInfo
