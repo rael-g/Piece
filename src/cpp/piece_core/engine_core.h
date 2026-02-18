@@ -61,13 +61,13 @@ class PIECE_CORE_API EngineCore
      *        This method is called once per frame to update game logic, physics, and other dynamic systems.
      * @param deltaTime The time elapsed since the last frame, in seconds.
      */
-    void Update(float deltaTime);
+    virtual void Update(float deltaTime);
 
     /**
      * @brief Renders the current frame.
      *        This method is responsible for drawing all visual elements to the screen.
      */
-    void Render();
+    virtual void Render();
 
     /**
      * @brief Gets the window interface.

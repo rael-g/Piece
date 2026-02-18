@@ -223,7 +223,7 @@
       - [x] NativeExports_EngineInitialize_LogsInitializationInfo
       - [x] NativeExports_EngineDestroy_DeletesEngineCore
       - [x] NativeExports_EngineDestroy_HandlesNullCorePtr
-      - [ ] NativeExports_EngineUpdate_CallsCoreUpdate
+      - [x] NativeExports_EngineUpdate_CallsCoreUpdate
       - [ ] NativeExports_EngineUpdate_HandlesNullCorePtr
       - [ ] NativeExports_EngineRender_CallsCoreRender
       - [ ] NativeExports_EngineRender_HandlesNullCorePtr
